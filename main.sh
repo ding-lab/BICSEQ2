@@ -3,7 +3,7 @@
 ## the name of the master directory holding inputs, outputs and processing codes
 toolName="BICSEQ2"
 ## the name of the batch
-batchName="UCEC.b4"
+batchName="UCEC.hg38.test"
 ## the name the directory holding the processing code
 toolDirName=${toolName}"."${batchName}
 ## the path to the master directory
@@ -27,8 +27,6 @@ bicseq2normLink="http://compbio.med.harvard.edu/BIC-seq/NBICseq-norm_v0.2.4.tar.
 bicseq2segLink="http://compbio.med.harvard.edu/BIC-seq/NBICseq-seg_v0.7.2.tar.gz"
 ## the link to CPTAC3 catalog BAM map git hub
 bamMapGit="https://github.com/ding-lab/CPTAC3.catalog.git"
-## the link to the mappability files
-mappabilityLink="http://compbio.med.harvard.edu/BIC-seq/Mappability/hg19.CRG.100bp.tar.gz"
 ## the path to the directory holding the manifest for BAM files
 bamMapPath="/diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs/CPTAC3.catalog/katmai.BamMap.dat"
 ## the path to the samtools helper script
@@ -37,27 +35,41 @@ samtoolsPath="/diskmnt/Projects/Users/qgao/Tools/BICSeq2/samtools-0.1.7a_getUniq
 normplPath="/diskmnt/Projects/Users/qgao/Tools/BICSeq2/NBICseq-norm_v0.2.4/NBICseq-norm.pl"
 ## the path to the BICseq2-seg perl script
 segplPath="/diskmnt/Projects/Users/qgao/Tools/BICSeq2/NBICseq-seg_v0.7.2/NBICseq-seg.pl"
-## the path to the by chromosome fasta file
-fastaDir="/diskmnt/Datasets/Reference/GenomeSTRiP/Homo_sapiens_assembly19/chromosome/"
 ## the path to the mappability file
-mappabilityDir="/diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs/hg19CRG.100bp/"
+mappabilityDir="/diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs/GRCh38.d1.vd1.fa.150mer/"
 ## the file prefix for the gene-level CNV report
 genelevelFile="gene_level_CNV"
 ## the name of the processing version
 version=1.1
-
+## the type of the BAM files we are using
+bamType="WGS"
+## the directory to gemtools binary
+refDir="/diskmnt/Datasets/Reference/GRCh38.d1.vd1/"
+refFile="GRCh38.d1.vd1.fa"
+## the length of the read
+readLength=150
+## the prefix of mappability file
+mappabilityPrefix=${refFile}.${readLength}mer
+## the genome build
+genomeBuild=hg38
+fastaLink="http://hgdownload.cse.ucsc.edu/goldenPath/hg38/chromosomes/"
+fastaDir=${inputDir}${genomeBuild}"/"
+mkdir -p ${fastaDir}
 #bash -c 'source activate bicseq2'
+
+## get the list of samples
+grep hg38 ${bamMapPath} | grep UCEC | grep ${bamType} | cut -f 2 | sort | uniq> sample.txt
 
 ## get dependencies
 step="get_dependencies"
-cm="bash ${step}.sh ${inputDir} ${bamMapGit} ${mappabilityLink} ${bicseq2normLink} ${bicseq2segLink}>&${logDir}${toolDirName}_${step}_$(date +%Y%m%d%H%M%S).log &"
+cm="bash ${step}.sh ${inputDir} ${bamMapGit} ${mappabilityDir} ${bicseq2normLink} ${bicseq2segLink} ${mappabilityPrefix} ${refDir} ${refFile} ${readLength} ${genomeBuild} ${fastaLink} ${fastaDir}>&${logDir}${toolDirName}_${step}_$(date +%Y%m%d%H%M%S).log &"
 echo ${cm}
 
 ## get unique reads
 step="run_uniq"
 outputPath=${outputDir_batchName}${step}"/"
 mkdir -p ${outputPath}
-cm="bash ${step}.sh ${bamMapPath} ${samtoolsPath} ${outputPath} &"
+cm="bash ${step}.sh ${bamMapPath} ${samtoolsPath} ${outputPath} ${bamType} ${genomeBuild} &"
 echo ${cm}
 
 ## get unique reads
@@ -65,7 +77,7 @@ seqDir=${outputPath}
 step="run_norm"
 outputPath=${outputDir_batchName}${step}"/"
 mkdir -p ${outputPath}
-cm="bash ${step}.sh ${bamMapPath} ${normplPath} ${outputPath} ${fastaDir} ${mappabilityDir} ${seqDir}>&${logDir}${toolDirName}_${step}_$(date +%Y%m%d%H%M%S).log &"
+cm="bash ${step}.sh ${bamMapPath} ${normplPath} ${outputPath} ${fastaDir} ${mappabilityDir} ${seqDir} ${mappabilityPrefix} >&${logDir}${toolDirName}_${step}_$(date +%Y%m%d%H%M%S).log &"
 echo ${cm}
 
 ## get unique reads

@@ -17,6 +17,10 @@ normDir=$6
 tmpDir=${outputPath}"TMP/"
 mkdir -p ${tmpDir}
 
+## create log directory
+logDir=${outputPath}"logs/"
+mkdir -p ${logDir}
+
 ## generate commands
 touch ${outputPath}"commands.txt" > ${outputPath}"commands.txt"
 
@@ -39,4 +43,4 @@ do
 		fi
 	done
 done
-cat ${outputPath}"commands.txt" | uniq | parallel -j 24 {} &
+cat ${outputPath}"commands.txt" | uniq | parallel  --resume-failed --joblog ${logDir}$(date +%Y%m%d%H%M%S).log -j 18 {} &
