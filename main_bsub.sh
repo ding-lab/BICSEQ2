@@ -70,6 +70,12 @@ else
 	exit
 fi
 
+## get the step name
+step=$1
+
+## the prefix of bsub prefix
+bsubCMDPrefix="bsub -oo ${logDir}${step}_$(date +%Y%m%d%H%M%S).log -M 40000000 -R 'select[mem>40000] span[hosts=1] rusage[mem=40000]' -q research-hpc -a 'docker(willmclaren/ensembl-vep:latest)'"
+
 
 ## get dependencies
 step="get_dependencies"
@@ -77,11 +83,15 @@ cm="bash ${step}.sh ${inputDir} ${bamMapGit} ${mappabilityDir} ${bicseq2normLink
 echo ${cm}
 
 ## get unique reads
-step="run_uniq"
-outputPath=${outputDir_batchName}${step}"/"
-mkdir -p ${outputPath}
-cm="bash ${step}.sh ${bamMapPath} ${samtoolsPath} ${outputPath} ${bamType} ${genomeBuild} &"
-echo ${cm}
+#step="run_uniq"
+if [ "${step}" == "get_uniq" ]
+then
+	outputPath=${outputDir_batchName}${step}"/"
+	mkdir -p ${outputPath}
+	cm="bash ${step}.sh ${bamMapPath} ${samtoolsPath} ${outputPath} ${bamType} ${genomeBuild} &"
+	bsubCMD="${bsubCMDPrefix} ${cm}"
+	echo ${bsubCMD}
+fi
 
 ## get unique reads
 seqDir=${outputPath}
