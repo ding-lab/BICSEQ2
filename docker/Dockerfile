@@ -32,3 +32,5 @@ RUN cd /tmp && \
 
 RUN yes | conda install -c conda-forge parallel
 RUN yes | conda install -c r r
+RUN yes | conda install -c conda-forge ncurses
+RUN yes | conda install -c bioconda samtools  

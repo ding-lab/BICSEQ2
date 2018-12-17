@@ -43,4 +43,4 @@ do
 	done
 done
 
-cat ${outputPath}"commands.txt" | uniq | parallel --resume-failed --joblog ${logDir}$(date +%Y%m%d%H%M%S).log -j 10 {} &
+cat ${outputPath}"commands.txt" | uniq | parallel --resume-failed --joblog ${logDir}$(date +%Y%m%d%H%M%S).log -j 24 {} &

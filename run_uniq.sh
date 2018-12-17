@@ -14,6 +14,10 @@ genomeBuild=$5
 logDir=${outputPath}"logs/"
 mkdir -p ${logDir}
 
+cat ${outputPath}"commands.txt" | uniq | parallel --resume-failed --joblog ${logDir}$(date +%Y%m%d%H%M%S).log  -j 24 {} &
+
+exit 1
+
 touch ${outputPath}"commands.txt" > ${outputPath}"commands.txt"
 
 cat sample.txt | while read Case
@@ -24,7 +28,20 @@ do
                 while read chr; do
 			if [ -s ${outputPath}${Case}_${SampType}_chr${chr}.seq ]
 			then
-				echo ""  >> ${outputPath}commands.txt
+				ls -r ${logDir} | while read logFile; do
+					exitVal=$(grep ${Case}_${SampType}_chr${chr}.seq ${logDir}${logFile} | awk -F '\t' '{print $7}')
+					signal=$(grep ${Case}_${SampType}_chr${chr}.seq ${logDir}${logFile} | awk -F '\t' '{print $8}')
+					if [ "${exitVal}" == "0" ] & [ "${signal}" == "0" ]
+					then
+						break
+					else
+						if grep -Fq ${Case}_${SampType}_chr${chr}.seq $(cat ${logDir}${logFile})
+						then
+							cm="samtools view -h ${bamPath} chr${chr} | perl ${samtoolsPath} unique - | cut -f 4 > ${outputPath}${Case}_${SampType}_chr${chr}.seq"
+							echo ${cm} >> ${outputPath}commands.txt
+						fi
+					fi
+				done
 			else
 				cm="samtools view -h ${bamPath} chr${chr} | perl ${samtoolsPath} unique - | cut -f 4 > ${outputPath}${Case}_${SampType}_chr${chr}.seq"
 				echo ${cm} >> ${outputPath}commands.txt
@@ -33,4 +50,4 @@ do
         done
 done
 
-cat ${outputPath}"commands.txt" | uniq | parallel --resume-failed --joblog ${logDir}  -j 15 {} &
+#cat ${outputPath}"commands.txt" | uniq | parallel --resume-failed --joblog ${logDir}$(date +%Y%m%d%H%M%S).log  -j 12 {} &

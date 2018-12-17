@@ -3,11 +3,12 @@
 ## the name of the master directory holding inputs, outputs and processing codes
 toolName="BICSEQ2"
 ## the name of the batch
-batchName="LUAD.b5_6"
+batchName="BICSEQ2.UCEC.hg38.121"
 ## the name the directory holding the processing code
 toolDirName=${toolName}"."${batchName}
+toolDirName="BICSEQ2.UCEC.hg38.121"
 ## the path to the master directory
-mainRunDir="/gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/"${toolName}"/"
+mainRunDir="/diskmnt/Projects/CPTAC3CNV/"${toolName}"/"
 ## the path to the directory hold current scripts
 scriptDir=${mainRunDir}${toolDirName}"/"
 ## the path to the inputs directory
@@ -28,8 +29,12 @@ bicseq2segLink="http://compbio.med.harvard.edu/BIC-seq/NBICseq-seg_v0.7.2.tar.gz
 ## the link to CPTAC3 catalog BAM map git hub
 bamMapGit="https://github.com/ding-lab/CPTAC3.catalog.git"
 ## the path to the directory holding the manifest for BAM files
-clusterName="MGI"
-bamMapPath="/gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/BICSEQ2/inputs/CPTAC3.catalog/"${clusterName}".BamMap.dat"
+clusterName="katmai"
+bamMapPath=${inputDir}"CPTAC3.catalog/"${clusterName}".BamMap.dat"
+#bamMapPath="/gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/BICSEQ2/inputs/CPTAC3.catalog/"${clusterName}".BamMap.dat"
+#bamMapPath="/home/mwyczalk_test/Projects/CPTAC3/import/import.CPTAC3.UCEC.hg38.all/dat/CPTAC3.UCEC.WGS.hg38.all.BamMap.dat"
+#bamMapPath="/home/mwyczalk_test/Projects/CPTAC3/import/import.CPTAC3.UCEC.hg38.all/dat/UCEC.WGS.hg38.all.BamMap.dat"
+#bamMapPath=${inputDir}UCEC.WGS.hg38.all.BamMap.dat
 ## the path to the samtools helper script
 samtoolsPath="/diskmnt/Projects/Users/qgao/Tools/BICSeq2/samtools-0.1.7a_getUnique-0.1.3/misc/samtools.pl"
 ## the path to the BICseq2-norm perl script
@@ -56,10 +61,13 @@ genomeBuild=hg38
 fastaLink="http://hgdownload.cse.ucsc.edu/goldenPath/hg38/chromosomes/"
 fastaDir=${inputDir}${genomeBuild}"/"
 mkdir -p ${fastaDir}
+## the gene annotation bed file
+geneBedFile="/diskmnt/Projects/CPTAC3CNV/gatk4wxscnv/inputs/gencode.v29.annotation.hg38.p12.bed"
+geneBedFile=${inputDir}"ucsc_refseq_hg38_all_fields_20180629.txStartEnd.dedup.bed"
 #bash -c 'source activate bicseq2'
 
 ## get the list of samples
-cancerType=LUAD
+cancerType=UCEC
 grep ${genomeBuild} ${bamMapPath} | grep ${cancerType} | grep ${bamType} | cut -f 2 | sort | uniq> sample.txt
 
 if [ -s sample.txt ]
@@ -104,5 +112,5 @@ detectDir=${outputPath}"lambda3/"
 step="get_gene_level_cnv"
 outputPath=${outputDir_batchName}${step}"/"
 mkdir -p ${outputPath}
-cm="bash ${step}.sh ${detectDir} ${scriptDir} ${inputDir} ${outputPath} ${genelevelFile} ${version}>&${logDir}${toolDirName}_${step}_$(date +%Y%m%d%H%M%S).log &"
+cm="bash ${step}.sh ${detectDir} ${scriptDir} ${inputDir} ${outputPath} ${genelevelFile} ${version} ${geneBedFile} ${batchName}>&${logDir}${toolDirName}_${step}_$(date +%Y%m%d%H%M%S).log &"
 echo ${cm}
