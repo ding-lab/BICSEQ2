@@ -46,7 +46,7 @@ mappabilityDir="/diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs/GRCh38.d1.vd1.fa.150m
 ## the file prefix for the gene-level CNV report
 genelevelFile="gene_level_CNV"
 ## the name of the processing version
-version=1.1
+version=1.2
 ## the type of the BAM files we are using
 bamType="WGS"
 ## the directory to gemtools binary

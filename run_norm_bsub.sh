@@ -22,7 +22,7 @@ do
 		else
                       	touch ${outputPath}"${Case}_${SampType}_chr${chr}_commands.sh" > ${outputPath}"${Case}_${SampType}_chr${chr}_commands.sh"
                         echo "#!/bin/bash" >> ${outputPath}"${Case}_${SampType}_chr${chr}_commands.sh"
-			cm="nohup perl "${normplPath}" --tmp="${tmpDir}" -l ${readLength} -s 350 -b 100 --fig "${outputPath}${Case}"_"${SampType}"_GC.pdf "${outputPath}${Case}"_"${SampType}"_config.txt "${outputPath}${Case}"_"${SampType}"_out.txt"
+			cm="perl "${normplPath}" --tmp="${tmpDir}" -l ${readLength} -s 350 -b 100 --fig "${outputPath}${Case}"_"${SampType}"_GC.pdf "${outputPath}${Case}"_"${SampType}"_config.txt "${outputPath}${Case}"_"${SampType}"_out.txt"
 			echo ${cm} >> ${outputPath}"${Case}_${SampType}_commands.sh"
 			bsub -o ${logDir}${step}_${Case}_${SampType}_$(date +%Y%m%d%H%M%S).log -q research-hpc -M 4000000 -R 'select[mem>40] span[hosts=1] rusage[mem=40]' -n 1 -a 'docker(yigewu/bicseq2:v2)' bash ${outputPath}${Case}"_"${SampType}"_commands.sh"
 			exit

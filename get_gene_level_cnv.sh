@@ -15,7 +15,8 @@ cd ${detectDir}
 ls *.CNV | while read file; do
 	sample=$(echo $file | cut -f1 -d'.')
 	echo $sample
-	sed '1d' $file | cut -f1,2,3,9 | bedtools intersect -loj -a ${geneBedFile} -b - | awk '$8!="."'  | python ${scriptDir}"gene_segment_overlap.py" > ${outputPath}$sample.gene_level.log2.seg
+#	sed '1d' $file | cut -f1,2,3,9 | bedtools intersect -loj -a ${geneBedFile} -b - | awk '$8!="."'  | python ${scriptDir}"gene_segment_overlap.py" > ${outputPath}$sample.gene_level.log2.seg
+	sed '1d' $file | cut -f1,2,3,9 | bedtools intersect -loj -a ${geneBedFile} -b - | python ${scriptDir}"gene_segment_overlap.py" > ${outputPath}$sample.gene_level.log2.seg
 done
 
 ls *.CNV | cut -f1 -d'.' > ${outputPath}samples.txt
