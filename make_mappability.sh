@@ -43,21 +43,30 @@ refFile=$(basename $REF)
 MER=${refFile}.${readLength}mer     # common name used for output
 
 
+>&2 echo Reference: $REF
 >&2 echo Output directory: $OUTD
 mkdir -p $OUTD
 cd $OUTD
 
-# Writes $MER.gem
-echo gem-indexer -i $REF -o ${refFile} -T 8
+# Writes .gem and .log
+NOW=$(date)
+>&2 echo [ $NOW ]
+>&2 echo "	** Running gem-indexer **"
+gem-indexer -i $REF -o ${refFile} -T 8
 test_exit_status
-exit
 
 ## this step needs a lot of CPU to run it fast enough so that not to be killed
-# Writes $MER.mappability
+# Writes .mappability and .mappability.log
+NOW=$(date)
+>&2 echo [ $NOW ]
+>&2 echo "      ** Running gem-mappability **"
 gem-mappability -m 2 -I ${refFile}.gem -l ${readLength} -o $MER -T 80 &> $MER.mappability.log
 test_exit_status
 
-# Writes $MER.wig ?
+# Writes .wig and .sizes 
+NOW=$(date)
+>&2 echo [ $NOW ]
+>&2 echo "      ** Running gem-2-wig **"
 gem-2-wig -I ${refFile}.gem -i $MER.mappability -o $MER
 test_exit_status
 
@@ -66,15 +75,23 @@ awk -F ' ' '{print $1, $3}' $MER.sizes | grep -v gi > $MER.sizes.cut
 test_exit_status
 
 # Writes $MER.bw
+NOW=$(date)
+>&2 echo [ $NOW ]
+>&2 echo "      ** Running wigToBigWig **"
 wigToBigWig $MER.wig.cut $MER.sizes.cut $MER.bw
 test_exit_status
 
 # Writes $MER.bedGraph 
+NOW=$(date)
+>&2 echo [ $NOW ]
+>&2 echo "      ** Running bigWigToBedGraph **"
 bigWigToBedGraph $MER.bw $MER.bedGraph
 test_exit_status
 
 # Writes $MER.bed
-
+NOW=$(date)
+>&2 echo [ $NOW ]
+>&2 echo Running loop over chrom which will die
 mkdir -p ${refFile}.${readLength}mer
 cd ${refFile}.${readLength}mer
 while read chr; do
