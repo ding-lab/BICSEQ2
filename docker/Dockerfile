@@ -65,6 +65,8 @@ RUN cd /usr/local/bin \
     && wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig \
     && chmod 555 bigWigToBedGraph wigToBigWig
 
+ENV foo=1
+RUN git clone --single-branch --branch maw-dev https://github.com/ding-lab/BICSEQ2.git
 
 
 CMD ["/bin/bash"]
