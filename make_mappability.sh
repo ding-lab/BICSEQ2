@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# create mappability indices
 
 function test_exit_status {
     # Evaluate return value for chain of pipes; see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
@@ -12,12 +13,21 @@ function test_exit_status {
     done
 }
 
-# create mappability indices
 
 # FASTA Reference should be passed
 REF=$1
 OUTD=$2 # the output directory
 CHROM=$3 # file listing all chromosomes
+
+if [ ! -e $REF ]; then
+	>&2 echo Reference $REF does not exist
+	exit 1
+fi
+
+if [ -z $OUTD ]; then
+	>&2 echo Output directory not defined
+	exit 1
+fi
 
 # Optional arguments
 readLength=150 ## the length of the read
@@ -38,8 +48,9 @@ mkdir -p $OUTD
 cd $OUTD
 
 # Writes $MER.gem
-gem-indexer -i $REF -o ${refFile} -T 8
+echo gem-indexer -i $REF -o ${refFile} -T 8
 test_exit_status
+exit
 
 ## this step needs a lot of CPU to run it fast enough so that not to be killed
 # Writes $MER.mappability
