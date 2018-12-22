@@ -54,8 +54,7 @@ RUN wget http://compbio.med.harvard.edu/BIC-seq/BICseq2/samtools-0.1.7a_getUniqu
 RUN wget https://sourceforge.net/projects/gemlibrary/files/gem-library/Binary%20pre-release%203/GEM-binaries-Linux-x86_64-core_i3-20130406-045632.tbz2 \
     && bzip2 -d GEM-binaries-Linux-x86_64-core_i3-20130406-045632.tbz2 \
     && tar -xf GEM-binaries-Linux-x86_64-core_i3-20130406-045632.tar \
-    && cd GEM-binaries-Linux-x86_64-core_i3-20130406-045632/bin \
-    && mv gem-indexer gem-mappability gem-2-wig /usr/local/bin \
+    && mv GEM-binaries-Linux-x86_64-core_i3-20130406-045632/bin/* /usr/local/bin \
     && cd / \
     && rm -rf GEM-binaries-Linux-x86_64-core_i3-20130406-045632 GEM-binaries-Linux-x86_64-core_i3-20130406-045632.tar
 
@@ -65,7 +64,7 @@ RUN cd /usr/local/bin \
     && wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig \
     && chmod 555 bigWigToBedGraph wigToBigWig
 
-ENV foo=1
+ENV foo=2
 RUN git clone --single-branch --branch maw-dev https://github.com/mwyczalkowski/BICSEQ2.git
 
 
