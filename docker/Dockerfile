@@ -66,7 +66,7 @@ RUN cd /usr/local/bin \
     && chmod 555 bigWigToBedGraph wigToBigWig
 
 ENV foo=1
-RUN git clone --single-branch --branch maw-dev https://github.com/ding-lab/BICSEQ2.git
+RUN git clone --single-branch --branch maw-dev https://github.com/mwyczalkowski/BICSEQ2.git
 
 
 CMD ["/bin/bash"]
