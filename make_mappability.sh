@@ -2,6 +2,9 @@
 
 # create mappability indices
 
+# Memory issues:
+# Requires > 4Gb memory for GRCh38 (as set on a Mac using Docker Preferences panel); 12Gb works, but `docker stats` suggests ~7Gb is used
+
 function test_exit_status {
     # Evaluate return value for chain of pipes; see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
     rcs=${PIPESTATUS[*]};
