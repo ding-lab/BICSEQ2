@@ -49,19 +49,30 @@ mkdir -p $OUTD
 cd $OUTD
 
 # Writes .gem and .log
+THREADS_INDEXER=4  # Yige had 8
 NOW=$(date)
 >&2 echo [ $NOW ]
 >&2 echo "	** Running gem-indexer **"
-gem-indexer -i $REF -o ${refFile} -T 8
+
+echo Skipping gem-indexer
+
+# gem-indexer -i $REF -o ${refFile} -T $THREADS_INDEXER
 test_exit_status
 
 ## this step needs a lot of CPU to run it fast enough so that not to be killed
 # Writes .mappability and .mappability.log
+THREADS_MAPPABILITY=2  # Yige had 80
 NOW=$(date)
 >&2 echo [ $NOW ]
 >&2 echo "      ** Running gem-mappability **"
-gem-mappability -m 2 -I ${refFile}.gem -l ${readLength} -o $MER -T 80 &> $MER.mappability.log
+#gem-mappability -m 2 -I ${refFile}.gem -l ${readLength} -o $MER -T $THREADS_MAPPABILITY &> $MER.mappability.log
+echo gem-mappability -m 2 -I ${refFile}.gem -l ${readLength} -o $MER -T $THREADS_MAPPABILITY 
+
+
+gem-mappability -m 2 -I GRCh38.d1.vd1.fa.gem -l 150 -o GRCh38.d1.vd1.fa.150mer -T 1
+
 test_exit_status
+exit
 
 # Writes .wig and .sizes 
 NOW=$(date)
