@@ -8,6 +8,7 @@
 #
 # Options:
 # -n SAMPLE_NAME: descriptive name of this sample or run. Default: Sample
+# -d : dry-run. Print commands but do not execute them
 # -o OUTD: directory where results and log files will be written, created if necessary.  Default: ./dat
 # -c LIST: Filename listing genomic reqions which will be processed in parallel.  Default is to process
 #    all chromosomes at once.  This is similar to "chromosomes.txt" but lines will typically be "chr1", etc. 
@@ -24,12 +25,12 @@ OUTD="./dat"
 PARALLEL_JOBS=4
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":n:o:j:c:" opt; do
+while getopts ":dn:o:j:c:" opt; do
   case $opt in
-#    d)  # example of binary argument
-#      >&2 echo "Dry run" 
-#      CMD="echo"
-#      ;;
+    d)  # example of binary argument
+      >&2 echo "Dry run" 
+      DRYRUN=1
+      ;;
     n) 
       SAMPLE_NAME=$OPTARG
       >&2 echo "Sample name: $SAMPLE_NAME"
@@ -38,10 +39,10 @@ while getopts ":n:o:j:c:" opt; do
       OUTD=$OPTARG
       >&2 echo "Output directory: $OUTD"
       ;;
-    J) 
+    j) 
       PARALLEL_JOBS=$OPTARG
       ;;
-    C) 
+    c) 
       CHRLIST=$OPTARG
       ;;
     \?)
@@ -84,15 +85,20 @@ function test_exit_status {
 
 # Unlike original implementation which writes to commands.txt file, all jobs are run directly.
 # Using semaphores to block as described here: https://www.usenix.org/system/files/login/articles/105438-Tange.pdf
+# Skipping BAM header 
 function process_BAM {
     BAM=$1
 
     NOW=$(date)
     SEQ="$OUTD/${SAMPLE_NAME}.seq"
-    CMD="samtools view -h $BAM | perl $samtoolsGU unique - | cut -f 4 > $SEQ"
+    CMD="samtools view $BAM | perl $samtoolsGU unique - | cut -f 4 > $SEQ"
     >&2 echo [ $NOW ] Direct run of uniquely mapped reads\; evaluating:
-    >&2 echo $CMD 
-    eval $CMD
+    if [ $DRYRUN ]; then
+	>&2 echo Dryrun: $CMD
+    else
+        >&2 echo $CMD 
+        eval $CMD
+    fi
     test_exit_status
 }
 
@@ -111,19 +117,26 @@ function process_BAM_parallel {
     >&2 echo [ $NOW ]: Parallel run of uniquely mapped reads\; looping over $CHRLIST
     while read CHR; do
         SEQ="$OUTD/${SAMPLE_NAME}_${CHR}.seq"
-        CMD="samtools view -h $BAM $CHR | perl $samtoolsGU unique - | cut -f 4 > $SEQ"
+        CMD="samtools view $BAM $CHR | perl $samtoolsGU unique - | cut -f 4 > $SEQ"
         CMDP="parallel --semaphore -j $PARALLEL_JOBS --id $MYID --joblog $OUTD/$SAMPLE_NAME.get_uniq.log $CMD"
         >&2 echo Launching $CHR
-        >&2 echo $CMDP
-        eval $CMDP
+        if [ $DRYRUN ]; then
+            >&2 echo Dryrun: $CMDP
+        else
+            >&2 echo $CMDP
+            eval $CMDP
+        fi
         test_exit_status
 
     done<$CHRLIST
+
     NOW=$(date)
     >&2 echo [ $NOW ] All jobs launched.  Waiting for them to complete
 
     # this will wait until all jobs completed
-    parallel --semaphore --wait --id $MYID
+    if [ ! $DRYRUN ]; then
+        parallel --semaphore --wait --id $MYID
+    fi
 
     NOW=$(date)
     >&2 echo [ $NOW ] All jobs have completed.  get_unique.sh finished
@@ -133,6 +146,10 @@ if [ -z $CHRLIST ]; then
 # no chrom list
     process_BAM $BAM
 else
-    process_BAM_parallel $BAM
+	if [ ! -e $CHRLIST ]; then
+		>&2 echo Error: File $CHRLIST does not exist
+		exit 1
+	fi
+    process_BAM_parallel $BAM $CHRLIST
 fi
 
