@@ -24,3 +24,9 @@ fi
 ADATD=$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $DATD)
 
 docker run $ENVARGS -v $ADATD:/data -it $IMAGE /bin/bash
+
+# TIPS:
+
+# To start another terminal in running container, first get name of running container with `docker ps`,
+# then start bash in it with,
+# `docker exec -it <container_name> bash`

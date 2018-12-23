@@ -1,2 +1,3 @@
 IMAGE="mwyczalkowski/bicseq2"
-docker build -t $IMAGE . 
+docker push $IMAGE
+
