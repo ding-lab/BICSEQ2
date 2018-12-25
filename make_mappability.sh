@@ -75,15 +75,13 @@ NOW=$(date)
 gem-2-wig -I ${refFile}.gem -i $MER.mappability -o $MER
 test_exit_status
 
-## cut the wig file starting from the line containing CMV
-awk -F ' ' '{print $1, $3}' $MER.sizes | grep -v gi > $MER.sizes.cut
-test_exit_status
+# Not cutting sizes file, using as is, as per https://wiki.bits.vib.be/index.php/Create_a_mappability_track
 
 # Writes $MER.bw
 NOW=$(date)
 >&2 echo [ $NOW ]
 >&2 echo "      ** Running wigToBigWig **"
-wigToBigWig $MER.wig.cut $MER.sizes.cut $MER.bw
+wigToBigWig $MER.wig $MER.sizes $MER.bw
 test_exit_status
 
 # Writes $MER.bedGraph 
@@ -96,11 +94,11 @@ test_exit_status
 # Writes $MER.bed
 NOW=$(date)
 >&2 echo [ $NOW ]
->&2 echo Running loop over chrom which will die
-mkdir -p ${refFile}.${readLength}mer
-cd ${refFile}.${readLength}mer
+>&2 echo "      ** Creating mappability files **"
+mkdir -p $MER
+cd $MER
 while read chr; do
-    grep ${chr} ../${refFile}.${readLength}mer.bedGraph | awk '$4==1 {print $2,$3}' > ${refFile}.${readLength}mer.${chr}.txt 
+    grep ${chr} ../$MER.bedGraph | awk '$4==1 {print $2,$3}' > $MER.${chr}.txt 
 done<$CHROM
 
 # This was commended out in Yige's code, but seems relevant...
