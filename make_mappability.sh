@@ -16,11 +16,18 @@ function test_exit_status {
     done
 }
 
+# OUTD this should be optional, default ./dat
+
+# TODO: write a file indicating path to all mappability files generated.  
+# This list will be used in a subsequent step when constructing configuration file
 
 # FASTA Reference should be passed
 REF=$1
 OUTD=$2 # the output directory
 CHROM=$3 # file listing all chromosomes
+# Optional arguments
+readLength=150 ## the length of the read
+
 
 if [ ! -e $REF ]; then
 	>&2 echo Reference $REF does not exist
@@ -31,9 +38,6 @@ if [ -z $OUTD ]; then
 	>&2 echo Output directory not defined
 	exit 1
 fi
-
-# Optional arguments
-readLength=150 ## the length of the read
 
 ## get and split and reference fasta file
 if [ ! -e $REF ]; then
@@ -91,7 +95,7 @@ NOW=$(date)
 bigWigToBedGraph $MER.bw $MER.bedGraph
 test_exit_status
 
-# Writes $MER.bed
+# Writes $MER.chr.txt
 NOW=$(date)
 >&2 echo [ $NOW ]
 >&2 echo "      ** Creating mappability files **"

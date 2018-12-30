@@ -1,46 +1,57 @@
 #!/bin/bash
 
-## the path to the WGS BAM map
-bamMapPath=$1
-## the path to the samtools helper script
-normplPath=$2
+normplPath="/diskmnt/Projects/Users/qgao/Tools/BICSeq2/NBICseq-norm_v0.2.4/NBICseq-norm.pl"
+
+
 ## the path to the output directory for this batch
-outputPath=$3
+OUTD=$3
 ## the path to the by chromosome fasta file
-fastaDir=$4
+REF=$4
 ## the path to the mappability file
 mappabilityDir=$5
 ## the path to the .seq file
-seqDir=$6
+seqDir=${outputPath}
 ## the prefix of the mappability file
 mappabilityPrefix=$7
 
 ## create log directory
-logDir=${outputPath}"logs/"
+logDir=${OUTD}"logs/"
 mkdir -p ${logDir}
 
 ## create tmp directory
-tmpDir=${outputPath}"TMP/"
+# be able to specify with -t
+tmpDir=${OUTD}"TMP/"
 mkdir -p ${tmpDir}
 
-touch ${outputPath}"commands.txt" > ${outputPath}"commands.txt"
 
-cat sample.txt | while read Case tumor normal
-do
-	for SampType in tumor blood_normal; do
-	## create config file
-		echo -e 'chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm' > ${outputPath}${Case}"_"${SampType}"_config.txt"
-		while read chr; do
-			echo -e 'chr'${chr}'\t'${fastaDir}'chr'${chr}'.fa\t'${mappabilityDir}${mappabilityPrefix}".chr"${chr}".txt\t"${seqDir}${Case}"_"${SampType}"_chr"${chr}".seq\t"${outputPath}${Case}"_"${SampType}"_chr"${chr}"_norm.bin" >> ${outputPath}${Case}"_"${SampType}"_config.txt"
-		done<chromosomes.txt
-	## genrate commands for parallel
-		if [ -s ${outputPath}${Case}"_"${SampType}"_out.txt" ]
-		then
-			echo "" >> ${outputPath}"commands.txt"
-		else
-			echo "nohup perl "${normplPath}" --tmp="${tmpDir}" -l 150 -s 350 -b 100 --fig "${outputPath}${Case}"_"${SampType}"_GC.pdf "${outputPath}${Case}"_"${SampType}"_config.txt "${outputPath}${Case}"_"${SampType}"_out.txt" >> ${outputPath}"commands.txt"
-		fi
-	done
-done
+SAMPLE_NAME="Sample"
 
-#cat ${outputPath}"commands.txt" | uniq | parallel --resume-failed --joblog ${logDir}$(date +%Y%m%d%H%M%S).log -j 24 {} &
+CONFIG="$OUTD/${SAMPLE_NAME}_config.txt"
+
+## create config file, defined here: http://compbio.med.harvard.edu/BIC-seq/
+# The first row of this file is assumed to be the header of the file and will be omitted by BICseq2-norm.
+# The 1st column (chromName) is the chromosome name
+# The 2nd column (faFile) is the reference sequence of this chromosome (human hg18 and hg19 are available for download)
+# The 3rd column (MapFile) is the mappability file of this chromosome (human hg18 (50bp) and hg19 (50bp and 75bp) are available for download)
+# The 4th column (readPosFile) is the file that stores all the mapping positions of all reads that uniquely mapped to this chromosome
+# The 5th column (binFile) is the file that stores the normalized data. The data will be binned with the bin size as specified by the option -b
+
+printf "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm" > $CONFIG
+chromName="chr${chr}"
+faFile="${REF}chr${chr}.fa"
+MapFile="${mappabilityDir}${mappabilityPrefix}.chr${chr}.txt"
+readPosFile="${seqDir}${Case}_${SampType}_chr${chr}.seq"
+binFileNorm="${OUTD}${Case}_${SampType}_chr${chr}_norm.bin" 
+
+PDF="${OUTD}${Case}_${SampType}_GC.pdf"
+
+while read chr; do
+    printf "$chromName\t$faFile\t$MapFile\t$readPosFile\t$binFileNorm" >> $CONFIG
+done<chromosomes.txt
+
+## genrate commands for parallel
+nohup perl ${normplPath} --tmp=${tmpDir} -l 150 -s 350 -b 100 --fig "${OUTD}${Case}"_"${SampType}"_GC.pdf "${OUTD}${Case}"_"${SampType}"_config.txt "${OUTD}${Case}"_"${SampType}"_out.txt" 
+fi
+
+
+#cat ${OUTD}"commands.txt" | uniq | parallel --resume-failed --joblog ${logDir}$(date +%Y%m%d%H%M%S).log -j 24 {} &

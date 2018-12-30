@@ -64,6 +64,10 @@ if [ "$#" -ne 1 ]; then
 fi
 
 BAM=$1
+if [ ! -e $BAM ]; then
+    >&2 echo Error: Bam file $BAM does not exist
+    exit 1
+fi
 
 # Output and log files go here
 mkdir -p $OUTD
