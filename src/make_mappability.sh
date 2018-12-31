@@ -3,7 +3,7 @@
 # Create mappability indices for a reference
 # * Reads all-chromosome reference 
 # * Generates per-chromosome mappability files 
-# * Output filename REF.READ_LENGTHmer.CHR.txt, e.g., GRCh38.d1.vd1.150mer.chr1.txt
+# * Output filename REF_BASE.READ_LENGTHmer.CHR.txt, e.g., GRCh38.d1.vd1.150mer.chr1.txt
 # * The following tools are run on the reference:
 #   * gem-indexer 
 #   * gem-mappability
@@ -11,22 +11,22 @@
 #   * wigToBigWig
 #   * bigWigToBedGraph
 # * Output of last step is split into per-chrom mappability files
-#   and written to directory REF.READ_LENGTHmer
+#   and written to directory REF_BASE.READ_LENGTHmer
 # * Several temporary files are generated in the output directory
 
 #
 # Usage:
-#   bash make_mappability.sh REF REFD OUTD CHRLIST
+#   bash make_mappability.sh REF OUTD CHRLIST
 #   
-# REF is reference basename, e.g., GRCh38.d1.vd1.fa
-# REFD is reference directory
+# REF is full path to reference file
 # OUTD is output directory.  Will be created if does not exist
 # CHRLIST is list of chromosomes, will be used to create output files
 #
 # Options:
 # -l READ_LENGTH: default = 150
+# -r REF_BASE: define alternate REF_BASE.  Default is based on filename of reference
 # -o OUT_CHR: string defining output filename, where %s is replaced by string from CHR  
-#           Default is ${REF}.${READ_LENGTH}mer.%s.txt
+#           Default is ${REF_BASE}.${READ_LENGTH}mer.%s.txt
 # -m THREADS_INDEXER: number of threads to be used by gem-indexer [default 4] (Yige had 8)
 # -n THREADS_MAPPABILITY: number of threads to be used by gem-indexer [default 16] (Yige had 80)
 
@@ -49,9 +49,10 @@ function test_exit_status {
 # Set defaults
 THREADS_INDEXER=4  # Yige had 8
 THREADS_MAPPABILITY=16  # Yige had 80
+READ_LENGTH=150
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":l:o:m:n:" opt; do
+while getopts ":l:o:m:n:r:" opt; do
   case $opt in
 #    d)  # example of binary argument
 #      >&2 echo "Dry run"   example
@@ -70,6 +71,9 @@ while getopts ":l:o:m:n:" opt; do
     n) 
       THREADS_MAPPABILITY=$OPTARG  
       ;;
+    r) 
+      REF_BASE_ARG=$OPTARG  
+      ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
       exit 1
@@ -83,31 +87,39 @@ done
 shift $((OPTIND-1))
 
 
-if [ "$#" -ne 4 ]; then # example
+if [ "$#" -ne 3 ]; then 
     >&2 echo Error: Wrong number of arguments
     exit 1
 fi
 
 # FASTA Reference is a file $REFD/$REF_BASE and must exist
-REF_BASE=$1
-REFD=$2
-OUTD=$3 # the output directory
-CHRLIST=$4 # file listing all chromosomes
-
-REF=$REFD/$REF_BASE
+REF=$1
+OUTD=$2 # the output directory
+CHRLIST=$3 # file listing all chromosomes
 
 if [ ! -e $REF ]; then
-	>&2 echo Reference $REF does not exist
-	exit 1
+    >&2 echo Reference $REF does not exist
+    exit 1
 fi
 
 if [ ! -e $CHRLIST ]; then
-	>&2 echo Chromosome list $CHRLIST does not exist
-	exit 1
+    >&2 echo Chromosome list $CHRLIST does not exist
+    exit 1
 fi
 
+# REF_BASE is typically basename of reference with extension removed, unless
+# it is defined otherwise.  Used for naming of output files
+if [ $REF_BASE_ARG ]; then
+    REF_BASE=$REF_BASE_ARG
+else    # https://stackoverflow.com/questions/965053/extract-filename-and-extension-in-bash
+    R=$(basename -- "$REF")
+    REF_BASE="${R%.*}"
+fi
+>&2 echo REF_BASE=$REF_BASE    
+
 # common name used for output, e.g., GRCh38.d1.vd1.150mer
-MER=${REF}.${READ_LENGTH}mer     
+MER=${REF_BASE}.${READ_LENGTH}mer     
+>&2 echo MER=$MER
 
 # Define format of output filename
 if [ $OUT_CHR_ARG ]; then
@@ -124,8 +136,10 @@ cd $OUTD
 # Writes .gem and .log
 NOW=$(date)
 >&2 echo [ $NOW ]
->&2 echo "	** Running gem-indexer **"
-gem-indexer -i $REF -o ${REF} -T $THREADS_INDEXER
+>&2 echo "  ** Running gem-indexer **"
+CMD="gem-indexer -i $REF -o $OUTD/$REF_BASE -T $THREADS_INDEXER"
+>&2 echo $CMD
+>&2 eval $CMD
 test_exit_status
 
 ## this step needs a lot of CPU to run it fast enough so that not to be killed
@@ -133,14 +147,18 @@ test_exit_status
 NOW=$(date)
 >&2 echo [ $NOW ]
 >&2 echo "      ** Running gem-mappability **"
-gem-mappability -m 2 -I ${REF}.gem -l ${READ_LENGTH} -o $MER -T $THREADS_MAPPABILITY &> $MER.mappability.log
+CMD="gem-mappability -m 2 -I $OUTD/${REF_BASE}.gem -l ${READ_LENGTH} -o $OUTD/$MER -T $THREADS_MAPPABILITY &> $OUTD/$MER.mappability.log"
+>&2 echo $CMD
+>&2 eval $CMD
 test_exit_status
 
 # Writes .wig and .sizes 
 NOW=$(date)
 >&2 echo [ $NOW ]
 >&2 echo "      ** Running gem-2-wig **"
-gem-2-wig -I ${REF}.gem -i $MER.mappability -o $MER
+CMD="gem-2-wig -I $OUTD/${REF_BASE}.gem -i $OUTD/$MER.mappability -o $MER"
+>&2 echo $CMD
+>&2 eval $CMD
 test_exit_status
 
 # Not cutting sizes file, using as is, as per https://wiki.bits.vib.be/index.php/Create_a_mappability_track
@@ -149,26 +167,31 @@ test_exit_status
 NOW=$(date)
 >&2 echo [ $NOW ]
 >&2 echo "      ** Running wigToBigWig **"
-wigToBigWig $MER.wig $MER.sizes $MER.bw
+CMD="wigToBigWig $OUTD/$MER.wig $OUTD/$MER.sizes $OUTD/$MER.bw"
+>&2 echo $CMD
+>&2 eval $CMD
 test_exit_status
 
 # Writes $MER.bedGraph 
 NOW=$(date)
 >&2 echo [ $NOW ]
 >&2 echo "      ** Running bigWigToBedGraph **"
-bigWigToBedGraph $MER.bw $MER.bedGraph
+CMD="bigWigToBedGraph $OUTD/$MER.bw $OUTD/$MER.bedGraph"
+>&2 echo $CMD
+>&2 eval $CMD
 test_exit_status
 
 # Writes $MER.CHR.txt
 NOW=$(date)
 >&2 echo [ $NOW ]
 >&2 echo "      ** Creating mappability files **"
-mkdir -p $MER
-cd $MER
+mkdir -p $OUTD/$MER
 while read CHR; do
-    OUTFN=$(printf $OUT_CHR $CHR)
-    >&2 echo Writing mappability file $OUT_FN
-    grep $CHR ../$MER.bedGraph | awk '$4==1 {print $2,$3}' > $OUT_FN
+    OUTFN=$OUTD/$MER/$(printf $OUT_CHR $CHR)
+    >&2 echo Writing mappability file $OUTFN
+    CMD="grep $CHR $OUTD/$MER.bedGraph | awk '\$4==1 {print \$2,\$3}' > $OUTFN"
+    #>&2 echo $CMD
+    >&2 eval $CMD
 done<$CHRLIST
 
 # This was commended out in Yige's code, but seems relevant...
