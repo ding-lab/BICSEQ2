@@ -15,7 +15,7 @@ if [ ! -d $DATD ]; then
     exit 1
 fi
 
-# These may be defined at `docker run`-time or prior to executing mutect directly in docker
+# These may be defined at `docker run`-time or prior to executing directly in docker
 #JAVA_OPTS="-Xms512m -Xmx512m"
 #ENVARGS="-e JAVA_OPTS=\"$JAVA_OPTS\""
 
@@ -26,7 +26,8 @@ ADATD=$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $DATD)
 docker run $ENVARGS -v $ADATD:/data -it $IMAGE /bin/bash
 
 # TIPS:
+# * May want to do `git pull origin maw-dev` in /BICSEQ2
+# * To start another terminal in running container, first get name of running container with `docker ps`,
+#   then start bash in it with `docker exec -it <container_name> bash`
 
-# To start another terminal in running container, first get name of running container with `docker ps`,
-# then start bash in it with,
-# `docker exec -it <container_name> bash`
+
