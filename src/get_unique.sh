@@ -1,49 +1,44 @@
 #!/bin/bash
 
 # Get the uniquely mapped reads from bam file, optionally in parallel runs
-# Modeled after run_uniq.sh
+# Modeled after run_uniq.sh in v1
+# Writes to directory $SEQD, filename is based SEQ_CHR when looping over CHRLIST, SEQ_OUT otherwise
+# (By default $SAMPLE_NAME.CHR.seq and $SAMPLE_NAME.seq, resp)
 
 # Usage: 
-#   get_unique.sh [options] BAM
+#   get_unique.sh [options] SAMPLE_NAME PROJECT_CONFIG BAM
 #
 # Options:
-# -n SAMPLE_NAME: descriptive name of this sample or run. Default: Sample
 # -d : dry-run. Print commands but do not execute them
-# -o OUTD: directory where results and log files will be written, created if necessary.  Default: ./dat
-# -c LIST: Filename listing genomic reqions which will be processed in parallel.  Default is to process
+# -c CHRLIST: Filename listing genomic reqions which will be processed in parallel.  Default is to process
 #    all chromosomes at once.  This is similar to "chromosomes.txt" but lines will typically be "chr1", etc. 
+#    This file is typically defined in PROJECT_CONFIG but may be overridden on command line.  "-c NONE" will
+#    skip per-chrom processing
 # -j JOBS: if parallel run, number of jobs to run at any one time (-j parameter to parallel).  Default: 4
 #
 # In parallel mode, will use [GNU parallel][1], but script will block until all jobs completed.
+# Output logs written to $SAMPLE_NAME.$CHR.get_uniq.log
+# Background on `parallel` and details about blocking / semaphores here:
 #     O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
 #     ;login: The USENIX Magazine, February 2011:42-47.
 # [ https://www.usenix.org/system/files/login/articles/105438-Tange.pdf ]
 
 # set detaults
 SAMPLE_NAME="Sample"
-OUTD="./dat"
 PARALLEL_JOBS=4
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":dn:o:j:c:" opt; do
+while getopts ":dj:c:" opt; do
   case $opt in
     d)  # example of binary argument
       >&2 echo "Dry run" 
       DRYRUN=1
       ;;
-    n) 
-      SAMPLE_NAME=$OPTARG
-      >&2 echo "Sample name: $SAMPLE_NAME"
-      ;;
-    o) 
-      OUTD=$OPTARG
-      >&2 echo "Output directory: $OUTD"
-      ;;
     j) 
       PARALLEL_JOBS=$OPTARG
       ;;
     c) 
-      CHRLIST=$OPTARG
+      CHRLIST_ARG=$OPTARG
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -57,23 +52,43 @@ while getopts ":dn:o:j:c:" opt; do
 done
 shift $((OPTIND-1))
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 3 ]; then
     >&2 echo Error: Wrong number of arguments
-    >&2 echo Usage: get_unique.sh BAM
+    >&2 echo Usage: get_unique.sh SAMPLE_NAME PROJECT_CONFIG BAM
     exit 1
 fi
 
-BAM=$1
+SAMPLE_NAME=$1
+PROJECT_CONFIG=$2
+BAM=$3
+
 if [ ! -e $BAM ]; then
     >&2 echo Error: Bam file $BAM does not exist
     exit 1
 fi
 
+if [ ! -e $PROJECT_CONFIG ]; then
+    >&2 echo Error: Project configuration file $PROJECT_CONFIG not found
+    exit 1
+fi
+
+>&2 echo Reading $PROJECT_CONFIG
+source $PROJECT_CONFIG
+
+if [ $CHRLIST_ARG ]; then
+    if [ $CHRLIST == "NONE" ]; then
+        CHRLIST=""
+    else
+        CHRLIST=$CHRLIST_ARG
+    fi
+fi
+
 # Output and log files go here
+OUTD=$MAPD
 mkdir -p $OUTD
 
 ## the path to the samtools getUnique helper script
-samtoolsGU="/samtools-0.1.7a_getUnique-0.1.3/misc/samtools.pl"
+SAMTOOLS_GU="/samtools-0.1.7a_getUnique-0.1.3/misc/samtools.pl"
 
 
 function test_exit_status {
@@ -87,15 +102,15 @@ function test_exit_status {
     done
 }
 
-# Unlike original implementation which writes to commands.txt file, all jobs are run directly.
-# Using semaphores to block as described here: https://www.usenix.org/system/files/login/articles/105438-Tange.pdf
-# Skipping BAM header 
+
+# Simple direct processing of BAM
 function process_BAM {
     BAM=$1
 
     NOW=$(date)
-    SEQ="$OUTD/${SAMPLE_NAME}.seq"
-    CMD="samtools view $BAM | perl $samtoolsGU unique - | cut -f 4 > $SEQ"
+    # Output filename based on SEQ_OUT
+    SEQ=$SEQ_OUT
+    CMD="samtools view $BAM | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
     >&2 echo [ $NOW ] Direct run of uniquely mapped reads\; evaluating:
     if [ $DRYRUN ]; then
 	>&2 echo Dryrun: $CMD
@@ -106,6 +121,9 @@ function process_BAM {
     test_exit_status
 }
 
+# Unlike original implementation which writes to commands.txt file, all jobs are run directly.
+# Using semaphores to block as described here: https://www.usenix.org/system/files/login/articles/105438-Tange.pdf
+# Skipping BAM header 
 function process_BAM_parallel {
     BAM=$1
     CHRLIST=$2
@@ -120,9 +138,12 @@ function process_BAM_parallel {
     MYID=$(date +%Y%m%d%H%M%S)
     >&2 echo [ $NOW ]: Parallel run of uniquely mapped reads\; looping over $CHRLIST
     while read CHR; do
-        SEQ="$OUTD/${SAMPLE_NAME}_${CHR}.seq"
-        CMD="samtools view $BAM $CHR | perl $samtoolsGU unique - | cut -f 4 > $SEQ"
-        CMDP="parallel --semaphore -j $PARALLEL_JOBS --id $MYID --joblog $OUTD/$SAMPLE_NAME.get_uniq.log $CMD"
+
+        # Output filename based on SEQ_CHR
+        SEQ=$(printf $SEQ_CHR $CHR)
+        JOBLOG="$OUTD/$SAMPLE_NAME.$CHR.get_uniq.log"
+        CMD="samtools view $BAM $CHR | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
+        CMDP="parallel --semaphore -j $PARALLEL_JOBS --id $MYID --joblog $JOBLOG $CMD"
         >&2 echo Launching $CHR
         if [ $DRYRUN ]; then
             >&2 echo Dryrun: $CMDP
@@ -146,7 +167,7 @@ function process_BAM_parallel {
     >&2 echo [ $NOW ] All jobs have completed.  get_unique.sh finished
 }
 
-if [ -z $CHRLIST ]; then
+if [ ! $CHRLIST ]; then
 # no chrom list
     process_BAM $BAM
 else
