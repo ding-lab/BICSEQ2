@@ -4,6 +4,7 @@ LABEL authors="Matt Wyczalkowski <m.wyczalkowski@wustl.edu>, Yige Wu <yigewu@wus
 
 # Using apt-based installation rather than conda, but conda would work
 # libnss-sss is required for MGI installation
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     git \
     libnss-sss \
@@ -11,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     python \
     python-dev \
     python-pip \
+    r-base \
     samtools \
     vim-tiny \
     wget \
@@ -19,6 +21,7 @@ RUN apt-get update && apt-get install -y \
 ## the link to the BIC-seq2 norm and seg modules
 RUN wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-norm_v0.2.4.tar.gz \
     && tar -xzf NBICseq-norm_v0.2.4.tar.gz \
+    && chmod 755 /NBICseq-norm_v0.2.4/NBICseq-norm.pl /NBICseq-norm_v0.2.4/BRS_1bp /NBICseq-norm_v0.2.4/BRS_1bp/BRS \
     && wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-seg_v0.7.2.tar.gz \
     && tar -xzf NBICseq-seg_v0.7.2.tar.gz \
     && rm NBICseq-norm_v0.2.4.tar.gz NBICseq-seg_v0.7.2.tar.gz
