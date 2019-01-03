@@ -119,7 +119,7 @@ centralized naming scheme.  Maybe pass around strings like "ref.chr%s.fa" which 
       This link [https://wiki.bits.vib.be/index.php/Create_a_mappability_track] does *not* include the awk step between the gem-2-wig and wigToBigWig
       steps (unlike Yige's code)
       With awk step removed, code now runs to completion on MantaDemo
-
+* 12/31/18: successful test of make_mappability in container using MantaDemo
 
 
 
