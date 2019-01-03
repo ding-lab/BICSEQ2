@@ -33,6 +33,8 @@ MAPD="/data1"
 SEQD="/data2"
 # Output of normalization step
 NORMD=$OUTD/norm
+# Output of segmentation step
+SEGD=$OUTD/segmentation
 
 # MER is a convenience string defined in make_mappability.sh
 MER=${REF_BASE}.${READ_LENGTH}mer     # common name used for output
@@ -68,3 +70,11 @@ BICSEQ_NORM="/NBICseq-norm_v0.2.4/NBICseq-norm.pl"
 # Parameters used by BICSEQ_NORM
 FRAG_SIZE=350
 BIN_SIZE=100
+
+# parameters for segmentation
+# LAMBDA is a smoothing parameter
+LAMBDA=3
+BICSEQ_SEG="/NBICseq-seg_v0.7.2/NBICseq-seg.pl"
+SEG_PDF="$OUTD/%s_seg.pdf"  # add to project_config
+SEG_CNV="$OUTD/%s.cnv"
+

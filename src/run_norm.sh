@@ -18,7 +18,7 @@
 #   * Reads per-chrom reference, mapping, and seq files
 #   * Iterates over CHRLIST
 # * All output of this step written to $OUTD:
-#   * normalization configuration file {SAMPLE_NAME}.config.txt
+#   * normalization configuration file {SAMPLE_NAME}.norm-config.txt
 #   * PDF written as {SAMPLE_NAME}.GC.pdf
 #   * parameter estimate output (not used) in {SAMPLE_NAME}.out.txt
 #   * Normalized data, per chrom, written to {SAMPLE_NAME}.{CHR}.norm.bin
@@ -119,7 +119,7 @@ function confirm {
 
 function write_norm_config {
     # Normalizaton configuration is distinct from project parameter configuration file
-    NORM_CONFIG="$OUTD/${SAMPLE_NAME}.config.txt"
+    NORM_CONFIG="$OUTD/${SAMPLE_NAME}.norm-config.txt"
 
     # Create configuration file by iterating over all chrom in CHRLIST
     ## Config file format defined here: http://compbio.med.harvard.edu/BIC-seq/
