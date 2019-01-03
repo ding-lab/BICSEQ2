@@ -4,6 +4,9 @@
 
 # It is assumed that both the complete reference and the per-chrom references are in reference directory like below
 REF="/data/TestData/MantaDemo/Homo_sapiens_assembly19.COST16011_region.fa"
+R=$(basename -- "$REF")
+REF_BASE="${R%.*}"
+
 
 # All output directories are rooted in $OUTD
 OUTD="/data/docker/BICSEQ2/demo.out"
@@ -27,7 +30,7 @@ NORMD=$OUTD/norm
 
 
 # MER is a convenience string defined in make_mappability.sh
-MER=${REF}.${READ_LENGTH}mer     # common name used for output
+MER=${REF_BASE}.${READ_LENGTH}mer     # common name used for output
 
 
 # Output filename specifications
@@ -36,7 +39,7 @@ MER=${REF}.${READ_LENGTH}mer     # common name used for output
 FA_CHR="${REF}%s.fa"
 # MAPD is identical to OUTD in make_mappability.sh
 # v1 defined in main.sh as /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs/GRCh38.d1.vd1.fa.150mer/
-MAP_CHR="$MAPD/$MER.%s.txt"
+MAP_CHR="$MAPD/$MER/$MER.%s.txt"
 
 # get_unique.sh parameters
 # SEQ_CHR is used when multiple chrom exist, otherwise SEQ_OUT is used

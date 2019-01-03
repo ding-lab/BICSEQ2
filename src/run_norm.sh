@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Run BICSeq normalization on all chromsomes
+# Create normalization configuration file and run BICSeq normalization on all chromsomes
 # Usage:
 #   bash run_norm.sh [options] SAMPLE_NAME PROJECT_CONFIG 
 #
@@ -9,8 +9,10 @@
 #
 # Options:
 #   -v: verbose
-#   -d: dry run. Make configuration file but do not execute BICSeq-norm script
+#   -d: dry run. Make normalization configuration file but do not execute BICSeq-norm script
 #   -c CHRLIST: define chrom list, overriding value in PROJECT_CONFIG
+#   -C norm_config: Use given normalization config file, rather than creating it
+#   -w: issue warnings instead of fatal errors if files do not exist
 
 # * Input
 #   * Reads per-chrom reference, mapping, and seq files
@@ -24,16 +26,23 @@
 #   * Tmp directory $OUTD/tmp created and passed as argument to NBICseq-norm.pl
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":vdc:" opt; do
+while getopts ":vdc:C:w" opt; do
   case $opt in
-    v)  # example of binary argument
+    v)  
       VERBOSE=1
       ;;
-    d)  # example of binary argument
+    w)  
+      WARN=1
+      ;;
+    d)  
       DRYRUN=1
       ;;
-    c) # example of value argument
+    c) # Define CHRLIST
       CHRLIST_ARG=$OPTARG
+      ;;
+    C) # define a normalization configuration file instead of writing it
+      NORM_CONFIG=$OPTARG
+      >&2 echo Norm config file passed: $NORM_CONFIG
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -77,9 +86,6 @@ fi
 
 OUTD=$NORMD
 
-# Normalizaton configuration is distinct from project parameter configuration file
-NORM_CONFIG="$OUTD/${SAMPLE_NAME}.config.txt"
-
 ## create tmp directory
 # be able to specify with -t
 TMPD="$OUTD/tmp"
@@ -97,45 +103,62 @@ mkdir -p $TMPD
 # OUTPARS - not generally used
 # NORM_OUT - per chrom
 
-OUTPARS=${SAMPLE_NAME}.out.txt
+OUTPARS=$OUTD/${SAMPLE_NAME}.out.txt
 
 function confirm {
     FN=$1
     if [ ! -e $FN ]; then
-        >&2 echo Error: $FN does not exist
-        exit 1
+        if [ $WARN ]; then
+            >&2 echo Warning: $FN does not exist
+        else
+            >&2 echo Error: $FN does not exist
+            exit 1
+        fi
     fi
 }
 
-# Create configuration file by iterating over all chrom in CHRLIST
-## Config file format defined here: http://compbio.med.harvard.edu/BIC-seq/
-    # The first row of this file is assumed to be the header of the file and will be omitted by BICseq2-norm.
-    # The 1st column (chromName) is the chromosome name
-    # The 2nd column (faFile) is the reference sequence of this chromosome (human hg18 and hg19 are available for download)
-    # The 3rd column (MapFile) is the mappability file of this chromosome (human hg18 (50bp) and hg19 (50bp and 75bp) are available for download)
-    # The 4th column (readPosFile) is the file that stores all the mapping positions of all reads that uniquely mapped to this chromosome
-    # The 5th column (binFile) is the file that stores the normalized data. The data will be binned with the bin size as specified by the option -b
->&2 echo Writing normalization configuration $NORM_CONFIG
-printf "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm\n" > $NORM_CONFIG
-while read CHR; do
-    faFile=$(printf $FA_CHR $CHR)
-    confirm $faFile   
-    MapFile=$(printf $MAP_CHR $CHR)
-    confirm $MapFile
-    readPosFile=$(printf $SEQ_CHR $CHR)
-    confirm $readPosFile   
-    binFile=$(printf $NORM_CHR $CHR)
-    confirm $binFile   
-    printf "$CHR\t$faFile\t$MapFile\t$readPosFile\t$binFile\n" >> $NORM_CONFIG
-done<$CHRLIST
+function write_norm_config {
+    # Normalizaton configuration is distinct from project parameter configuration file
+    NORM_CONFIG="$OUTD/${SAMPLE_NAME}.config.txt"
+
+    # Create configuration file by iterating over all chrom in CHRLIST
+    ## Config file format defined here: http://compbio.med.harvard.edu/BIC-seq/
+        # The first row of this file is assumed to be the header of the file and will be omitted by BICseq2-norm.
+        # The 1st column (chromName) is the chromosome name
+        # The 2nd column (faFile) is the reference sequence of this chromosome (human hg18 and hg19 are available for download)
+        # The 3rd column (MapFile) is the mappability file of this chromosome (human hg18 (50bp) and hg19 (50bp and 75bp) are available for download)
+        # The 4th column (readPosFile) is the file that stores all the mapping positions of all reads that uniquely mapped to this chromosome
+        # The 5th column (binFile) is the file that stores the normalized data. The data will be binned with the bin size as specified by the option -b
+    >&2 echo Writing normalization configuration $NORM_CONFIG
+    printf "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm\n" > $NORM_CONFIG
+    while read CHR; do
+        faFile=$(printf $FA_CHR $CHR)
+        confirm $faFile   
+        MapFile=$(printf $MAP_CHR $CHR)
+        confirm $MapFile
+        readPosFile=$(printf $SEQ_CHR $CHR)
+        confirm $readPosFile   
+        binFile=$(printf $NORM_CHR $CHR)
+        confirm $binFile   
+        printf "$CHR\t$faFile\t$MapFile\t$readPosFile\t$binFile\n" >> $NORM_CONFIG
+    done<$CHRLIST
+    >&2 echo Normalization configuration $NORM_CONFIG written successfully
+}
+
+# Skip writing configutation file if it has already been defined with -C
+if [ ! $NORM_CONFIG ]; then
+    write_norm_config
+else
+    confirm $NORM_CONFIG
+fi
 
 CMD="perl $BICSEQ_NORM --tmp=$TMPD -l $READ_LENGTH -s $FRAG_SIZE -b $BIN_SIZE --fig $NORM_PDF $NORM_CONFIG $OUTPARS"
 if [ $DRYRUN ]; then
     >&2 echo Dry run: $CMD
 else
+    >&2 echo Running: $CMD
     eval $CMD
 fi
-
 
 # Evaluate return value see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
 rc=$?
