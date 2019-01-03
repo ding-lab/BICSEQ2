@@ -4,6 +4,7 @@ LABEL authors="Matt Wyczalkowski <m.wyczalkowski@wustl.edu>, Yige Wu <yigewu@wus
 
 # Using apt-based installation rather than conda, but conda would work
 # libnss-sss is required for MGI installation
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     git \
     libnss-sss \
@@ -11,23 +12,33 @@ RUN apt-get update && apt-get install -y \
     python \
     python-dev \
     python-pip \
+    r-base \
     samtools \
     vim-tiny \
     wget \
     && apt-get clean
 
 ## the link to the BIC-seq2 norm and seg modules
+## Note that chmod / chown required for MGI installations, where otherwise executables may not be visible
 RUN wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-norm_v0.2.4.tar.gz \
     && tar -xzf NBICseq-norm_v0.2.4.tar.gz \
-    && wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-seg_v0.7.2.tar.gz \
-    && tar -xzf NBICseq-seg_v0.7.2.tar.gz \
-    && rm NBICseq-norm_v0.2.4.tar.gz NBICseq-seg_v0.7.2.tar.gz
+    && chown -R root:root /NBICseq-norm_v0.2.4 \
+    && cd /NBICseq-norm_v0.2.4 \
+    && chmod 755 NBICseq-norm.pl BRS_1bp BRS_1bp randomSample DataPrepare \
+    && rm /NBICseq-norm_v0.2.4.tar.gz
 
+RUN wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-seg_v0.7.2.tar.gz \
+    && tar -xzf NBICseq-seg_v0.7.2.tar.gz \
+    && chown -R root:root /NBICseq-seg_v0.7.2 \
+    && chmod 755 /NBICseq-seg_v0.7.2 \
+    && rm /NBICseq-seg_v0.7.2.tar.gz
 
 # We use only the misc/samtools.pl script, so the following target need not be compiled.
 RUN wget http://compbio.med.harvard.edu/BIC-seq/BICseq2/samtools-0.1.7a_getUnique-0.1.3.tar.gz \
-    && tar -zxf samtools-0.1.7a_getUnique-0.1.3.tar.gz 
-
+    && tar -zxf samtools-0.1.7a_getUnique-0.1.3.tar.gz \
+    && chown -R root:root /samtools-0.1.7a_getUnique-0.1.3 \
+    && chmod 755 /samtools-0.1.7a_getUnique-0.1.3 \
+    && rm /samtools-0.1.7a_getUnique-0.1.3.tar.gz
 
 # Install GEM library 
 RUN wget https://sourceforge.net/projects/gemlibrary/files/gem-library/Binary%20pre-release%203/GEM-binaries-Linux-x86_64-core_i3-20130406-045632.tbz2 \
@@ -43,8 +54,9 @@ RUN cd /usr/local/bin \
     && wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig \
     && chmod 555 bigWigToBedGraph wigToBigWig
 
+ENV LANG=C
 # Increment foo to force `git clone`
-ENV foo=4 
+ENV foo=1 
 RUN git clone --single-branch --branch maw-dev https://github.com/mwyczalkowski/BICSEQ2.git
 
 
