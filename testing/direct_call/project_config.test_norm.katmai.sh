@@ -11,17 +11,18 @@
 # It is assumed that both the complete reference and the per-chrom references are in reference directory like below
 REF="/data4/GRCh38.d1.vd1.fa"
 R=$(basename -- "$REF")
-REF_BASE="${R%.*}"
+#REF_BASE="${R%.*}"	# this takes trailing .fa off
+REF_BASE="${R}"
 
 # This is the root directory of per-chrom reference.  Filename is e.g. chr20.fa
 REF_CHR="/data1/hg38"
 
 # All output directories are rooted in $OUTD
-OUTD="/data3/docker/BICSEQ2/demo.out"
+OUTD="/data3/demo.out"
 
 READ_LENGTH=150
 
-CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
+CHRLIST="/BICSEQ2/testing/test_data/chromosomes.hg38.20.dat"
 
 
 # Create output directories
@@ -53,7 +54,7 @@ MAP_CHR="$MAPD/$MER/$MER.%s.txt"
 # NORM_PDF="$OUTD/${SAMPLE_NAME}.GC.pdf"
 
 # NOte that config file does not know about sequence names
-SEQ_CHR="$SEQD/%s.%s.seq"
+SEQ_CHR="$SEQD/%s_%s.seq"
 SEQ_OUT="$SEQD/%s.seq"
 NORM_CHR="$OUTD/%s.%s.norm.bin" 
 NORM_PDF="$OUTD/%s.GC.pdf"

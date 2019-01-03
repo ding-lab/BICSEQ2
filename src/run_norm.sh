@@ -136,10 +136,9 @@ function write_norm_config {
         confirm $faFile   
         MapFile=$(printf $MAP_CHR $CHR)
         confirm $MapFile
-        readPosFile=$(printf $SEQ_CHR $CHR)
+        readPosFile=$(printf $SEQ_CHR $SAMPLE_NAME $CHR)
         confirm $readPosFile   
-        binFile=$(printf $NORM_CHR $CHR)
-        confirm $binFile   
+        binFile=$(printf $NORM_CHR $SAMPLE_NAME $CHR)
         printf "$CHR\t$faFile\t$MapFile\t$readPosFile\t$binFile\n" >> $NORM_CONFIG
     done<$CHRLIST
     >&2 echo Normalization configuration $NORM_CONFIG written successfully
@@ -152,7 +151,8 @@ else
     confirm $NORM_CONFIG
 fi
 
-CMD="perl $BICSEQ_NORM --tmp=$TMPD -l $READ_LENGTH -s $FRAG_SIZE -b $BIN_SIZE --fig $NORM_PDF $NORM_CONFIG $OUTPARS"
+PDF=$(printf $NORM_PDF $SAMPLE_NAME)
+CMD="perl $BICSEQ_NORM --tmp=$TMPD -l $READ_LENGTH -s $FRAG_SIZE -b $BIN_SIZE --fig $PDF $NORM_CONFIG $OUTPARS"
 if [ $DRYRUN ]; then
     >&2 echo Dry run: $CMD
 else
