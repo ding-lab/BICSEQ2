@@ -99,6 +99,14 @@ mkdir -p $TMPD
 
 OUTPARS=${SAMPLE_NAME}.out.txt
 
+function confirm {
+    FN=$1
+    if [ ! -e $FN ]; then
+        >&2 echo Error: $FN does not exist
+        exit 1
+    fi
+}
+
 # Create configuration file by iterating over all chrom in CHRLIST
 ## Config file format defined here: http://compbio.med.harvard.edu/BIC-seq/
     # The first row of this file is assumed to be the header of the file and will be omitted by BICseq2-norm.
@@ -108,16 +116,20 @@ OUTPARS=${SAMPLE_NAME}.out.txt
     # The 4th column (readPosFile) is the file that stores all the mapping positions of all reads that uniquely mapped to this chromosome
     # The 5th column (binFile) is the file that stores the normalized data. The data will be binned with the bin size as specified by the option -b
 >&2 echo Writing normalization configuration $NORM_CONFIG
-printf "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm" > $NORM_CONFIG
+printf "chromName\tfaFile\tMapFile\treadPosFile\tbinFileNorm\n" > $NORM_CONFIG
 while read CHR; do
     faFile=$(printf $FA_CHR $CHR)
+    confirm $faFile   
     MapFile=$(printf $MAP_CHR $CHR)
+    confirm $MapFile
     readPosFile=$(printf $SEQ_CHR $CHR)
+    confirm $readPosFile   
     binFile=$(printf $NORM_CHR $CHR)
-    printf "$CHR\t$faFile\t$MapFile\t$readPosFile\t$binFile" >> $NORM_CONFIG
+    confirm $binFile   
+    printf "$CHR\t$faFile\t$MapFile\t$readPosFile\t$binFile\n" >> $NORM_CONFIG
 done<$CHRLIST
 
-CMD="perl $BICSEQ_NORM --tmp=$TMPD -l $READ_LENGTH -s $FRAG_SIZE -b $BIN_SIZE --fig $PDF $NORM_CONFIG $OUTPARS"
+CMD="perl $BICSEQ_NORM --tmp=$TMPD -l $READ_LENGTH -s $FRAG_SIZE -b $BIN_SIZE --fig $NORM_PDF $NORM_CONFIG $OUTPARS"
 if [ $DRYRUN ]; then
     >&2 echo Dry run: $CMD
 else

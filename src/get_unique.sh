@@ -23,19 +23,15 @@
 #     ;login: The USENIX Magazine, February 2011:42-47.
 # [ https://www.usenix.org/system/files/login/articles/105438-Tange.pdf ]
 
-# set detaults
-SAMPLE_NAME="Sample"
+# set defaults
 PARALLEL_JOBS=4
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":dj:c:" opt; do
+while getopts ":dc:" opt; do
   case $opt in
     d)  # example of binary argument
       >&2 echo "Dry run" 
       DRYRUN=1
-      ;;
-    j) 
-      PARALLEL_JOBS=$OPTARG
       ;;
     c) 
       CHRLIST_ARG=$OPTARG
@@ -84,7 +80,7 @@ if [ $CHRLIST_ARG ]; then
 fi
 
 # Output and log files go here
-OUTD=$MAPD
+OUTD=$SEQD
 mkdir -p $OUTD
 
 ## the path to the samtools getUnique helper script
@@ -111,9 +107,9 @@ function process_BAM {
     # Output filename based on SEQ_OUT
     SEQ=$SEQ_OUT
     CMD="samtools view $BAM | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
-    >&2 echo [ $NOW ] Direct run of uniquely mapped reads\; evaluating:
+    >&2 echo [ $NOW ] Direct run of uniquely mapped reads.  Writing to $SEQD \; evaluating:
     if [ $DRYRUN ]; then
-	>&2 echo Dryrun: $CMD
+    >&2 echo Dryrun: $CMD
     else
         >&2 echo $CMD 
         eval $CMD
@@ -164,17 +160,17 @@ function process_BAM_parallel {
     fi
 
     NOW=$(date)
-    >&2 echo [ $NOW ] All jobs have completed.  get_unique.sh finished
+    >&2 echo [ $NOW ] All jobs have completed, written to $SEQD  
 }
 
 if [ ! $CHRLIST ]; then
 # no chrom list
     process_BAM $BAM
 else
-	if [ ! -e $CHRLIST ]; then
-		>&2 echo Error: File $CHRLIST does not exist
-		exit 1
-	fi
+    if [ ! -e $CHRLIST ]; then
+        >&2 echo Error: File $CHRLIST does not exist
+        exit 1
+    fi
     process_BAM_parallel $BAM $CHRLIST
 fi
 

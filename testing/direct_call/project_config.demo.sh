@@ -2,13 +2,14 @@
 # Includes all files which are "passed" from one step to the next
 
 
+# It is assumed that both the complete reference and the per-chrom references are in reference directory like below
+REF="/data/TestData/MantaDemo/Homo_sapiens_assembly19.COST16011_region.fa"
+
 # All output directories are rooted in $OUTD
 OUTD="/data/docker/BICSEQ2/demo.out"
 
 READ_LENGTH=150
 
-# It is assumed that both the complete reference and the per-chrom references are in $REFD
-REF="/data/TestData/MantaDemo/Homo_sapiens_assembly19.COST16011_region.fa"
 
 # Reference base name
 
@@ -31,8 +32,8 @@ MER=${REF}.${READ_LENGTH}mer     # common name used for output
 
 # Output filename specifications
 
-# Assumed per-chrom FASTA installed in $REFD
-FA_CHR="${REFD}/${REF}%s.fa"
+# Assumed per-chrom FASTA installed in same directory as $REF
+FA_CHR="${REF}%s.fa"
 # MAPD is identical to OUTD in make_mappability.sh
 # v1 defined in main.sh as /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs/GRCh38.d1.vd1.fa.150mer/
 MAP_CHR="$MAPD/$MER.%s.txt"
@@ -45,8 +46,14 @@ SEQ_OUT="$SEQD/$SAMPLE_NAME.seq"
 NORM_CHR="$OUTD/${SAMPLE_NAME}.%s.norm.bin" 
 NORM_PDF="$OUTD/${SAMPLE_NAME}.GC.pdf"
 
+# PARALLEL_JOBS: if parallel run, number of jobs to run at any one time 
+PARALLEL_JOBS=4
+
 # See http://compbio.med.harvard.edu/BIC-seq/ for details
 BICSEQ_NORM="/NBICseq-norm_v0.2.4/NBICseq-norm.pl"
+
+
+
 # Parameters used by BICSEQ_NORM
 FRAG_SIZE=350
 BIN_SIZE=100
