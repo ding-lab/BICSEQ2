@@ -22,7 +22,7 @@
 #   * Reads per-chrom normalized data files
 #   * Iterates over CHRLIST
 # * All output of this step written to $OUTD:
-#   * segmentation configuration file {SAMPLE_NAME}.seg-config.txt
+#   * segmentation configuration file {CASE_NAME}.seg-config.txt
 #   * PDF output (CASE-seg.pdf)
 #   * CNV file  (CASE.cnv)
 #   * tmp directory $OUTD/tmp
@@ -125,7 +125,7 @@ function confirm {
 
 function write_seg_config {
     # Segmentation configuration is distinct from project parameter configuration file
-    SEG_CONFIG="$OUTD/${SAMPLE_NAME}.seg-config.txt"
+    SEG_CONFIG="$OUTD/${CASE_NAME}.seg-config.txt"
 
     # Create configuration file by iterating over all chrom in CHRLIST
     ## Config file format defined here: http://compbio.med.harvard.edu/BIC-seq/ (using control)
@@ -136,7 +136,7 @@ function write_seg_config {
         binCase=$(printf $NORM_CHR $SAMPLE_NAME_CASE $CHR)
         confirm $binCase   
         binControl=$(printf $NORM_CHR $SAMPLE_NAME_CONTROL $CHR)
-        confirm $binCONTROL   
+        confirm $binControl   
         printf "$CHR\t$binCase\t$binControl\n" >> $SEG_CONFIG
     done<$CHRLIST
     >&2 echo Segmentation configuration $SEG_CONFIG written successfully
@@ -144,7 +144,7 @@ function write_seg_config {
 
 # Skip writing configutation file if it has already been defined with -C
 if [ ! $SEG_CONFIG ]; then
-    write_norm_config
+    write_seg_config
 else
     confirm $SEG_CONFIG
 fi
@@ -152,7 +152,7 @@ fi
 PDF=$(printf $SEG_PDF $CASE_NAME)
 CNV=$(printf $SEG_CNV $CASE_NAME)
 
-CMD="perl $BICSEQ_SEG --detail --control --noscale --lambda=$LAMBDA --tmp=$TMPD --fig $PDF $SEG_CONFIG $SEG_CNV"
+CMD="perl $BICSEQ_SEG --detail --control --noscale --lambda=$LAMBDA --tmp=$TMPD --fig $PDF $SEG_CONFIG $CNV"
 
 if [ $DRYRUN ]; then
     >&2 echo Dry run: $CMD

@@ -8,5 +8,5 @@ CONFIG="project_config.test_norm.katmai.sh"
 # Tip: to debug norm-config file before processing, run with flags -dw,
 # check / edit config file as necessary, and run with -C config.txt flag to pass config explicitly
 
-bash /BICSEQ2/src/run_segmentation.sh $@ C3L-00008_tumor C3L-00008_blood_normal $CONFIG 
+bash /BICSEQ2/src/run_segmentation.sh $@ -s C3L-00008 C3L-00008_tumor C3L-00008_blood_normal $CONFIG 
 
