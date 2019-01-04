@@ -13,9 +13,9 @@
 #
 # Options:
 # -d: dry run
+# -n: do not delete temporary downloaded GFF file
 # 
 # TODO:
-# Option to not delete temp (.gz) file
 # Checks to see if output file exists before overwriting
 #   Option to force overwrite even if output exists
 
@@ -31,10 +31,13 @@ function test_exit_status {
 }
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":d" opt; do
+while getopts ":dn" opt; do
   case $opt in
     d)  
       DRYRUN=1
+      ;;
+    n)  
+      NORMGZ=1
       ;;
 #    l)   # example
 #      READ_LENGTH=$OPTARG  
@@ -57,19 +60,24 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-$GFF_URL=$1
-$BED_OUT=$2
+GFF_URL=$1
+BED_OUT=$2
 
-# expand out the path of $BED_OUT and save to OUTD
-OUTD=$(dirname $(readlink -f $BED_OUT) )
+# expand out the path of $BED_OUT and save to DESTD
+DESTD=$(dirname $(readlink -f $BED_OUT) )
 
->&2 echo Output directory $OUTD
-cd $OUTD
+>&2 echo Output directory $DESTD
+cd $DESTD
 
->&2 echo Getting $GFF_URL
-wget $GFF_URL
+GFF=$(basename $GFF_URL)
+if [ -e $GFF ]; then
+    echo Note: Target exists: $GFF
+    echo Skipping download...
+else
+    >&2 echo Getting $GFF_URL
+    wget $GFF_URL
+fi
 
-$GFF=$(basename $GFF_URL)
 
 # Past data:
 # 
@@ -80,15 +88,21 @@ $GFF=$(basename $GFF_URL)
 # geneAnnoBedFile=gencode.v29.annotation.hg38.p12.bed
 # path: /diskmnt/Projects/CPTAC3CNV/gatk4wxscnv/inputs
 
+PATH="$PATH:/bedops/bin"
 >&2 echo Processing $GFF
 
-CMD="zcat $GFF | awk '$3==\"gene\"' | /bedops/bin/convert2bed -i gff - | cut -f 1,2,3,10 | awk -F ';|\\t' '{print $1,$2,$3,$7}' | awk -F ' |\\=' '{print $1,$2,$3,$5}' OFS='\t' > $BED_OUT"
+CMD="zcat $DESTD/$GFF | awk '\$3==\"gene\"' | convert2bed -i gff - | cut -f 1,2,3,10 | awk -F ';|\\t' '{print \$1,\$2,\$3,\$7}' | awk -F ' |\\=' '{print \$1,\$2,\$3,\$5}' OFS='\t' > $BED_OUT"
 if [ $DRYRUN ]; then
     >&2 echo Dryrun: $CMD
 else
-    >&2 echo Running:
+    >&2 echo Running: $CMD
     eval $CMD
     test_exit_status
     >&2 echo Successfully written to $BED_OUT
 fi
 
+if [ ! $NORMGZ ]; then
+# "No rm gz" is not set
+    >&2 echo Deleting temporary file $DESTD/$GFF
+    rm -f $DESTD/$GFF
+fi
