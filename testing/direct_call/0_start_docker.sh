@@ -1,6 +1,6 @@
 #!/bin/bash
-# Start docker container in regular and/or MGI environment, and map given path to /data1, /data2, ...
-# Usage: 0_start_docker.sh [options] data_path_1 [data_path_2 ...]
+# Start docker container in regular and/or MGI environment, and optionally map given paths to /data1, /data2, ...
+# Usage: 0_start_docker.sh [options] [data_path_1 data_path_2 ...]
 #
 # -M: run in MGI environment
 # -d: dry run.  print out docker statement but do not execute
@@ -39,11 +39,6 @@ while getopts ":MdI:" opt; do
   esac
 done
 shift $((OPTIND-1))
-
-if [ "$#" -lt 1 ]; then
-    >&2 echo Usage: 0_start_docker.sh data1_path \[data2_path...\]
-    exit 1
-fi
 
 D=1
 DATMAP=""
