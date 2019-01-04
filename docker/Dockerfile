@@ -4,8 +4,10 @@ LABEL authors="Matt Wyczalkowski <m.wyczalkowski@wustl.edu>, Yige Wu <yigewu@wus
 
 # Using apt-based installation rather than conda, but conda would work
 # libnss-sss is required for MGI installation
+# bedtools needed for prep_gene_annotation.sh
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
+    bedtools \  
     git \
     libnss-sss \
     parallel \
@@ -18,6 +20,12 @@ RUN apt-get update && apt-get install -y \
     wget \
     && apt-get clean
 
+# Install bedops.  Needed for prep_gene_annotation.sh
+RUN git clone https://github.com/bedops/bedops.git \
+    && cd bedops \
+    && make \
+    && make install
+
 ## the link to the BIC-seq2 norm and seg modules
 ## Note that chmod / chown required for MGI installations, where otherwise executables may not be visible
 RUN wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-norm_v0.2.4.tar.gz \
@@ -25,12 +33,16 @@ RUN wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-norm_v0.2.4.tar.gz \
     && chown -R root:root /NBICseq-norm_v0.2.4 \
     && cd /NBICseq-norm_v0.2.4 \
     && chmod 755 NBICseq-norm.pl BRS_1bp BRS_1bp randomSample DataPrepare \
+    && chmod 644 R/*.R \
     && rm /NBICseq-norm_v0.2.4.tar.gz
 
 RUN wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-seg_v0.7.2.tar.gz \
     && tar -xzf NBICseq-seg_v0.7.2.tar.gz \
     && chown -R root:root /NBICseq-seg_v0.7.2 \
-    && chmod 755 /NBICseq-seg_v0.7.2 \
+    && cd /NBICseq-seg_v0.7.2 \
+    && chmod 755 . combineFile MBIC-seq_v0.1.5 R \
+    && chmod 644 *.pl R/*.R \
+    && chmod 755 MBIC-seq_v0.1.5/MBICseq combineFile/combineFile \
     && rm /NBICseq-seg_v0.7.2.tar.gz
 
 # We use only the misc/samtools.pl script, so the following target need not be compiled.
@@ -53,6 +65,8 @@ RUN cd /usr/local/bin \
     && wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigToBedGraph \
     && wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig \
     && chmod 555 bigWigToBedGraph wigToBigWig
+
+
 
 ENV LANG=C
 # Increment foo to force `git clone`
