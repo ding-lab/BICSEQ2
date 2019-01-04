@@ -27,21 +27,21 @@ Will use reference and mapping data as they exist on katmai.
 
 Reference and mapping data here: `/diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs/hg38`
 
-
-# Testing of normalization:
+# Testing of normalization and segmentation steps:
 For testing of normalization on katmai, using data in 
 *   data1:/diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs  (chrom reference (./hg38) and mappability)
 *   data2:/diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq  (.seq files)
 *   data3:/diskmnt/Datasets/BICSEQ2-dev.tmp (output)
 *   data4:/diskmnt/Datasets/Reference/GRCh38.d1.vd1 (all-chrom reference, unused)
+
 Details are in `project_config.test_norm.katmai.sh`
 Start container with,
+```
+bash 0_start_docker.sh  /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs  \
+    /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq  \
+    /diskmnt/Datasets/BICSEQ2-dev.tmp \
+    /diskmnt/Datasets/Reference/GRCh38.d1.vd1
+```
 
-`0_start_docker.sh  /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq /diskmnt/Datasets/BICSEQ2-dev.tmp /diskmnt/Datasets/Reference/GRCh38.d1.vd1`
-
-
-
-
-
-on MGI, 
+# MGI, 
 bash 0_start_docker.sh -M /gscmnt/gc2508/dinglab/mwyczalk/BICSEQ2-dev.tmp
