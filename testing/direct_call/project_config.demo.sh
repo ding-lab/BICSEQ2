@@ -3,13 +3,13 @@
 
 
 # It is assumed that both the complete reference and the per-chrom references are in reference directory like below
-REF="/data/TestData/MantaDemo/Homo_sapiens_assembly19.COST16011_region.fa"
+REF="/data1/TestData/MantaDemo/Homo_sapiens_assembly19.COST16011_region.fa"
 R=$(basename -- "$REF")
 REF_BASE="${R%.*}"
 
 
 # All output directories are rooted in $OUTD
-OUTD="/data/docker/BICSEQ2/demo.out"
+OUTD="/data1/docker/BICSEQ2/demo.out"
 
 READ_LENGTH=150
 
