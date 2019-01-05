@@ -1,3 +1,10 @@
+**Update**
+
+Testing directory being restructured.  Scripts and project_config files 
+at this directory level are deprecated.  See `run_sample.C3L-chr.katmai`
+project for most modern version of test scrips
+
+# Prior work notes
 
 # on shiso:
 bash 0_start_docker.sh ~/Data

@@ -72,11 +72,21 @@ fi
 >&2 echo Reading $PROJECT_CONFIG
 source $PROJECT_CONFIG
 
+if [ ! -e $GENE_BED ]; then
+    >&2 echo Error: Gene annotation file $GENE_BED not found
+    exit 1
+fi
+
 CNV=$(printf $SEG_CNV $CASE_NAME)
 GL_OUT=$(printf $GL_CASE $CASE_NAME)
 
+if [ ! -e $CNV ]; then
+    >&2 echo Error: CNV input file $CNV not found
+    exit 1
+fi
+
 # Note, one CNV per sample
-CMD="sed '1d' $CNV | cut -f1,2,3,9 | bedtools intersect -loj -a $GENE_BED -b - | python gene_segment_overlap.py > $GL_OUT"
+CMD="sed '1d' $CNV | cut -f1,2,3,9 | bedtools intersect -loj -a $GENE_BED -b - | python $SRCD/gene_segment_overlap.py > $GL_OUT"
 
 if [ $DRYRUN ]; then
     >&2 echo Dry run: $CMD
