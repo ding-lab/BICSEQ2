@@ -1,8 +1,8 @@
-# Run make_mappability.sh from within docker.  Typically, start docker first with 0_start_docker.sh
+# Run prep_gene_annotation.sh from within docker.  Typically, start docker first with 0_start_docker.sh
 
-# This requires mapping of data1,2,3,4 as in README.md
-# Specific to particular test katmai setup
-source project_config.test_norm.katmai.sh
+# Using same project_config as other katmai steps.  In particular, writing output to /data3/demo.out
+source project_config.run_sample.C3L-chr.katmai.sh
+
 # previously, ../run_sample.C3L-chr.katmai/project_config.run_sample.C3L-chr.katmai.sh
 
 GFF_URL="ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gff3.gz"
