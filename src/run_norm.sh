@@ -167,3 +167,4 @@ if [[ $rc != 0 ]]; then
     exit $rc;
 fi
 
+>&2 echo run_norm.sh completed successfully

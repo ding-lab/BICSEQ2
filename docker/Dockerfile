@@ -45,7 +45,7 @@ RUN wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-seg_v0.7.2.tar.gz \
     && cd /NBICseq-seg_v0.7.2 \
     && chmod 755 . combineFile MBIC-seq_v0.1.5 R \
     && chmod 644 *.pl R/*.R \
-    && chmod 755 MBIC-seq_v0.1.5/MBICseq combineFile/combineFile \
+    && chmod 755 MBIC-seq_v0.1.5/MBICseq combineFile/combineFile BICseqTwoSample.pl \
     && rm /NBICseq-seg_v0.7.2.tar.gz
 
 # We use only the misc/samtools.pl script, so the following target need not be compiled.
@@ -68,6 +68,9 @@ RUN cd /usr/local/bin \
     && wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigToBedGraph \
     && wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig \
     && chmod 555 bigWigToBedGraph wigToBigWig
+
+RUN pip install numpy
+
 
 ENV LANG=C
 # Increment foo to force `git clone`
