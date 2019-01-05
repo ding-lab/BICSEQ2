@@ -12,6 +12,9 @@ readLength=$9
 genomeBuild=${10}
 fastaLink=${11}
 bamMapDir=${12}
+geneAnnoGFF3Link=${13}
+geneAnnoGFF3File=${14}
+geneAnnoBedFile=${15}
 
 cp chromosomes.txt ${inputDir}
 cd ${inputDir}
@@ -34,6 +37,23 @@ tar -xzf NBICseq-seg_v0.7.2.tar.gz
 cp -r /diskmnt/Projects/Users/qgao/Tools/BICSeq2/samtools-0.1.7a_getUnique-0.1.3 .
 ## get and unzip BIC-seq2 modules
 
+## get the gene annotation bed file
+if [ -s ${inputDir}${geneAnnoBedFile} ]
+then
+        echo "gene annotation bed file is available!"
+else
+        echo "gene annotation bed file is being generated!"
+        if [ -s ${inputDir}${geneAnnoGFF3File} ]
+        then
+                echo "gene annotation GFF3 file is available"
+        else
+                echo "gene annotation GFF3 file is being copied!"
+                cd ${inputDir}
+                wget ${geneAnnoGFF3Link}
+                gunzip ${geneAnnoGFF3File}.gz
+        fi
+        cat ${inputDir}${geneAnnoGFF3File} | awk '$3=="gene"' | grep protein_coding | convert2bed -i gff - | cut -f 1,2,3,10 | awk -F ';|\\t' '{print $1,$2,$3,$7}' | awk -F ' |\\=' '{print $1,$2,$3,$5}' OFS='\t' > ${inputDir}${geneAnnoBedFile}
+fi
 
 ## get and split and reference fasta file
 if [ -s ${inputDir}${refFile} ]
