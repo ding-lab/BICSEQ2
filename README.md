@@ -86,6 +86,9 @@ Steps:
         * Gene annotation - run gene annotation step
             * requires gene annotation bed file
 
+Note that processing here is per-sample.  Additional post-processing may be performed to merge per-sample gene annotation
+results; for guidance see section which writes to $geneLevelOut in original [`get_gene_level_cnv.sh`](https://github.com/ding-lab/BICSEQ2/blob/master/get_gene_level_cnv.sh)
+
 
 
 ## Input to run_norm

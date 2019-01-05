@@ -1,5 +1,4 @@
-# Run get_unique step on MantaDemo test data 
-# Direct (not parallel) evaluation 
+# Execute normalization step on two samples on katmai
 
 CONFIG="project_config.run_sample.C3L-chr.katmai.sh"
 

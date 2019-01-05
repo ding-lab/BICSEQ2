@@ -5,4 +5,7 @@ bash $BICSEQ2/src/start_docker.sh  \
     /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs  \
     /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq  \
     /diskmnt/Datasets/BICSEQ2-dev.tmp \
-    /diskmnt/Datasets/Reference/GRCh38.d1.vd1
+    /diskmnt/Projects/CPTAC3CNV/gatk4wxscnv/inputs 
+
+# Note that we are reusing Yige's run UCEC.hg38.test for run_uniq
+# This is the same as her subsequent runs, e.g., BICSEQ2.UCEC.hg38.121

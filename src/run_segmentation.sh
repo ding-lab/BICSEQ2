@@ -27,6 +27,49 @@
 #   * CNV file  (CASE.cnv)
 #   * tmp directory $OUTD/tmp
 
+
+function test_exit_status {
+    # Evaluate return value for chain of pipes; see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
+    rcs=${PIPESTATUS[*]};
+    for rc in ${rcs}; do
+        if [[ $rc != 0 ]]; then
+            >&2 echo Fatal error.  Exiting.
+            exit $rc;
+        fi;
+    done
+}
+
+function confirm {
+    FN=$1
+    if [ ! -e $FN ]; then
+        if [ $WARN ]; then
+            >&2 echo Warning: $FN does not exist
+        else
+            >&2 echo Error: $FN does not exist
+            exit 1
+        fi
+    fi
+}
+
+function write_seg_config {
+    # Segmentation configuration is distinct from project parameter configuration file
+    SEG_CONFIG="$OUTD/${CASE_NAME}.seg-config.txt"
+
+    # Create configuration file by iterating over all chrom in CHRLIST
+    ## Config file format defined here: http://compbio.med.harvard.edu/BIC-seq/ (using control)
+
+    >&2 echo Writing segmentation configuration $SEG_CONFIG
+    printf "chromName\tbinFileNorm.Case\tbinFileNorm.Control\n" > $SEG_CONFIG
+    while read CHR; do
+        binCase=$(printf $NORM_CHR $SAMPLE_NAME_CASE $CHR)
+        confirm $binCase   
+        binControl=$(printf $NORM_CHR $SAMPLE_NAME_CONTROL $CHR)
+        confirm $binControl   
+        printf "$CHR\t$binCase\t$binControl\n" >> $SEG_CONFIG
+    done<$CHRLIST
+    >&2 echo Segmentation configuration $SEG_CONFIG written successfully
+}
+
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
 while getopts ":vdc:C:ws:" opt; do
   case $opt in
@@ -111,37 +154,6 @@ OUTD=$SEGD
 TMPD="$OUTD/tmp"
 mkdir -p $TMPD
 
-function confirm {
-    FN=$1
-    if [ ! -e $FN ]; then
-        if [ $WARN ]; then
-            >&2 echo Warning: $FN does not exist
-        else
-            >&2 echo Error: $FN does not exist
-            exit 1
-        fi
-    fi
-}
-
-function write_seg_config {
-    # Segmentation configuration is distinct from project parameter configuration file
-    SEG_CONFIG="$OUTD/${CASE_NAME}.seg-config.txt"
-
-    # Create configuration file by iterating over all chrom in CHRLIST
-    ## Config file format defined here: http://compbio.med.harvard.edu/BIC-seq/ (using control)
-
-    >&2 echo Writing segmentation configuration $SEG_CONFIG
-    printf "chromName\tbinFileNorm.Case\tbinFileNorm.Control\n" > $SEG_CONFIG
-    while read CHR; do
-        binCase=$(printf $NORM_CHR $SAMPLE_NAME_CASE $CHR)
-        confirm $binCase   
-        binControl=$(printf $NORM_CHR $SAMPLE_NAME_CONTROL $CHR)
-        confirm $binControl   
-        printf "$CHR\t$binCase\t$binControl\n" >> $SEG_CONFIG
-    done<$CHRLIST
-    >&2 echo Segmentation configuration $SEG_CONFIG written successfully
-}
-
 # Skip writing configutation file if it has already been defined with -C
 if [ ! $SEG_CONFIG ]; then
     write_seg_config
@@ -159,12 +171,7 @@ if [ $DRYRUN ]; then
 else
     >&2 echo Running: $CMD
     eval $CMD
-fi
-
-# Evaluate return value see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
-rc=$?
-if [[ $rc != 0 ]]; then
-    >&2 echo Fatal error $rc: $!.  Exiting.
-    exit $rc;
+    test_exit_status
+    >&2 echo Written to $CNV
 fi
 
