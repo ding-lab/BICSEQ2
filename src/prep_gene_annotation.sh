@@ -91,7 +91,9 @@ fi
 PATH="$PATH:/bedops/bin"
 >&2 echo Processing $GFF
 
-CMD="zcat $DESTD/$GFF | awk '\$3==\"gene\"' | convert2bed -i gff - | cut -f 1,2,3,10 | awk -F ';|\\t' '{print \$1,\$2,\$3,\$7}' | awk -F ' |\\=' '{print \$1,\$2,\$3,\$5}' OFS='\t' > $BED_OUT"
+# Yige update 1/5/19
+# cat ${inputDir}${geneAnnoGFF3File} | awk '$3=="gene"' | grep protein_coding | convert2bed -i gff - | cut -f 1,2,3,10 | awk -F ';|\\t' '{print $1,$2,$3,$7}' | awk -F ' |\\=' '{print $1,$2,$3,$5}' OFS='\t' > ${inputDir}${geneAnnoBedFile}
+CMD="zcat $DESTD/$GFF | awk '\$3==\"gene\"' | grep protein_coding | convert2bed -i gff - | cut -f 1,2,3,10 | awk -F ';|\\t' '{print \$1,\$2,\$3,\$7}' | awk -F ' |\\=' '{print \$1,\$2,\$3,\$5}' OFS='\t' > $BED_OUT"
 if [ $DRYRUN ]; then
     >&2 echo Dryrun: $CMD
 else
@@ -106,3 +108,4 @@ if [ ! $NORMGZ ]; then
     >&2 echo Deleting temporary file $DESTD/$GFF
     rm -f $DESTD/$GFF
 fi
+
