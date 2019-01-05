@@ -40,14 +40,17 @@ Steps:
             * Yige uses katmai:/diskmnt/Datasets/Reference/GRCh38.d1.vd1/GRCh38.d1.vd1.fa
             * per-chrom hg38 is downloaded from http://hgdownload.cse.ucsc.edu/goldenPath/hg38/chromosomes/
             * Output / reference directory is $REFD
-        * `make_mappability.sh` generates mapping files
+            * Not currently automated
+        * `prep_mappability.sh` generates mapping files
             * specific to reference
             * dependent on read length (150 currently used)
             * Takes long time to run.  Can use cached results XXX *TODO*
             * Example filename: GRCh38.d1.vd1.150mer.chr1.txt
             * Output / mappability directory is $MAPD
+        * `prep_gene_annotation.sh` generates annotation bed files
+            * Based on gencode GFF file
     * Per sample
-        * `get_unique.sh` get unique mapped reads (.seq readPos file) for BAM file.  
+        * `get_unique.sh` get read positions, i.e., locations of unique mapped reads (.seq "readPos" file)
             * Usage: get_unique.sh [options] BAM
             * Input: 
                 * BAM file 
@@ -58,7 +61,7 @@ Steps:
                 * filename is $SAMPLE_NAME.seq (or $SAMPLE_NAME.$CHR.seq when iterating over chrom)
             * stores all the mapping positions of all reads that uniquely mapped to this chromosome
             * May run per chrom in parallel iterating over chromosome.txt
-        * `run_norm.sh`
+        * `run_norm.sh`: run normalization step
             * Run script /NBICseq-norm_v0.2.4/NBICseq-norm.pl
             * Requires CHRLIST
             * Requires SAMPLE_NAME
@@ -78,10 +81,10 @@ Steps:
                     * for CWL this may complicate staging, may require .tar.gz to pass data around
                     * For now, focus on docker implementation and have paths as well as filenames defined in project config file
                         * Filenames are passed as strings with `%s` which will be replaced by CHROM
-
-
-        * `run_detect.sh`
+        * `run_detect.sh` - run segmentation step
             * Run BICSeq Detect step
+        * Gene annotation - run gene annotation step
+            * requires gene annotation bed file
 
 
 

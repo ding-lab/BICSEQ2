@@ -26,6 +26,9 @@ RUN git clone https://github.com/bedops/bedops.git \
     && make \
     && make install
 
+# Possibly need to add the following:
+# PATH="$PATH:/bedops/bin/"
+
 ## the link to the BIC-seq2 norm and seg modules
 ## Note that chmod / chown required for MGI installations, where otherwise executables may not be visible
 RUN wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-norm_v0.2.4.tar.gz \
@@ -65,8 +68,6 @@ RUN cd /usr/local/bin \
     && wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/bigWigToBedGraph \
     && wget http://hgdownload.soe.ucsc.edu/admin/exe/linux.x86_64/wigToBigWig \
     && chmod 555 bigWigToBedGraph wigToBigWig
-
-
 
 ENV LANG=C
 # Increment foo to force `git clone`

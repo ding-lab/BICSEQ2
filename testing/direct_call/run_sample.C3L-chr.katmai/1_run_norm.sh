@@ -1,7 +1,7 @@
 # Run get_unique step on MantaDemo test data 
 # Direct (not parallel) evaluation 
 
-CONFIG="project_config.test_norm.katmai.sh"
+CONFIG="project_config.run_sample.C3L-chr.katmai.sh"
 
 # Tip: to debug norm-config file before processing, run with flags -dw,
 # check / edit config file as necessary, and run with -C config.txt flag to pass config explicitly

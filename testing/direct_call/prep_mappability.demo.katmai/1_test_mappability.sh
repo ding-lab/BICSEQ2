@@ -1,5 +1,11 @@
 # Run make_mappability.sh from within docker.  Typically, start docker first with 0_start_docker.sh
 
+#Before running Demo data, be sure to uncompress reference:
+#```
+#cd demo_data
+#tar -xvjf Homo_sapiens_assembly19.COST16011_region.fa.tar.bz2
+#```
+
 source project_config.demo.sh
 
 # process test data

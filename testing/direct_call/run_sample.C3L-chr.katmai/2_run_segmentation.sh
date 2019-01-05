@@ -1,7 +1,7 @@
 # Run get_unique step on MantaDemo test data 
 # Direct (not parallel) evaluation 
 
-CONFIG="project_config.test_norm.katmai.sh"
+CONFIG="project_config.run_sample.C3L-chr.katmai.sh"
 
 #   bash run_segmentation.sh [options] SAMPLE_NAME.CASE SAMPLE_NAME.CONTROL PROJECT_CONFIG 
 
