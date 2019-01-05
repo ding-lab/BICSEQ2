@@ -16,6 +16,12 @@ ls *.CNV | while read file; do
 	sample=$(echo $file | cut -f1 -d'.')
 	echo $sample
 #	sed '1d' $file | cut -f1,2,3,9 | bedtools intersect -loj -a ${geneBedFile} -b - | awk '$8!="."'  | python ${scriptDir}"gene_segment_overlap.py" > ${outputPath}$sample.gene_level.log2.seg
+
+## the below code does the following steps:
+### sed '1d' $file: take in .CNV file and take out the first row
+### cut -f1,2,3,9: keep columns representing chromosome, CNV start, CNV end and log2(copy ratio)
+### bedtools intersect -loj -a ${geneBedFile} -b -: intersect with gene annotation file, whose outputs have columns representing (1) chromosome, (2) gene start, (3) gene end, (4) gene symbol, (5) chromosome, (6) CNV start, (7) CNV end, (8) CNV log2(copy ratio).
+###  
 	sed '1d' $file | cut -f1,2,3,9 | bedtools intersect -loj -a ${geneBedFile} -b - | python ${scriptDir}"gene_segment_overlap.py" > ${outputPath}$sample.gene_level.log2.seg
 done
 
