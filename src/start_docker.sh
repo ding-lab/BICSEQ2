@@ -46,7 +46,7 @@ DATMAP=""
 for DATDH in "$@"
 do
     if [ ! -d $DATDH ]; then
-        >&2 echo Error: $DATDH is not an existing directory
+        >&2 echo ERROR: $DATDH is not an existing directory
         exit 1
     fi
 
@@ -104,3 +104,5 @@ if [ $MGI ]; then
 else
     start_docker
 fi
+
+>&2 echo SUCCESS

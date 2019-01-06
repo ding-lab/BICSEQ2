@@ -33,7 +33,7 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal error.  Exiting.
+            >&2 echo Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
@@ -45,7 +45,7 @@ function confirm {
         if [ $WARN ]; then
             >&2 echo Warning: $FN does not exist
         else
-            >&2 echo Error: $FN does not exist
+            >&2 echo ERROR: $FN does not exist
             exit 1
         fi
     fi
@@ -106,7 +106,7 @@ shift $((OPTIND-1))
 
 
 if [ "$#" -ne 3 ]; then
-    >&2 echo Error: Wrong number of arguments
+    >&2 echo ERROR: Wrong number of arguments
     >&2 echo Usage:
     >&2 echo bash run_segmentation.sh \[options\] SAMPLE_NAME.CASE SAMPLE_NAME.CONTROL PROJECT_CONFIG
     exit 1
@@ -117,7 +117,7 @@ SAMPLE_NAME_CONTROL=$2
 PROJECT_CONFIG=$3
 
 if [ ! -e $PROJECT_CONFIG ]; then
-    >&2 echo Error: Project configuration file $PROJECT_CONFIG not found
+    >&2 echo ERROR: Project configuration file $PROJECT_CONFIG not found
     exit 1
 fi
 
@@ -129,7 +129,7 @@ if [ $CHRLIST_ARG ]; then
 fi
 
 if [ ! -e $CHRLIST ]; then
-    >&2 echo Error: File $CHRLIST does not exist
+    >&2 echo ERROR: File $CHRLIST does not exist
     exit 1
 fi
 
@@ -143,7 +143,7 @@ fi
 
 # LAMBDA is a smoothing parameter
 if [ ! $LAMBDA ]; then
-    >&2 echo Error: parameter LAMBDA not defined
+    >&2 echo ERROR: parameter LAMBDA not defined
     exit 1
 fi
 
@@ -175,3 +175,4 @@ else
     >&2 echo Written to $CNV
 fi
 
+>&2 echo SUCCESS

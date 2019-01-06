@@ -40,7 +40,7 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal error.  Exiting.
+            >&2 echo Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
@@ -88,7 +88,7 @@ shift $((OPTIND-1))
 
 
 if [ "$#" -ne 3 ]; then 
-    >&2 echo Error: Wrong number of arguments
+    >&2 echo ERROR: Wrong number of arguments
     exit 1
 fi
 
@@ -193,6 +193,8 @@ while read CHR; do
     #>&2 echo $CMD
     >&2 eval $CMD
 done<$CHRLIST
+
+>&2 echo SUCCESS
 
 # This was commended out in Yige's code, but seems relevant...
 # bedGraphTobed ${REF}.${READ_LENGTH}mer.bedGraph ${REF}.${READ_LENGTH}mer.bed 1 ${REF} ${REF}.${READ_LENGTH}mer.uniq.bed

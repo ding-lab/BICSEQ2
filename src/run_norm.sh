@@ -58,7 +58,7 @@ shift $((OPTIND-1))
 
 
 if [ "$#" -ne 2 ]; then
-    >&2 echo Error: Wrong number of arguments
+    >&2 echo ERROR: Wrong number of arguments
     >&2 echo Usage:
     >&2 echo bash run_norm.sh \[options\] SAMPLE_NAME PROJECT_CONFIG 
     exit 1
@@ -68,7 +68,7 @@ SAMPLE_NAME=$1
 PROJECT_CONFIG=$2
 
 if [ ! -e $PROJECT_CONFIG ]; then
-    >&2 echo Error: Project configuration file $PROJECT_CONFIG not found
+    >&2 echo ERROR: Project configuration file $PROJECT_CONFIG not found
     exit 1
 fi
 
@@ -80,7 +80,7 @@ if [ $CHRLIST_ARG ]; then
 fi
 
 if [ ! -e $CHRLIST ]; then
-    >&2 echo Error: File $CHRLIST does not exist
+    >&2 echo ERROR: File $CHRLIST does not exist
     exit 1
 fi
 
@@ -111,7 +111,7 @@ function confirm {
         if [ $WARN ]; then
             >&2 echo Warning: $FN does not exist
         else
-            >&2 echo Error: $FN does not exist
+            >&2 echo ERROR: $FN does not exist
             exit 1
         fi
     fi
@@ -163,8 +163,8 @@ fi
 # Evaluate return value see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
 rc=$?
 if [[ $rc != 0 ]]; then
-    >&2 echo Fatal error $rc: $!.  Exiting.
+    >&2 echo Fatal ERROR $rc: $!.  Exiting.
     exit $rc;
 fi
 
->&2 echo run_norm.sh completed successfully
+>&2 echo SUCCESS

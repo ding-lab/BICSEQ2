@@ -49,7 +49,7 @@ done
 shift $((OPTIND-1))
 
 if [ "$#" -ne 3 ]; then
-    >&2 echo Error: Wrong number of arguments
+    >&2 echo ERROR: Wrong number of arguments
     >&2 echo Usage: get_unique.sh SAMPLE_NAME PROJECT_CONFIG BAM
     exit 1
 fi
@@ -59,12 +59,12 @@ PROJECT_CONFIG=$2
 BAM=$3
 
 if [ ! -e $BAM ]; then
-    >&2 echo Error: Bam file $BAM does not exist
+    >&2 echo ERROR: Bam file $BAM does not exist
     exit 1
 fi
 
 if [ ! -e $PROJECT_CONFIG ]; then
-    >&2 echo Error: Project configuration file $PROJECT_CONFIG not found
+    >&2 echo ERROR: Project configuration file $PROJECT_CONFIG not found
     exit 1
 fi
 
@@ -92,7 +92,7 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal error.  Exiting.
+            >&2 echo Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
@@ -168,9 +168,10 @@ if [ ! $CHRLIST ]; then
     process_BAM $BAM
 else
     if [ ! -e $CHRLIST ]; then
-        >&2 echo Error: File $CHRLIST does not exist
+        >&2 echo ERROR: File $CHRLIST does not exist
         exit 1
     fi
     process_BAM_parallel $BAM $CHRLIST
 fi
 
+>&2 echo SUCCESS

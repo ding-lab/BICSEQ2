@@ -6,7 +6,7 @@
 
 # Input: 
 #   URL of gff
-#   filename of output
+#   path and filename of output.  May be relative.  Directory will be created.  All output will go to this directory
 # Output:
 #   Writes to output file
 #   Temp directory in output file path, or specified independently
@@ -24,7 +24,7 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal error.  Exiting.
+            >&2 echo Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
@@ -56,26 +56,35 @@ shift $((OPTIND-1))
 
 
 if [ "$#" -ne 2 ]; then 
-    >&2 echo Error: Wrong number of arguments
+    >&2 echo ERROR: Wrong number of arguments
     exit 1
 fi
 
 GFF_URL=$1
 BED_OUT=$2
 
+# Note that BED_OUT may be relative path (../foo/blah.bed)
+# destination directory DESTD is absolute
+# Need to create directory of $BED_OUT before running `readlink -f`
+# 	(because readlink will fail if the directory does not exist)
+BED_OUT_DIR=$(dirname $BED_OUT)	# possibly relative path to BED_OUT
+>&2 echo Making directory $BED_OUT_DIR
+mkdir -p $BED_OUT_DIR
+test_exit_status
+
 # expand out the path of $BED_OUT and save to DESTD
 DESTD=$(dirname $(readlink -f $BED_OUT) )
 
->&2 echo Output directory $DESTD
-cd $DESTD
+>&2 echo Output absolute path $DESTD
 
-GFF=$(basename $GFF_URL)
+GFF=$DESTD/$(basename $GFF_URL)
 if [ -e $GFF ]; then
     echo Note: Target exists: $GFF
     echo Skipping download...
 else
-    >&2 echo Getting $GFF_URL
-    wget $GFF_URL
+    >&2 echo Getting $GFF_URL writing to $GFF
+    wget -O $GFF $GFF_URL
+    test_exit_status
 fi
 
 
@@ -93,7 +102,7 @@ PATH="$PATH:/bedops/bin"
 
 # Yige update 1/5/19
 # cat ${inputDir}${geneAnnoGFF3File} | awk '$3=="gene"' | grep protein_coding | convert2bed -i gff - | cut -f 1,2,3,10 | awk -F ';|\\t' '{print $1,$2,$3,$7}' | awk -F ' |\\=' '{print $1,$2,$3,$5}' OFS='\t' > ${inputDir}${geneAnnoBedFile}
-CMD="zcat $DESTD/$GFF | awk '\$3==\"gene\"' | grep protein_coding | convert2bed -i gff - | cut -f 1,2,3,10 | awk -F ';|\\t' '{print \$1,\$2,\$3,\$7}' | awk -F ' |\\=' '{print \$1,\$2,\$3,\$5}' OFS='\t' > $BED_OUT"
+CMD="zcat $GFF | awk '\$3==\"gene\"' | grep protein_coding | convert2bed -i gff - | cut -f 1,2,3,10 | awk -F ';|\\t' '{print \$1,\$2,\$3,\$7}' | awk -F ' |\\=' '{print \$1,\$2,\$3,\$5}' OFS='\t' > $BED_OUT"
 if [ $DRYRUN ]; then
     >&2 echo Dryrun: $CMD
 else
@@ -105,7 +114,9 @@ fi
 
 if [ ! $NORMGZ ]; then
 # "No rm gz" is not set
-    >&2 echo Deleting temporary file $DESTD/$GFF
-    rm -f $DESTD/$GFF
+    >&2 echo Deleting temporary file $GFF
+    rm -f $GFF
+    test_exit_status
 fi
 
+>&2 echo SUCCESS 

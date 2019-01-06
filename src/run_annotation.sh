@@ -25,7 +25,7 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal error.  Exiting.
+            >&2 echo Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
@@ -55,7 +55,7 @@ shift $((OPTIND-1))
 
 
 if [ "$#" -ne 2 ]; then
-    >&2 echo Error: Wrong number of arguments
+    >&2 echo ERROR: Wrong number of arguments
     >&2 echo Usage:
     >&2 echo bash run_annotation.sh \[options\] CASE_NAME PROJECT_CONFIG
     exit 1
@@ -65,7 +65,7 @@ CASE_NAME=$1
 PROJECT_CONFIG=$2
 
 if [ ! -e $PROJECT_CONFIG ]; then
-    >&2 echo Error: Project configuration file $PROJECT_CONFIG not found
+    >&2 echo ERROR: Project configuration file $PROJECT_CONFIG not found
     exit 1
 fi
 
@@ -73,7 +73,7 @@ fi
 source $PROJECT_CONFIG
 
 if [ ! -e $GENE_BED ]; then
-    >&2 echo Error: Gene annotation file $GENE_BED not found
+    >&2 echo ERROR: Gene annotation file $GENE_BED not found
     exit 1
 fi
 
@@ -81,7 +81,7 @@ CNV=$(printf $SEG_CNV $CASE_NAME)
 GL_OUT=$(printf $GL_CASE $CASE_NAME)
 
 if [ ! -e $CNV ]; then
-    >&2 echo Error: CNV input file $CNV not found
+    >&2 echo ERROR: CNV input file $CNV not found
     exit 1
 fi
 
@@ -97,6 +97,7 @@ else
     >&2 echo Written to $GL_OUT
 fi
 
+>&2 echo SUCCESS
 
 # Note, not merging across all samples into final result named e.g. gene_level_CNV.BICSEQ2.UCEC.hg38.121.v1.2.tsv
 # Code below from https://github.com/ding-lab/BICSEQ2/blob/master/get_gene_level_cnv.sh
