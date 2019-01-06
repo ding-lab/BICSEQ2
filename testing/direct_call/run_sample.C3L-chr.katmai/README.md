@@ -13,6 +13,12 @@ Test the following sample workflow steps on C3L-chr dataset:
     * Segmentation
     * Gene annotation
 
+Performance
+* get_unique ~ 17 min for chrom 18,19,20
+  * because of this, implementing option in project config to use either pipeline or preprocessed
+    .seq files
+  * /data4 is mapped to preprocessed .seq data
+
 Starting now, doing `get_unique` step.  Previously, used `.seq` files provided by other runs.
 
 Project configuration in `project_config.run_sample.C3L-chr.katmai.sh`
