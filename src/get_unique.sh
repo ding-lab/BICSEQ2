@@ -84,9 +84,11 @@ if [ $CHRLIST_ARG ]; then
     fi
 fi
 
-# Output and log files go here
+# Output, tmp, and log files go here
 OUTD=$SEQD
 mkdir -p $OUTD
+TMPD="$OUTD/tmp"
+mkdir -p $TMPD
 
 ## the path to the samtools getUnique helper script
 SAMTOOLS_GU="/samtools-0.1.7a_getUnique-0.1.3/misc/samtools.pl"
@@ -155,7 +157,7 @@ function process_BAM_parallel {
 
         JOBLOG="$OUTD/$SAMPLE_NAME.$CHR.get_uniq.log"
         CMD="samtools view $BAM $CHR | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
-        CMDP="parallel --semaphore -j $PARALLEL_JOBS --id $MYID --joblog $JOBLOG $CMD"
+        CMDP="parallel --semaphore -j $PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD $CMD"
         >&2 echo Launching $CHR
         if [ $DRYRUN ]; then
             >&2 echo Dryrun: $CMDP
