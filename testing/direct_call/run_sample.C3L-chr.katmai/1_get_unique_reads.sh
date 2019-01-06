@@ -17,5 +17,21 @@ TUMOR="/data3/1c0e0f84-4caf-4493-9b2f-8f5f9ef9231b/f6924a26-a14f-45a3-b4bd-7a459
 #   get_unique.sh [options] SAMPLE_NAME PROJECT_CONFIG BAM
 
 bash /BICSEQ2/src/get_unique.sh $@ C3L-00008_tumor $CONFIG $TUMOR
+
+* TODO * problem with output SEQ file.  
+```
+SEQ_CHR = /data1/run_sample.C3L-chr.katmai/unique_reads/%s_%s.seq
+CHR = chr18
+SEQ = /data1/run_sample.C3L-chr.katmai/unique_reads/chr18_.seq
+```
+What should it be?  Second string?  Look at stored SEQ files
+Should be:
+C3L-00008_blood_normal_chr14.seq
+
+SAMPLE_NAME is missing
+
+>&2 echo Exiting after tumor
+exit
+
 bash /BICSEQ2/src/get_unique.sh $@ C3L-00008_blood_normal $CONFIG $NORMAL
 

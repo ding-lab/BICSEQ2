@@ -177,8 +177,10 @@ function process_BAM_parallel {
 
 if [ ! $CHRLIST ]; then
 # no chrom list
+    >&2 echo Processing BAM singly
     process_BAM $BAM
 else
+    >&2 echo Processing BAM in parallel
     if [ ! -e $CHRLIST ]; then
         >&2 echo ERROR: File $CHRLIST does not exist
         exit 1

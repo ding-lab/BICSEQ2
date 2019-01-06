@@ -6,6 +6,10 @@
 #   data2:/diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs  (chrom reference (./hg38) and mappability)
 #   data3:/diskmnt/Projects/cptac_downloads_3/GDC_import/data (BAM files)
 
+# Optionally:
+#   data4:/diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq  (Yige .seq files)
+
+
 PROJECT="run_sample.C3L-chr.katmai"
 
 # REF defined below is used for two purposes: to get path to all-chrom reference used in prep_mappability step, 
