@@ -143,7 +143,8 @@ function process_BAM_parallel {
     while read CHR; do
 
         # Output filename based on SEQ_CHR
-        SEQ=$(printf $SEQ_CHR $CHR)
+        SEQ=$(printf $SEQ_CHR $SAMPLE_NAME $CHR)
+
         JOBLOG="$OUTD/$SAMPLE_NAME.$CHR.get_uniq.log"
         CMD="samtools view $BAM $CHR | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
         CMDP="parallel --semaphore -j $PARALLEL_JOBS --id $MYID --joblog $JOBLOG $CMD"
