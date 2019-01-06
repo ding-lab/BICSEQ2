@@ -11,7 +11,7 @@
 # if $IMPORT_SEQ is 1, use external (preprocessed) SEQ file, otherwise
 # use directory as defined by workflow.  This is to simplify testing and restarts
 # Be careful about inadvertant overwriting of data
-IMPORT_SEQ=1
+IMPORT_SEQ=0
 
 PROJECT="run_sample.C3L-chr.katmai"
 
