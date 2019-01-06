@@ -17,9 +17,5 @@ TUMOR="/data3/1c0e0f84-4caf-4493-9b2f-8f5f9ef9231b/f6924a26-a14f-45a3-b4bd-7a459
 #   get_unique.sh [options] SAMPLE_NAME PROJECT_CONFIG BAM
 
 bash /BICSEQ2/src/get_unique.sh $@ C3L-00008_tumor $CONFIG $TUMOR
-
->&2 echo Exiting after tumor
-exit
-
 bash /BICSEQ2/src/get_unique.sh $@ C3L-00008_blood_normal $CONFIG $NORMAL
 

@@ -11,7 +11,7 @@
 # if $IMPORT_SEQ is 1, use external (preprocessed) SEQ file, otherwise
 # use directory as defined by workflow.  This is to simplify testing and restarts
 # Be careful about inadvertant overwriting of data
-IMPORT_SEQ=0
+IMPORT_SEQ=1
 
 PROJECT="run_sample.C3L-chr.katmai"
 
@@ -45,6 +45,8 @@ mkdir -p $OUTD
 MAPD="/data2"
 
 
+# This is not ideal way to do this - for example, this statement is printed out every step.
+# Better isolate this into separate file
 ## the path to the .seq file, 
 if [ "$IMPORT_SEQ" == 1 ]; then
     SEQD="/data4"
@@ -60,6 +62,8 @@ NORMD="$OUTD/norm"
 SEGD="$OUTD/segmentation"
 # Output of annotation step
 ANND="$OUTD/annotation"
+>&2 echo Making output directories $NORMD $SEGD $ANND
+mkdir -p $NORMD $SEGD $ANND
 
 # MER is a convenience string defined in make_mappability.sh
 MER=${REF_BASE}.${READ_LENGTH}mer     # common name used for output
