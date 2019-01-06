@@ -8,13 +8,10 @@
 #	This is if want to use external SEQ files
 #   data4:/diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq  (.seq files)
 
-# Optionally:
-#   data4:/diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq  (Yige .seq files)
-
-# if $IMPORT_SEQ is defined, use external (preprocessed) SEQ file, otherwise
+# if $IMPORT_SEQ is 1, use external (preprocessed) SEQ file, otherwise
 # use directory as defined by workflow.  This is to simplify testing and restarts
-IMPORT_SEQ=1
-
+# Be careful about inadvertant overwriting of data
+IMPORT_SEQ=0
 
 PROJECT="run_sample.C3L-chr.katmai"
 
@@ -49,10 +46,12 @@ MAPD="/data2"
 
 
 ## the path to the .seq file, 
-if [ $IMPORT_SEQ ]; then
+if [ "$IMPORT_SEQ" == 1 ]; then
     SEQD="/data4"
+    >&2 echo "IMPORT_SEQ: will read .seq from $SEQD"
 else
     SEQD="$OUTD/unique_reads"
+    >&2 echo "IMPORT_SEQ: will read .seq from workflow $SEQD"
 fi
 
 # Output of normalization step

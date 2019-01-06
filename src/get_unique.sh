@@ -112,6 +112,10 @@ function process_BAM {
     # Output filename based on SEQ_OUT
     SEQ=$SEQ_OUT
     CMD="samtools view $BAM | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
+    if [ -e $SEQ ]; then
+        >&2 echo ERROR: $SEQ exists.  Will not overwrite existing .seq data
+        exit 1
+    fi
     >&2 echo [ $NOW ] Direct run of uniquely mapped reads.  Writing to $SEQD \; evaluating:
     if [ $DRYRUN ]; then
     >&2 echo Dryrun: $CMD
@@ -144,6 +148,10 @@ function process_BAM_parallel {
 
         # Output filename based on SEQ_CHR
         SEQ=$(printf $SEQ_CHR $SAMPLE_NAME $CHR)
+        if [ -e $SEQ ]; then
+            >&2 echo ERROR: $SEQ exists.  Will not overwrite existing .seq data
+            exit 1
+        fi
 
         JOBLOG="$OUTD/$SAMPLE_NAME.$CHR.get_uniq.log"
         CMD="samtools view $BAM $CHR | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"

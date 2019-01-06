@@ -7,6 +7,7 @@
 # -I DOCKER_IMAGE: Specify docker image.  Default: mwyczalkowski/bicseq2:latest
 
 # data_path will map to /data in container
+# TODO: make /data1 be rw, others ro
 
 # TIPS:
 # * May want to do `git pull origin maw-dev` in /BICSEQ2
