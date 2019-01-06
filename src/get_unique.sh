@@ -10,6 +10,7 @@
 #
 # Options:
 # -d : dry-run. Print commands but do not execute them
+# -1 : stop after one.  If CHRLIST defined, launch only one job and proceed
 # -c CHRLIST: Filename listing genomic reqions which will be processed in parallel.  Default is to process
 #    all chromosomes at once.  This is similar to "chromosomes.txt" but lines will typically be "chr1", etc. 
 #    This file is typically defined in PROJECT_CONFIG but may be overridden on command line.  "-c NONE" will
@@ -27,7 +28,7 @@
 PARALLEL_JOBS=4
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":dc:" opt; do
+while getopts ":dc:1" opt; do
   case $opt in
     d)  # example of binary argument
       >&2 echo "Dry run" 
@@ -35,6 +36,10 @@ while getopts ":dc:" opt; do
       ;;
     c) 
       CHRLIST_ARG=$OPTARG
+      ;;
+    1) 
+      >&2 echo "Will stop after one element of CHRLIST" 
+      JUSTONE=1
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -132,7 +137,9 @@ function process_BAM_parallel {
     # Man page: https://www.gnu.org/software/parallel/man.html
     NOW=$(date)
     MYID=$(date +%Y%m%d%H%M%S)
-    >&2 echo [ $NOW ]: Parallel run of uniquely mapped reads\; looping over $CHRLIST
+    >&2 echo [ $NOW ]: Parallel run of uniquely mapped reads
+    >&2 echo . 	  Looping over $CHRLIST
+    >&2 echo . 	  Parallel jobs: $PARALLEL_JOBS
     while read CHR; do
 
         # Output filename based on SEQ_CHR
@@ -144,10 +151,14 @@ function process_BAM_parallel {
         if [ $DRYRUN ]; then
             >&2 echo Dryrun: $CMDP
         else
-            >&2 echo $CMDP
+            >&2 echo Running: $CMDP
             eval $CMDP
         fi
         test_exit_status
+
+        if [ $JUSTONE ]; then
+            break
+        fi
 
     done<$CHRLIST
 
@@ -157,8 +168,8 @@ function process_BAM_parallel {
     # this will wait until all jobs completed
     if [ ! $DRYRUN ]; then
         parallel --semaphore --wait --id $MYID
+        test_exit_status
     fi
-    test_exit_status
 
     NOW=$(date)
     >&2 echo [ $NOW ] All jobs have completed, written to $SEQD  
