@@ -5,6 +5,8 @@
 #   data1:/diskmnt/Datasets/BICSEQ2-dev.tmp (output)
 #   data2:/diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs  (chrom reference (./hg38) and mappability)
 #   data3:/diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq  (.seq files)
+#	This is if want to use external SEQ files
+#   data4:/diskmnt/Projects/cptac_downloads_3/GDC_import/data (BAM files)
 
 PROJECT="run_sample.C3L-chr.katmai"
 

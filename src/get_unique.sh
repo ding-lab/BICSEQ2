@@ -158,6 +158,7 @@ function process_BAM_parallel {
     if [ ! $DRYRUN ]; then
         parallel --semaphore --wait --id $MYID
     fi
+    test_exit_status
 
     NOW=$(date)
     >&2 echo [ $NOW ] All jobs have completed, written to $SEQD  
