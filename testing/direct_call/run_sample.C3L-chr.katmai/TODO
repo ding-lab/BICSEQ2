@@ -2,4 +2,14 @@
   each chrom to complete
 * Each step creates its own output directory.  Do not create them all at once,
   So can keep track of progress according to output directory created
-* Confirm --tmpdir works in get_unique - crashed with disk full errors
+
+Update 1/7/19
+* Run succeeds, but results are different than those from Yige's prior run here:
+  - /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/BICSEQ2.UCEC.hg38.121/get_gene_level_cnv
+
+  Specifically, 
+	* /data1/run_sample.C3L-00008.katmai/annotation/C3L-00008.gene_level.log2.seg
+	* /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/BICSEQ2.UCEC.hg38.121/get_gene_level_cnv/C3L-00008.gene_level.log2.seg
+  differ.  Need to track down upstream source of these errors
+
+
