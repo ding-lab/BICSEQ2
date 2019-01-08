@@ -5,6 +5,7 @@
 # -M: run in MGI environment
 # -d: dry run.  print out docker statement but do not execute
 # -I DOCKER_IMAGE: Specify docker image.  Default: mwyczalkowski/bicseq2:latest
+# -c cmd: run given command.  default: bash
 
 # data_path will map to /data in container
 # TODO: make /data1 be rw, others ro
@@ -17,17 +18,21 @@
 DOCKER_IMAGE="mwyczalkowski/bicseq2:latest"
 
 LSFQ="-q research-hpc"  # MGI LSF queue.  
-while getopts ":MdI:" opt; do
+CMD="/bin/bash"
+while getopts ":MdI:c:" opt; do
   case $opt in
     M)  # example of binary argument
       MGI=1
       >&2 echo MGI Mode
       ;;
     d) 
-      DRYRUN=1
+      DRYRUN="1"
       ;;
     I)
       DOCKER_IMAGE=$OPTARG
+      ;;    
+    c)
+      CMD="$OPTARG"
       ;;    
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -70,17 +75,18 @@ done
 
 # MGI code from https://github.com/ding-lab/importGDC/blob/master/GDC_import.sh
 function start_docker_MGI {
+CMD="$1"
 
 # Where container's /data is mounted on host
 #export LSF_DOCKER_VOLUMES="$ADATD:/data"
 export LSF_DOCKER_VOLUMES="$DATMAP"
 
-CMD="bsub $LSFQ -Is -a \"docker($DOCKER_IMAGE)\" /bin/bash "
+DCMD="bsub $LSFQ -Is -a \"docker($DOCKER_IMAGE)\" $CMD "
 if [ $DRYRUN ]; then
-    echo Dryrun: $CMD
+    echo Dryrun: $DCMD
 else
-    echo Running: $CMD
-    eval $CMD
+    echo Running: $DCMD
+    eval $DCMD
 fi
 
 }
@@ -89,21 +95,22 @@ function start_docker {
 # These may be defined at `docker run`-time or prior to executing directly in docker
 #JAVA_OPTS="-Xms512m -Xmx512m"
 #ENVARGS="-e JAVA_OPTS=\"$JAVA_OPTS\""
+CMD=$1
 
-CMD="docker run $ENVARGS $DATMAP -it $DOCKER_IMAGE /bin/bash"
+DCMD="docker run $ENVARGS $DATMAP -it $DOCKER_IMAGE $CMD"
 if [ $DRYRUN ]; then
-    echo Dryrun: $CMD
+    echo Dryrun: $DCMD
 else
-    echo Running: $CMD
-    eval $CMD
+    echo Running: $DCMD
+    eval $DCMD
 fi
 
 }
 
 if [ $MGI ]; then
-    start_docker_MGI
+    start_docker_MGI "$CMD"
 else
-    start_docker
+    start_docker "$CMD"
 fi
 
 >&2 echo SUCCESS
