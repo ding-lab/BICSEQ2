@@ -12,8 +12,4 @@ bash $BICSEQ2/src/start_docker.sh  \
     /diskmnt/Projects/cptac_downloads_3/GDC_import/data \
     /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq
 
-
-
-
-# Note that we are reusing Yige's run UCEC.hg38.test for run_uniq
-# This is the same as her subsequent runs, e.g., BICSEQ2.UCEC.hg38.121
+# Tip: run this command within a tmux session for long runs
