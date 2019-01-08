@@ -13,6 +13,7 @@
 # -d: dry run: print commands but do not run
 #     This may be repeated (e.g., -dd or -d -d) to pass the -d argument to called functions instead,
 # -f: force overwrite of existing data, if it exists
+# -j: number of parallel jobs for get_unique step [default 4]
 
 # Details about BICSEQ2 pipeline: http://compbio.med.harvard.edu/BIC-seq/
 
@@ -43,19 +44,19 @@ function announce {
 }
 
 ARGS=""
-FORCE_ARGS=""
+GET_UNIQ_ARGS=""
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":df" opt; do
+while getopts ":dfj:" opt; do
   case $opt in
     d)
       DRYRUN="d$DRYRUN" # -d is a stack of parameters, each script popping one off until get to -d
       ;;
     f)
-      FORCE_ARGS="-f" 
+      GET_UNIQ_ARGS="$GET_UNIQ_ARGS -f" 
       ;;
-#    c) # example
-#      CHRLIST_ARG=$OPTARG
-#      ;;
+    j) 
+      GET_UNIQ_ARGS="$GET_UNIQ_ARGS -j $OPTARG"
+      ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
       exit 1
@@ -118,7 +119,7 @@ function process_sample {
     BAM=$2
 
     announce "$SN: Running get_unique step"
-    CMD="bash /BICSEQ2/src/get_unique.sh $ARGS $FORCE_ARGS $SN $CONFIG $BAM"
+    CMD="bash /BICSEQ2/src/get_unique.sh $ARGS $GET_UNIQ_ARGS $SN $CONFIG $BAM"
     run_cmd "$CMD"
 
     announce "$SN: Running normalization step"

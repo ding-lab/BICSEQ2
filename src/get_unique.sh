@@ -29,7 +29,7 @@
 PARALLEL_JOBS=4
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":dc:1f" opt; do
+while getopts ":dc:1fj:" opt; do
   case $opt in
     d)  # example of binary argument
       >&2 echo "Dry run" 
@@ -44,6 +44,9 @@ while getopts ":dc:1f" opt; do
       ;;
     f) 
       FORCE_OVERWRITE=1
+      ;;
+    j) 
+      PARALLEL_JOBS=$OPTARG
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 

@@ -14,7 +14,8 @@
 IMPORT_SEQ=0
 
 PROJECT="execute_workflow.C3L-00006.katmai"
-CHRLIST="/BICSEQ2/testing/test_data/chromosomes.20.dat"
+#CHRLIST="/BICSEQ2/testing/test_data/chromosomes.20.dat"
+CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
 #CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
 
 # REF defined below is used for two purposes: to get path to all-chrom reference used in prep_mappability step, 
@@ -86,9 +87,6 @@ SEQ_CHR="$SEQD/%s_%s.seq"
 SEQ_OUT="$SEQD/%s.seq"
 NORM_CHR="$NORMD/%s.%s.norm.bin" 
 NORM_PDF="$NORMD/%s.GC.pdf"
-
-# PARALLEL_JOBS: if parallel run, number of jobs to run at any one time 
-PARALLEL_JOBS=4
 
 # See http://compbio.med.harvard.edu/BIC-seq/ for details
 BICSEQ_NORM="/NBICseq-norm_v0.2.4/NBICseq-norm.pl"

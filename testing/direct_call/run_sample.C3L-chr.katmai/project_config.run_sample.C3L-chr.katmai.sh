@@ -90,9 +90,6 @@ SEQ_OUT="$SEQD/%s.seq"
 NORM_CHR="$NORMD/%s.%s.norm.bin" 
 NORM_PDF="$NORMD/%s.GC.pdf"
 
-# PARALLEL_JOBS: if parallel run, number of jobs to run at any one time 
-PARALLEL_JOBS=4
-
 # See http://compbio.med.harvard.edu/BIC-seq/ for details
 BICSEQ_NORM="/NBICseq-norm_v0.2.4/NBICseq-norm.pl"
 
