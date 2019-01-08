@@ -87,8 +87,8 @@ if [ ! -e $CNV ]; then
     exit 1
 fi
 
-# Note, one CNV per sample
-CMD="sed '1d' $CNV | cut -f1,2,3,9 | bedtools intersect -loj -a $GENE_BED -b - | python $SRCD/gene_segment_overlap.py > $GL_OUT"
+# Note, one CNV per sample.  
+CMD="sed '1d' $CNV | cut -f1,2,3,9 | /usr/bin/bedtools intersect -loj -a $GENE_BED -b - | /usr/bin/python $SRCD/gene_segment_overlap.py > $GL_OUT"
 
 if [ $DRYRUN ]; then
     >&2 echo Dry run: $CMD

@@ -43,16 +43,16 @@ RUN wget http://compbio.med.harvard.edu/BIC-seq/NBICseq-seg_v0.7.2.tar.gz \
     && tar -xzf NBICseq-seg_v0.7.2.tar.gz \
     && chown -R root:root /NBICseq-seg_v0.7.2 \
     && cd /NBICseq-seg_v0.7.2 \
-    && chmod 755 . combineFile MBIC-seq_v0.1.5 R \
+    && chmod 755 . combineFile MBIC-seq_v0.1.5 R bootstrap \
     && chmod 644 *.pl R/*.R \
-    && chmod 755 MBIC-seq_v0.1.5/MBICseq combineFile/combineFile BICseqTwoSample.pl \
+    && chmod 755 MBIC-seq_v0.1.5/MBICseq combineFile/combineFile BICseqTwoSample.pl bootstrap/bootstrapTest \
     && rm /NBICseq-seg_v0.7.2.tar.gz
 
 # We use only the misc/samtools.pl script, so the following target need not be compiled.
 RUN wget http://compbio.med.harvard.edu/BIC-seq/BICseq2/samtools-0.1.7a_getUnique-0.1.3.tar.gz \
     && tar -zxf samtools-0.1.7a_getUnique-0.1.3.tar.gz \
     && chown -R root:root /samtools-0.1.7a_getUnique-0.1.3 \
-    && chmod 755 /samtools-0.1.7a_getUnique-0.1.3 \
+    && chmod 755 /samtools-0.1.7a_getUnique-0.1.3 /samtools-0.1.7a_getUnique-0.1.3/misc /samtools-0.1.7a_getUnique-0.1.3/misc/samtools.pl \
     && rm /samtools-0.1.7a_getUnique-0.1.3.tar.gz
 
 # Install GEM library 
