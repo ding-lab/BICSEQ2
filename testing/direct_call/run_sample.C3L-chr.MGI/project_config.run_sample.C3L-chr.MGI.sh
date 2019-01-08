@@ -11,8 +11,8 @@
 IMPORT_SEQ=0
 
 PROJECT="run_sample.C3L-00008.MGI"
-#CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
-CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
+CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
+#CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
 
 # REF defined below is used for two purposes: to get path to all-chrom reference used in prep_mappability step, 
 # and for getting the basename of the mappability files ("MER").  For this project, we are not mapping the 
@@ -60,8 +60,6 @@ NORMD="$OUTD/norm"
 SEGD="$OUTD/segmentation"
 # Output of annotation step
 ANND="$OUTD/annotation"
->&2 echo Making output directories $NORMD $SEGD $ANND
-mkdir -p $NORMD $SEGD $ANND
 
 # MER is a convenience string defined in make_mappability.sh
 MER=${REF_BASE}.${READ_LENGTH}mer     # common name used for output
