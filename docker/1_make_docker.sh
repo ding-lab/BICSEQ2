@@ -1,2 +1,5 @@
 IMAGE="mwyczalkowski/bicseq2"
-docker build -t $IMAGE . 
+
+# Build needs to take place in root directory of project 
+cd ..
+docker build -f docker/Dockerfile -t $IMAGE . 

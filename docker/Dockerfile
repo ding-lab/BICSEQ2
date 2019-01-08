@@ -73,7 +73,10 @@ RUN pip install numpy
 
 ENV LANG=C
 # Increment foo to force `git clone`
-ENV foo=1 
-RUN git clone --single-branch --branch maw-dev https://github.com/mwyczalkowski/BICSEQ2.git
+ENV foo=2
+#RUN git clone --single-branch --branch maw-dev https://github.com/mwyczalkowski/BICSEQ2.git
+# set up working directory
+COPY . /BICSEQ2
+WORKDIR /BICSEQ2
 
 CMD ["/bin/bash"]

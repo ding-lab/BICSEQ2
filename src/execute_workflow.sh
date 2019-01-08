@@ -19,6 +19,7 @@ function confirm {
     FN=$1
     if [ ! -e $FN ]; then
         >&2 echo ERROR: $FN does not exist
+        exit 1
     fi
 }
 

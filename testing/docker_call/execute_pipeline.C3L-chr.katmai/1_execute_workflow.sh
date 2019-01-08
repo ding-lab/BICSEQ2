@@ -4,7 +4,9 @@
 # C3L-00006.WGS.T.hg38	C3L-00006	UCEC	WGS	tumor	/diskmnt/Projects/cptac_downloads_5/GDC_import/data/457f2c4d-ddf3-416e-bb50-b112eede02d5/d9975c5f-288d-417d-bdb3-f490d9a36401_gdc_realn.bam	252294227835	BAM	hg38	457f2c4d-ddf3-416e-bb50-b112eede02d5	katmai
 
 # bash execute_pipeline [options] PROJECT_CONFIG CASE_NAME SN_TUMOR TUMOR_BAM SN_NORMAL NORMAL_BAM
-PROJECT_CONFIG="project_config.execute_workflow.C3L-chr.katmai.sh"
+
+# Project config must be visible from container
+PROJECT_CONFIG="/BICSEQ2/testing/docker_call/execute_pipeline.C3L-chr.katmai/project_config.execute_workflow.C3L-chr.katmai.sh"
 CASE_NAME="C3L-00006"
 SN_NORMAL="C3L-00006.WGS.N.hg38"
 SN_TUMOR="C3L-00006.WGS.T.hg38"
@@ -28,6 +30,6 @@ bash $BICSEQ_H/src/start_docker.sh $@  -c "$CMD" \
     /diskmnt/Datasets/BICSEQ2-dev.tmp \
     /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs  \
     /diskmnt/Projects/cptac_downloads_5/GDC_import/data \
-    /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/UCEC.hg38.test/run_uniq
+    /diskmnt/Projects/CPTAC3CNV/gatk4wxscnv/inputs
 
 # Tip: run this command within a tmux session for long runs
