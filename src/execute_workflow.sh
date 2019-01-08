@@ -12,6 +12,7 @@
 # Options:
 # -d: dry run: print commands but do not run
 #     This may be repeated (e.g., -dd or -d -d) to pass the -d argument to called functions instead,
+# -f: force overwrite of existing data, if it exists
 
 # Details about BICSEQ2 pipeline: http://compbio.med.harvard.edu/BIC-seq/
 
@@ -42,11 +43,15 @@ function announce {
 }
 
 ARGS=""
+FORCE_ARGS=""
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":d" opt; do
+while getopts ":df" opt; do
   case $opt in
     d)
       DRYRUN="d$DRYRUN" # -d is a stack of parameters, each script popping one off until get to -d
+      ;;
+    f)
+      FORCE_ARGS="-f" 
       ;;
 #    c) # example
 #      CHRLIST_ARG=$OPTARG
@@ -113,7 +118,7 @@ function process_sample {
     BAM=$2
 
     announce "$SN: Running get_unique step"
-    CMD="bash /BICSEQ2/src/get_unique.sh $ARGS $SN $CONFIG $BAM"
+    CMD="bash /BICSEQ2/src/get_unique.sh $ARGS $FORCE_ARGS $SN $CONFIG $BAM"
     run_cmd "$CMD"
 
     announce "$SN: Running normalization step"

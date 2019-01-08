@@ -16,6 +16,7 @@
 #    This file is typically defined in PROJECT_CONFIG but may be overridden on command line.  "-c NONE" will
 #    skip per-chrom processing
 # -j JOBS: if parallel run, number of jobs to run at any one time (-j parameter to parallel).  Default: 4
+# -f : Force overwrite if .seq files exist
 #
 # In parallel mode, will use [GNU parallel][1], but script will block until all jobs completed.
 # Output logs written to $SAMPLE_NAME.$CHR.get_uniq.log
@@ -28,7 +29,7 @@
 PARALLEL_JOBS=4
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":dc:1" opt; do
+while getopts ":dc:1f" opt; do
   case $opt in
     d)  # example of binary argument
       >&2 echo "Dry run" 
@@ -40,6 +41,9 @@ while getopts ":dc:1" opt; do
     1) 
       >&2 echo "Will stop after one element of CHRLIST" 
       JUSTONE=1
+      ;;
+    f) 
+      FORCE_OVERWRITE=1
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -115,8 +119,12 @@ function process_BAM {
     SEQ=$SEQ_OUT
     CMD="samtools view $BAM | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
     if [ -e $SEQ ]; then
-        >&2 echo ERROR: $SEQ exists.  Will not overwrite existing .seq data
-        exit 1
+        if [ $FORCE_OVERWRITE ]; then
+            >&2 echo NOTE: $SEQ exists.  Forcing overwrite \(-f\) of existing .seq data
+        else
+            >&2 echo ERROR: $SEQ exists.  Will not overwrite existing .seq data 
+            exit 1
+        fi
     fi
     >&2 echo [ $NOW ] Direct run of uniquely mapped reads.  Writing to $SEQD \; evaluating:
     if [ $DRYRUN ]; then
@@ -151,13 +159,17 @@ function process_BAM_parallel {
         # Output filename based on SEQ_CHR
         SEQ=$(printf $SEQ_CHR $SAMPLE_NAME $CHR)
         if [ -e $SEQ ]; then
-            >&2 echo ERROR: $SEQ exists.  Will not overwrite existing .seq data
-            exit 1
+            if [ $FORCE_OVERWRITE ]; then
+                >&2 echo NOTE: $SEQ exists.  Forcing overwrite \(-f\) of existing .seq data
+            else
+                >&2 echo ERROR: $SEQ exists.  Will not overwrite existing .seq data 
+                exit 1
+            fi
         fi
 
         JOBLOG="$OUTD/$SAMPLE_NAME.$CHR.get_uniq.log"
         CMD="samtools view $BAM $CHR | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
-        CMDP="parallel --semaphore -j $PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD $CMD"
+        CMDP="parallel --semaphore -j$PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
         >&2 echo Launching $CHR
         if [ $DRYRUN ]; then
             >&2 echo Dryrun: $CMDP
