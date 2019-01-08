@@ -53,10 +53,6 @@ while getopts ":d" opt; do
 done
 shift $((OPTIND-1))
 
-OUTD=$ANND
-mkdir -p $OUTD
-
-
 if [ "$#" -ne 2 ]; then
     >&2 echo ERROR: Wrong number of arguments
     >&2 echo Usage:
@@ -79,6 +75,9 @@ if [ ! -e $GENE_BED ]; then
     >&2 echo ERROR: Gene annotation file $GENE_BED not found
     exit 1
 fi
+
+OUTD=$ANND
+mkdir -p $OUTD
 
 CNV=$(printf $SEG_CNV $CASE_NAME)
 GL_OUT=$(printf $GL_CASE $CASE_NAME)

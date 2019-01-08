@@ -14,6 +14,7 @@
 #     This may be repeated (e.g., -dd or -d -d) to pass the -d argument to called functions instead,
 # -f: force overwrite of existing data, if it exists
 # -j: number of parallel jobs for get_unique step [default 4]
+# -s: step to run [ get_unique, normalization, segmentation, annotation, all ]
 
 # Details about BICSEQ2 pipeline: http://compbio.med.harvard.edu/BIC-seq/
 
@@ -45,8 +46,9 @@ function announce {
 
 ARGS=""
 GET_UNIQ_ARGS=""
+STEP="all"	# this might be expanded to allow comma-separated steps
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":dfj:" opt; do
+while getopts ":dfj:s:" opt; do
   case $opt in
     d)
       DRYRUN="d$DRYRUN" # -d is a stack of parameters, each script popping one off until get to -d
@@ -56,6 +58,9 @@ while getopts ":dfj:" opt; do
       ;;
     j) 
       GET_UNIQ_ARGS="$GET_UNIQ_ARGS -j $OPTARG"
+      ;;
+    s) 
+      STEP="$OPTARG"
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -100,6 +105,27 @@ fi
 
 ARGS="$ARGS $DRYARG"
 
+# -s: step to run [ get_unique, normalization, segmentation, annotation, all ]
+if [ $STEP == "all" ]; then 
+    RUN_UNIQUE=1
+    RUN_NORM=1
+    RUN_SEG=1
+    RUN_ANN=1
+elif [ $STEP == "get_unique" ]; then 
+    RUN_UNIQUE=1
+elif [ $STEP == "normalization" ]; then 
+    RUN_NORM=1
+elif [ $STEP == "segmentation" ]; then 
+    RUN_SEG=1
+elif [ $STEP == "annotation" ]; then
+    RUN_ANN=1
+else
+    >&2 echo ERROR: Unknown step $STEP
+    >&2 echo Valid values: get_unique, normalization, segmentation, annotation, all
+    exit 1
+fi
+>&2 echo Running step $STEP
+
 # Evaluate given command CMD either as dry run or for real
 function run_cmd {
     CMD=$1
@@ -118,26 +144,33 @@ function process_sample {
     SN=$1
     BAM=$2
 
-    announce "$SN: Running get_unique step"
-    CMD="bash /BICSEQ2/src/get_unique.sh $ARGS $GET_UNIQ_ARGS $SN $CONFIG $BAM"
-    run_cmd "$CMD"
+    if [ $RUN_UNIQUE ]; then
+        announce "$SN: Running get_unique step"
+        CMD="bash /BICSEQ2/src/get_unique.sh $ARGS $GET_UNIQ_ARGS $SN $CONFIG $BAM"
+        run_cmd "$CMD"
+    fi
 
-    announce "$SN: Running normalization step"
-    CMD="bash /BICSEQ2/src/run_norm.sh $ARGS $SN $CONFIG "
-    run_cmd "$CMD"
+    if [ $RUN_NORM ]; then
+        announce "$SN: Running normalization step"
+        CMD="bash /BICSEQ2/src/run_norm.sh $ARGS $SN $CONFIG "
+        run_cmd "$CMD"
+    fi
 }
 
 process_sample $SN_TUMOR $TUMOR_BAM 
 process_sample $SN_NORMAL $NORMAL_BAM 
 
-# Execute segmentation step using tumor/normal as case/control
-announce "Running segmentation step"
-CMD="bash /BICSEQ2/src/run_segmentation.sh $ARGS -s $CASE_NAME $SN_TUMOR $SN_NORMAL $CONFIG "
-run_cmd "$CMD"
+if [ $RUN_SEG ]; then
+    # Execute segmentation step using tumor/normal as case/control
+    announce "Running segmentation step"
+    CMD="bash /BICSEQ2/src/run_segmentation.sh $ARGS -s $CASE_NAME $SN_TUMOR $SN_NORMAL $CONFIG "
+    run_cmd "$CMD"
+fi
 
-announce "Running gene annotation step"
-CMD="bash /BICSEQ2/src/run_annotation.sh $ARGS $CASE_NAME $CONFIG"
-run_cmd "$CMD"
-
+if [ $RUN_ANN ]; then
+    announce "Running gene annotation step"
+    CMD="bash /BICSEQ2/src/run_annotation.sh $ARGS $CASE_NAME $CONFIG"
+    run_cmd "$CMD"
+fi
 
 
