@@ -88,7 +88,7 @@ elif [ $DRYRUN == "d" ]; then  # DRYRUN is -d: echo the command rather than exec
     DRYARG=""
     >&2 echo Dry run in $0
 else    # DRYRUN has multiple d's: pop one d off the argument and pass it to function
-    DRYARG=${DRYRUN%?}
+    DRYARG="-${DRYRUN%?}"
 fi
 
 ARGS="$ARGS $DRYARG"
@@ -97,10 +97,10 @@ ARGS="$ARGS $DRYARG"
 function run_cmd {
     CMD=$1
 
-    if [ $DRYARG == "d" ]; then
+    if [ "$DRYRUN" == "d" ]; then
         echo Dryrun: $CMD
     else
-        echo Running:: $CMD
+        echo Running: $CMD
         eval $CMD
         test_exit_status
     fi
@@ -108,8 +108,8 @@ function run_cmd {
 
 function process_sample {
 # run get_unique and normalization steps on given sample
-    $SN=$1
-    $BAM=$2
+    SN=$1
+    BAM=$2
 
     announce "$SN: Running get_unique step"
     CMD="bash /BICSEQ2/src/get_unique.sh $ARGS $SN $CONFIG $BAM"

@@ -53,6 +53,9 @@ while getopts ":d" opt; do
 done
 shift $((OPTIND-1))
 
+OUTD=$ANND
+mkdir -p $OUTD
+
 
 if [ "$#" -ne 2 ]; then
     >&2 echo ERROR: Wrong number of arguments
