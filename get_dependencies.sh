@@ -11,11 +11,19 @@ refFile=$8
 readLength=$9
 genomeBuild=${10}
 fastaLink=${11}
+bamMapDir=${12}
 
 cp chromosomes.txt ${inputDir}
 cd ${inputDir}
 
-git clone --recursive ${bamMapGit}
+## get the most updated version of BAM map
+if [ -d ${bamMapDir} ]; then
+	cd ${bamMapDir}
+	git pull 
+	cd ..
+else
+	git clone --recursive ${bamMapGit}
+fi
 
 wget ${bicseq2normLink}
 tar -xzf NBICseq-norm_v0.2.4.tar.gz
@@ -24,6 +32,8 @@ wget ${bicseq2segLink}
 tar -xzf NBICseq-seg_v0.7.2.tar.gz
 
 cp -r /diskmnt/Projects/Users/qgao/Tools/BICSeq2/samtools-0.1.7a_getUnique-0.1.3 .
+## get and unzip BIC-seq2 modules
+
 
 ## get and split and reference fasta file
 if [ -s ${inputDir}${refFile} ]

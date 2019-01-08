@@ -20,5 +20,3 @@ mappabilityPrefix=GRCh38.d1.vd1.fa.150mer
 genomeBuild=hg38
 fastaDir=/gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/BICSEQ2/inputs/hg38/
 cancerType=LUAD
-seqDir=/gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/BICSEQ2/outputs/LUAD.b5_6/run_uniq/
-outputPath=/gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/BICSEQ2/outputs/LUAD.b5_6/run_norm/
