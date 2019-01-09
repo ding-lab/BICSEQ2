@@ -13,9 +13,9 @@
 # Be careful about inadvertant overwriting of data
 IMPORT_SEQ=0
 
-PROJECT="execute_workflow-docker.C3L-00006.katmai"
-#CHRLIST="/BICSEQ2/testing/test_data/chromosomes.20.dat"
-CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
+PROJECT="execute_workflow-docker.testA.katmai"
+CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
+#CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
 
 # REF defined below is used for two purposes: to get path to all-chrom reference used in prep_mappability step, 
 # and for getting the basename of the mappability files ("MER").  For this project, we are not mapping the 

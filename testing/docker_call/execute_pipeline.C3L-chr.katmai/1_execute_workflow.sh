@@ -5,17 +5,21 @@
 
 # bash execute_pipeline [options] PROJECT_CONFIG CASE_NAME SN_TUMOR TUMOR_BAM SN_NORMAL NORMAL_BAM
 
-# Project config must be visible from container
-PROJECT_CONFIG="/BICSEQ2/testing/docker_call/execute_pipeline.C3L-chr.katmai/project_config.execute_workflow.C3L-chr.katmai.sh"
+# Project config path is on host, and may be relative. Will be mounted as a file $CONFIG_C
+PROJECT_CONFIG_H="project_config.execute_workflow.C3L-chr.katmai.sh"
 CASE_NAME="C3L-00006"
 SN_NORMAL="C3L-00006.WGS.N.hg38"
 SN_TUMOR="C3L-00006.WGS.T.hg38"
+
+# what config will be visible as in container
+CONFIG_C="/project_config.sh"
+
 
 # Assume /data3 maps to /diskmnt/Projects/cptac_downloads_5/GDC_import/data
 NORMAL_BAM="/data3/9f29ebe1-de5d-47a8-a54d-d1e8441409c6/92b5e534-6cb0-43eb-8147-ce7d18526f5e_gdc_realn.bam"
 TUMOR_BAM="/data3/457f2c4d-ddf3-416e-bb50-b112eede02d5/d9975c5f-288d-417d-bdb3-f490d9a36401_gdc_realn.bam"
 
-CMD="bash /BICSEQ2/src/execute_workflow.sh $@ $PROJECT_CONFIG $CASE_NAME $SN_TUMOR $TUMOR_BAM $SN_NORMAL $NORMAL_BAM"
+CMD="bash /BICSEQ2/src/execute_workflow.sh $@ $CONFIG $CASE_NAME $SN_TUMOR $TUMOR_BAM $SN_NORMAL $NORMAL_BAM"
 
 
 #  This is if want to use external SEQ files
@@ -26,7 +30,7 @@ CMD="bash /BICSEQ2/src/execute_workflow.sh $@ $PROJECT_CONFIG $CASE_NAME $SN_TUM
 BICSEQ_H="/home/mwyczalk_test/Projects/BICSEQ2"
 
 # See README.md for details.  Paths specific to katmai
-bash $BICSEQ_H/src/start_docker.sh $@  -c "$CMD" \
+bash $BICSEQ_H/src/start_docker.sh $@  -H $PROJECT_CONFIG_H -C $CONFIG_C -c "$CMD" \
     /diskmnt/Datasets/BICSEQ2-dev.tmp \
     /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs  \
     /diskmnt/Projects/cptac_downloads_5/GDC_import/data \

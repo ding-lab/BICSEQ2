@@ -19,8 +19,6 @@ and MGI (McDonnell Genome Institute cluster).
 
 Datasets we use currently:
 * Demo dataset - small tumor / normal BAM file pair and reference, from distribution of Manta
-  * 
-
 
 * C3L-00008 chr18-20 - several chromosomes of specific dataset.  Hosted on katmai and MGI. hg38
 * C3L-00008 - complete dataset from CPTAC3 project. hg38

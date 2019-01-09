@@ -6,6 +6,8 @@
 # -d: dry run.  print out docker statement but do not execute
 # -I DOCKER_IMAGE: Specify docker image.  Default: mwyczalkowski/bicseq2:latest
 # -c cmd: run given command.  default: bash
+# -H mntH : additional host mount, may be a file or directory, relative path OK.  If defined, -C must also be defined
+# -C mntC : additional container command.  mntH will be mapped to mntC
 
 # data_path will map to /data in container
 # TODO: make /data1 be rw, others ro
@@ -19,11 +21,17 @@ DOCKER_IMAGE="mwyczalkowski/bicseq2:latest"
 
 LSFQ="-q research-hpc"  # MGI LSF queue.  
 CMD="/bin/bash"
-while getopts ":MdI:c:" opt; do
+while getopts ":MdI:c:H:C:" opt; do
   case $opt in
     M)  # example of binary argument
       MGI=1
       >&2 echo MGI Mode
+      ;;
+    H)  
+      MNTH=$OPTARG
+      ;;
+    C)  
+      MNTC=$OPTARG
       ;;
     d) 
       DRYRUN="1"
@@ -72,6 +80,31 @@ do
 
     let D++
 done
+
+# Exclusive or
+if [[ ( $MNTC  && ! $MNTH) || ( ! $MNTC  && $MNTH) ]] ; then
+    >&2 echo ERROR: neither or both of -H and -C must be defined
+    exit 1
+fi
+
+# alternative mounting may be used for e.g. files
+if [[ $MNTH ]]; then
+    if [ ! -e $MNTH ]; then
+        >&2 echo ERROR: $MNTH does not exist
+        exit 1
+    fi
+
+    AMNTH=$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $MNTH)   # get absolute path
+
+    >&2 echo Mapping $MNTC to $AMNTH
+    if [ $MGI ]; then
+        DATMAP="$DATMAP $AMNTH:$MNTC"
+    else
+        DATMAP="$DATMAP -v $AMNTH:$MNTC"
+    fi 
+else
+    >&2 echo Not doing alternative mounts
+fi
 
 # MGI code from https://github.com/ding-lab/importGDC/blob/master/GDC_import.sh
 function start_docker_MGI {
