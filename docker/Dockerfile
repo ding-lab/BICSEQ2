@@ -71,14 +71,15 @@ RUN cd /usr/local/bin \
 
 RUN pip install numpy
 
-USER bps
-COPY vimrc /home/bps/.vimrc
-ENV HOME=/home/bps
+# Will run `python -S` to not import site data on initialization.  This is important in MGI
+ENV PYTHONPATH="/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages"
+
+#USER bps
+#COPY vimrc /home/bps/.vimrc
+#ENV HOME=/home/bps
 
 ENV LANG=C
-# Increment foo to force `git clone`
-ENV foo=2
-#RUN git clone --single-branch --branch maw-dev https://github.com/mwyczalkowski/BICSEQ2.git
+
 # set up working directory
 COPY . /BICSEQ2
 WORKDIR /BICSEQ2
