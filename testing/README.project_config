@@ -1,0 +1,6 @@
+Project_config files may evolve over time.  Having common elements would be helpful.
+
+For now, main difference between them, aside from project names, is that GENE_BED may be obtained either 
+from workflow directory or from mapped directory (e.g. data4, as is done in execute_workflow)
+
+

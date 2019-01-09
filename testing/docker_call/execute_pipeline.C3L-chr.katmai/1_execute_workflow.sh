@@ -19,7 +19,7 @@ CONFIG_C="/project_config.sh"
 NORMAL_BAM="/data3/9f29ebe1-de5d-47a8-a54d-d1e8441409c6/92b5e534-6cb0-43eb-8147-ce7d18526f5e_gdc_realn.bam"
 TUMOR_BAM="/data3/457f2c4d-ddf3-416e-bb50-b112eede02d5/d9975c5f-288d-417d-bdb3-f490d9a36401_gdc_realn.bam"
 
-CMD="bash /BICSEQ2/src/execute_workflow.sh $@ $CONFIG $CASE_NAME $SN_TUMOR $TUMOR_BAM $SN_NORMAL $NORMAL_BAM"
+CMD="bash /BICSEQ2/src/execute_workflow.sh $@ $CONFIG_C $CASE_NAME $SN_TUMOR $TUMOR_BAM $SN_NORMAL $NORMAL_BAM"
 
 
 #  This is if want to use external SEQ files

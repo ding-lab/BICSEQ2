@@ -149,4 +149,3 @@ else
     start_docker "$CMD"
 fi
 
->&2 echo SUCCESS
