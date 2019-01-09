@@ -81,8 +81,8 @@ CMD="$1"
 #export LSF_DOCKER_VOLUMES="$ADATD:/data"
 export LSF_DOCKER_VOLUMES="$DATMAP"
 
-# This clears most environment variables / paths, but also clears $HOME, which parallel relies on
-export LSF_DOCKER_PRESERVE_ENVIRONMENT=false
+## This clears most environment variables / paths, but also clears $HOME, which parallel relies on
+#export LSF_DOCKER_PRESERVE_ENVIRONMENT=false
 
 DCMD="bsub $LSFQ -Is -a \"docker($DOCKER_IMAGE)\" $CMD "
 if [ $DRYRUN ]; then
