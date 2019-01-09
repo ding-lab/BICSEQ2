@@ -71,6 +71,10 @@ RUN cd /usr/local/bin \
 
 RUN pip install numpy
 
+USER bps
+COPY vimrc /home/bps/.vimrc
+ENV HOME=/home/bps
+
 ENV LANG=C
 # Increment foo to force `git clone`
 ENV foo=2

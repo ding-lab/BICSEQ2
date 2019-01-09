@@ -1,9 +1,11 @@
 # Run prep_gene_annotation.sh from within docker.  Typically, start docker first with 0_start_docker.sh
 
-# Using same project_config as other katmai steps.  
-source project_config.run_sample.C3L-chr.katmai.sh
+# Because user directories are mapped on MGI, CONFIG points to the host (rather than container) path to project config file
+CONFIG="/gscuser/mwyczalk/projects/BICSEQ2/testing/direct_call/run_sample.C3L-chr.MGI/project_config.run_sample.C3L-chr.MGI.sh"
+source $CONFIG
 
-# previously, ../run_sample.C3L-chr.katmai/project_config.run_sample.C3L-chr.katmai.sh
+# MGI-specific setup
+export LANG=C
 
 GFF_URL="ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_29/gencode.v29.annotation.gff3.gz"
 

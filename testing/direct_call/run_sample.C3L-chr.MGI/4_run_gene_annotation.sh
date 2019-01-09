@@ -4,8 +4,8 @@
 CONFIG="/gscuser/mwyczalk/projects/BICSEQ2/testing/direct_call/run_sample.C3L-chr.MGI/project_config.run_sample.C3L-chr.MGI.sh"
 
 # MGI-specific setup
-export LANG=C
-
+LANG=""
+PYTHONPATH="" 
 
 CASE_NAME="C3L-00001"
 
