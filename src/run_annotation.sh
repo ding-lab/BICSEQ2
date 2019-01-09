@@ -88,10 +88,13 @@ if [ ! -e $CNV ]; then
 fi
 
 # -S prevents site packages from loading, important at MGI
-# PYTHONPATH defines additional library paths
+# PYTHONPATH defines additional library paths.  MGI doesn't seem to respect environment variables from Dockerfile ?
 PYTHON="/usr/bin/python -S"
-# Note, one CNV per sample.  
+export PYTHONPATH="/usr/local/lib/python2.7/dist-packages:/usr/lib/python2.7/dist-packages:$PYTHONPATH"
 CMD="sed '1d' $CNV | cut -f1,2,3,9 | /usr/bin/bedtools intersect -loj -a $GENE_BED -b - | $PYTHON $SRCD/gene_segment_overlap.py > $GL_OUT"
+
+#>&2 echo testing python...
+#CMD="python -S -c \"import sys;print(sys.path)\" "
 
 if [ $DRYRUN ]; then
     >&2 echo Dry run: $CMD
