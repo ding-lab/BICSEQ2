@@ -18,6 +18,9 @@ PROJECT="execute_workflow-docker.C3L-chr.MGI"
 CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
 #CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
 
+# make perl on MGI be quiet
+LANG="C"
+
 # REF defined below is used for two purposes: to get path to all-chrom reference used in prep_mappability step, 
 # and for getting the basename of the mappability files ("MER").  For this project, we are not mapping the 
 # directory but respecting the reference base name
