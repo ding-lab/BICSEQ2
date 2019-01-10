@@ -29,7 +29,7 @@ REF_BASE="${R}"
 REF_CHR="/data2/hg38"
 
 # All output directories are rooted in $OUTD
-OUTD="/data1/$PROJECT"
+OUTD="/data1"
 
 READ_LENGTH=150
 
@@ -39,8 +39,6 @@ GENE_BED="/data4/gencode.v29.annotation.hg38.p12.protein_coding.bed"
 
 SRCD="/BICSEQ2/src"	# scripts directory
 
-# Create output directories
-mkdir -p $OUTD
 # MAPD is passed to make_mappability.sh as OUTD, is mappability file directory
 MAPD="/data2"
 

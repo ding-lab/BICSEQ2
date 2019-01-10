@@ -3,9 +3,15 @@ BICSEQ2="/home/mwyczalk_test/Projects/BICSEQ2"
 # gene annotation file:
 # /diskmnt/Projects/CPTAC3CNV/gatk4wxscnv/inputs/gencode.v29.annotation.hg38.p12.protein_coding.bed
 
+CONFIG="project_config.execute_pipeline.C3L-chr.katmai.sh"
+source $CONFIG
+
+OUTD="/gscmnt/gc2508/dinglab/mwyczalk/BICSEQ2-dev.tmp/$PROJECT "
+>&2 echo Output directory: $OUTD
+mkdir -p $OUTD
 # See README.md for details.  Paths specific to katmai
-bash $BICSEQ2/src/start_docker.sh  \
-    /diskmnt/Datasets/BICSEQ2-dev.tmp \
+bash $BICSEQ2/src/start_docker.sh $@  \
+    $OUTD \
     /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs  \
     /diskmnt/Projects/cptac_downloads_5/GDC_import/data \
     /diskmnt/Projects/CPTAC3CNV/gatk4wxscnv/inputs
