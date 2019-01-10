@@ -131,9 +131,9 @@ function run_cmd {
     CMD=$1
 
     if [ "$DRYRUN" == "d" ]; then
-        echo Dryrun: $CMD
+        >&2 echo Dryrun: $CMD
     else
-        echo Running: $CMD
+        >&2 echo Running: $CMD
         eval $CMD
         test_exit_status
     fi

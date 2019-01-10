@@ -50,11 +50,11 @@ while getopts ":MdI:c:H:C:L:" opt; do
       INTERACTIVE=0
       ;;    
     \?)
-      echo "Invalid option: -$OPTARG" >&2
+      >&2 echo "Invalid option: -$OPTARG" >&2
       exit 1
       ;;
     :)
-      echo "Option -$OPTARG requires an argument." >&2
+      >&2 echo "Option -$OPTARG requires an argument." >&2
       exit 1
       ;;
   esac
@@ -130,14 +130,14 @@ if [ $LOGD ]; then
     ERRLOG="$LOGD/${TS}.err"
     OUTLOG="$LOGD/${TS}.out"
     LOGS="-e $ERRLOG -o $OUTLOG"
-    echo Writing bsub logs to $OUTLOG and $ERRLOG
+    >&2 echo Writing bsub logs to $OUTLOG and $ERRLOG
 fi
 
 DCMD="bsub $LSFQ $ARGS $LOGS -a \"docker($DOCKER_IMAGE)\" $CMD "
 if [ $DRYRUN ]; then
-    echo Dryrun: $DCMD
+    >&2 echo Dryrun: $DCMD
 else
-    echo Running: $DCMD
+    >&2 echo Running: $DCMD
     eval $DCMD
 fi
 
@@ -155,9 +155,9 @@ fi
 
 DCMD="docker run $ENVARGS $DATMAP $ARGS $DOCKER_IMAGE $CMD"
 if [ $DRYRUN ]; then
-    echo Dryrun: $DCMD
+    >&2 echo Dryrun: $DCMD
 else
-    echo Running: $DCMD
+    >&2 echo Running: $DCMD
     eval $DCMD
 fi
 

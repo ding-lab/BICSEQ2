@@ -79,8 +79,8 @@ DESTD=$(dirname $(readlink -f $BED_OUT) )
 
 GFF=$DESTD/$(basename $GFF_URL)
 if [ -e $GFF ]; then
-    echo Note: Target exists: $GFF
-    echo Skipping download...
+    >&2 echo Note: Target exists: $GFF
+    >&2 echo Skipping download...
 else
     >&2 echo Getting $GFF_URL writing to $GFF
     wget -O $GFF $GFF_URL
