@@ -6,7 +6,7 @@ BICSEQ2="/home/mwyczalk_test/Projects/BICSEQ2"
 #	currently, this is defined in project configuration file
 
 # See README.md for details.  Paths specific to katmai
-bash $BICSEQ2/src/start_docker.sh  \
+bash $BICSEQ2/src/start_docker.sh  $@ \
     /diskmnt/Datasets/BICSEQ2-dev.tmp \
     /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs  \
     /diskmnt/Projects/cptac_downloads_3/GDC_import/data \

@@ -3,6 +3,7 @@
 # Usage: start_docker.sh [options] [data_path_1 data_path_2 ...]
 #
 # -M: run in MGI environment
+# -L: MGI logs host path. Output of bsub goes here.  directory will be created
 # -d: dry run.  print out docker statement but do not execute
 # -I DOCKER_IMAGE: Specify docker image.  Default: mwyczalkowski/bicseq2:latest
 # -c cmd: run given command.  default: bash
@@ -20,12 +21,17 @@
 DOCKER_IMAGE="mwyczalkowski/bicseq2:latest"
 
 LSFQ="-q research-hpc"  # MGI LSF queue.  
-CMD="/bin/bash"
-while getopts ":MdI:c:H:C:" opt; do
+DOCKER_CMD="/bin/bash"
+INTERACTIVE=1
+
+while getopts ":MdI:c:H:C:L:" opt; do
   case $opt in
-    M)  # example of binary argument
+    M)  
       MGI=1
       >&2 echo MGI Mode
+      ;;
+    L)  
+      LOGD=$OPTARG
       ;;
     H)  
       MNTH=$OPTARG
@@ -40,7 +46,8 @@ while getopts ":MdI:c:H:C:" opt; do
       DOCKER_IMAGE=$OPTARG
       ;;    
     c)
-      CMD="$OPTARG"
+      DOCKER_CMD="$OPTARG"
+      INTERACTIVE=0
       ;;    
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -102,8 +109,6 @@ if [[ $MNTH ]]; then
     else
         DATMAP="$DATMAP -v $AMNTH:$MNTC"
     fi 
-else
-    >&2 echo Not doing alternative mounts
 fi
 
 # MGI code from https://github.com/ding-lab/importGDC/blob/master/GDC_import.sh
@@ -114,10 +119,21 @@ CMD="$1"
 #export LSF_DOCKER_VOLUMES="$ADATD:/data"
 export LSF_DOCKER_VOLUMES="$DATMAP"
 
-## This clears most environment variables / paths, but also clears $HOME, which parallel relies on
-#export LSF_DOCKER_PRESERVE_ENVIRONMENT=false
+# Based on importGDC/GDC_import.sh
+if [ $INTERACTIVE == 1 ]; then
+    ARGS="-Is"
+fi
 
-DCMD="bsub $LSFQ -Is -a \"docker($DOCKER_IMAGE)\" $CMD "
+if [ $LOGD ]; then
+    mkdir -p $LOGD
+    TS=$(date +%s)
+    ERRLOG="$LOGD/${TS}.err"
+    OUTLOG="$LOGD/${TS}.out"
+    LOGS="-e $ERRLOG -o $OUTLOG"
+    echo Writing bsub logs to $OUTLOG and $ERRLOG
+fi
+
+DCMD="bsub $LSFQ $ARGS $LOGS -a \"docker($DOCKER_IMAGE)\" $CMD "
 if [ $DRYRUN ]; then
     echo Dryrun: $DCMD
 else
@@ -133,7 +149,11 @@ function start_docker {
 #ENVARGS="-e JAVA_OPTS=\"$JAVA_OPTS\""
 CMD=$1
 
-DCMD="docker run $ENVARGS $DATMAP -it $DOCKER_IMAGE $CMD"
+if [ $INTERACTIVE == 1 ]; then
+    ARGS="-it"
+fi
+
+DCMD="docker run $ENVARGS $DATMAP $ARGS $DOCKER_IMAGE $CMD"
 if [ $DRYRUN ]; then
     echo Dryrun: $DCMD
 else
@@ -144,8 +164,8 @@ fi
 }
 
 if [ $MGI ]; then
-    start_docker_MGI "$CMD"
+    start_docker_MGI "$DOCKER_CMD"
 else
-    start_docker "$CMD"
+    start_docker "$DOCKER_CMD"
 fi
 
