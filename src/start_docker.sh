@@ -9,6 +9,7 @@
 # -c cmd: run given command.  default: bash
 # -H mntH : additional host mount, may be a file or directory, relative path OK.  If defined, -C must also be defined
 # -C mntC : additional container command.  mntH will be mapped to mntC
+# -m DOCKERMAP : path to docker map file.  Contains 1 or more lines like PATH_H:PATH_C which define additional volume mapping
 
 # data_path will map to /data in container
 # TODO: make /data1 be rw, others ro
@@ -24,7 +25,7 @@ LSFQ="-q research-hpc"  # MGI LSF queue.
 DOCKER_CMD="/bin/bash"
 INTERACTIVE=1
 
-while getopts ":MdI:c:H:C:L:" opt; do
+while getopts ":MdI:c:H:C:L:m:" opt; do
   case $opt in
     M)  
       MGI=1
@@ -49,6 +50,9 @@ while getopts ":MdI:c:H:C:L:" opt; do
       DOCKER_CMD="$OPTARG"
       INTERACTIVE=0
       ;;    
+    m) 
+      DOCKERMAP="$OPTARG"
+      ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" >&2
       exit 1
@@ -110,6 +114,40 @@ if [[ $MNTH ]]; then
         DATMAP="$DATMAP -v $AMNTH:$MNTC"
     fi 
 fi
+
+# Dockermap provides additional ways to map volumes. Expect each line to be passed as is to docker -v
+if [ ! -z $DOCKERMAP ]; then
+# If defined, dockermap must exist
+    if [ ! -e $DOCKERMAP ]; then
+        >&2 echo "ERROR: Dockermap \(-m\) $DOCKERMAP does not exist"
+        exit 1
+    fi
+fi
+
+# DOCKERMAP has lines of format,
+#   PATH_H:PATH_C
+while read l; do
+    # Skip comments 
+    [[ $l = \#* ]] && continue
+    PATH_H=$(echo "$l" | cut -f 1 -d :)
+    PATH_C=$(echo "$l" | cut -f 2 -d :)
+    if [ -z $PATH_C ] || [ -z $PATH_H ]; then
+        >&2 echo ERROR: Bad line in $DOCKERMAP:
+        >&2 echo $l
+        exit 1
+    fi
+    if [ ! -e $PATH_H ]; then
+        >&2 echo ERROR: $PATH_H does not exist \( defined in $DOCKERMAP \)
+        exit 1
+    fi
+
+    if [ $MGI ]; then
+        DATMAP="$DATMAP $l"
+    else
+        DATMAP="$DATMAP -v $l"
+    fi
+ 
+done < $DOCKERMAP
 
 # MGI code from https://github.com/ding-lab/importGDC/blob/master/GDC_import.sh
 function start_docker_MGI {

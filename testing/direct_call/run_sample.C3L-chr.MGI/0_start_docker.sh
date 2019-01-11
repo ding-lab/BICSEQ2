@@ -11,6 +11,7 @@ mkdir -p $OUTD
 bash $BICSEQ2/src/start_docker.sh $@ -M \
     $OUTD \
     /gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/BICSEQ2/inputs \
+    /gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/BICSEQ2/inputs \
     /gscmnt/gc2619/dinglab_cptac3/GDC_import/data
 
 # Tip: run this command within a tmux session for long runs
