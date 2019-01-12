@@ -26,6 +26,8 @@
 #     ;login: The USENIX Magazine, February 2011:42-47.
 # [ https://www.usenix.org/system/files/login/articles/105438-Tange.pdf ]
 
+SCRIPT=$(basename $0)
+
 # set defaults
 PARALLEL_JOBS=4
 
@@ -54,11 +56,11 @@ while getopts ":dc:1fj:o:" opt; do
       OUTD_BASE=$OPTARG
       ;;
     \?)
-      >&2 echo "Invalid option: -$OPTARG" 
+      >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
       exit 1
       ;;
     :)
-      >&2 echo "Option -$OPTARG requires an argument." 
+      >&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument."
       exit 1
       ;;
   esac
@@ -113,7 +115,7 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal ERROR.  Exiting.
+            >&2 echo $SCRIPT Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done

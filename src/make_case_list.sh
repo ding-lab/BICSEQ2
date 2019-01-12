@@ -34,6 +34,8 @@
 #   PATH_B - path to data file. Remapped to container path if dockermap is defined
 #   UUID_B - UUID of sample B
 
+SCRIPT=$(basename $0)
+
 # Default values
 REF="hg38"
 ES="WGS"
@@ -71,18 +73,16 @@ while getopts ":db:r:e:A:B:m:D:H" opt; do
       HEADER=0
       ;;
     \?)
-      >&2 echo "Invalid option: -$OPTARG" 
+      >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG" 
       exit 1
       ;;
     :)
-      >&2 echo "Option -$OPTARG requires an argument." 
+      >&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument." 
       exit 1
       ;;
   esac
 done
 shift $((OPTIND-1))
-
-SCRIPT=$(basename $0)
 
 if [ -z $DIS ]; then
     >&2 echo ERROR: Disease not defined \(-D\)
@@ -125,12 +125,11 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal error.  Exiting.
+            >&2 echo $SCRIPT: Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
 }
-
 
 function remap_path {
     DATPATH=$1

@@ -26,9 +26,11 @@
 #     * Note that this is written to config file used by NBICseq-norm.pl
 #   * Tmp directory $OUTD/tmp created and passed as argument to NBICseq-norm.pl
 
+SCRIPT=$(basename $0)
+
 OUTD_BASE="/data1"
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":vdc:C:w" opt; do
+while getopts ":vdc:C:wo:" opt; do
   case $opt in
     v)  
       VERBOSE=1
@@ -50,11 +52,11 @@ while getopts ":vdc:C:w" opt; do
       OUTD_BASE=$OPTARG
       ;;
     \?)
-      >&2 echo "Invalid option: -$OPTARG" 
+      >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
       exit 1
       ;;
     :)
-      >&2 echo "Option -$OPTARG requires an argument." 
+      >&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument."
       exit 1
       ;;
   esac

@@ -152,39 +152,26 @@ function get_launch_cmd {
         # CaseList format, from make_case_list.sh:
         #   CASE    - unique name of this tumor/normal sample
         #   SAMPLE_NAME_A - sample name of sample A
-        #   PATH_A - path to data file. Remapped to container path if dockermap is defined
+        #   PATH_A - container path to data file A
         #   UUID_A - UUID of sample A
         #   SAMPLE_NAME_B - sample name of sample B
-        #   PATH_B - path to data file. Remapped to container path if dockermap is defined
+        #   PATH_B - container path to data file A
         #   UUID_B - UUID of sample B
     SN_A=$(echo "$CASEDATA" | cut -f 2)
     PATH_A=$(echo "$CASEDATA" | cut -f 3)
     SN_B=$(echo "$CASEDATA" | cut -f 5)
     PATH_B=$(echo "$CASEDATA" | cut -f 6)
 
-    OUTD_BASE="$OUTD_PROJECT_BASE/$CASE"
-    ARGS="$OUTD_BASE"
-
-    if [ -z "$FN" ]; then
-        >&2 echo ERROR: CASE $CASE not found in $SR_H
-        exit 1
-    fi
-
-    ARGS="$ARGS $DRYARG"
-
-    LOGD_H="$LOGD_BASE_PROJECT/$CASE"
-    ARGS="$ARGS -L $LOGD_H"
+    # define output directory for this case and propagate DRYRUN workflow arguments
+    ARGS_CASE="-o $OUTD_PROJECT_BASE/$CASE $DRYARG_WORKFLOW"
 
     # This is the command which will be executed for each CASE in container
-    CMD_HOST="bash /BICSEQ2/src/execute_workflow.sh $ARGS $PROJECT_CONFIG_C $CASE $SN_A $PATH_A $SN_B $PATH_B"
+    CMD_HOST="bash /BICSEQ2/src/execute_workflow.sh $ARGS_CASE $PROJECT_CONFIG_C $CASE $SN_A $PATH_A $SN_B $PATH_B"
 
-    # DATAMAP example.  These will map to /data1, /data2, etc, resp.
-    # $OUTD_H \
-    # /gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/BICSEQ2/inputs \
-    # /gscmnt/gc2619/dinglab_cptac3/GDC_import/data \
-    # /gscmnt/gc2508/dinglab/mwyczalk/BICSEQ2-dev.tmp/cached.annotation \
+    # Define log path for this case, add dry run policy 
+    RUN_ARGS_CASE="$RUN_ARGS $DRYARG_DOCKER -L $LOGD_BASE_PROJECT/$CASE"
 
-    CMD="bash $SCRIPT_PATH/start_docker.sh $RUN_ARGS -c \"$CMD_HOST\" $DATAMAP "
+    CMD="bash $SCRIPT_PATH/start_docker.sh $RUN_ARGS_CASE -c \"$CMD_HOST\" $DATAMAP "
 
     echo "$CMD"
 
@@ -201,15 +188,22 @@ fi
 confirm $CASELIST
 confirm $PROJECT_CONFIG
 
-# If DRYRUN is 'd' then we're in dry run mode (only print the called function),
-# otherwise call the function as normal with one less -d argument than we got (passing DRYARG)
+# DRYRUN implementation here takes into account that we're calling `start_docker.sh execute_workflow.sh`
+# We want successive 'd' in DRYRUN to propagate to called functions as DRYARG_XXX
+#   if DRYRUN is blank, execute normally
+#   if DRYRUN is 'd', print out call to `start_docker` instead of running it
+#   if DRYRUN is 'dd', pass -d to `start_docker`
+#   if DRYRUN is 'ddd' and longer, strip off `dd` and pass remainder to `execute_workflow`
+DRYARG_DOCKER=""
+DRYARG_WORKFLOW=""
 if [ -z $DRYRUN ]; then   # DRYRUN not set
-    DRYARG=""
+    :   # no-op 
 elif [ $DRYRUN == "d" ]; then  # DRYRUN is -d: echo the command rather than executing it
-    DRYARG=""
     >&2 echo Dry run in $SCRIPT
-else    # DRYRUN has multiple d's: pop one d off the argument and pass it to function
-    DRYARG="-${DRYRUN%?}"
+elif [ $DRYRUN == "dd" ]; then  # `start_docker.sh -d`
+    DRYARG_DOCKER="-d"
+else    # DRYRUN has multiple d's: pop two d off the argument and pass it to workflow 
+    DRYARG_WORKFLOW="-${DRYRUN%??}"
 fi
 
 # this allows us to get CASEs in one of two ways:

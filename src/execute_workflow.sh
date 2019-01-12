@@ -19,6 +19,8 @@
 
 # Details about BICSEQ2 pipeline: http://compbio.med.harvard.edu/BIC-seq/
 
+SCRIPT=$(basename $0)
+
 function confirm {
     FN=$1
     if [ ! -e $FN ]; then
@@ -32,7 +34,7 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal error.  Exiting.
+            >&2 echo $SCRIPT: Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
@@ -70,11 +72,11 @@ while getopts ":dfj:s:o:" opt; do
       >&2 echo Output directory: $OUTD_BASE
       ;;
     \?)
-      >&2 echo "Invalid option: -$OPTARG" 
+      >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
       exit 1
       ;;
     :)
-      >&2 echo "Option -$OPTARG requires an argument." 
+      >&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument."
       exit 1
       ;;
   esac

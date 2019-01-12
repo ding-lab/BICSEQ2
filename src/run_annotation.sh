@@ -21,6 +21,8 @@
 # detectDir: /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/BICSEQ2.UCEC.hg38.121/run_detect/lambda3
 # outputPath: /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/BICSEQ2.UCEC.hg38.121/get_gene_level_cnv
 
+SCRIPT=$(basename $0)
+
 # Defaults
 OUTD_BASE="/data1"
 
@@ -29,15 +31,14 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal ERROR.  Exiting.
+            >&2 echo $SCRIPT: Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
 }
 
-
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":d" opt; do
+while getopts ":do:" opt; do
   case $opt in
     d)  
       DRYRUN=1
@@ -46,11 +47,11 @@ while getopts ":d" opt; do
       OUTD_BASE=$OPTARG
       ;;
     \?)
-      >&2 echo "Invalid option: -$OPTARG" 
+      >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
       exit 1
       ;;
     :)
-      >&2 echo "Option -$OPTARG requires an argument." 
+      >&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument."
       exit 1
       ;;
   esac

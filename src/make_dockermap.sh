@@ -16,6 +16,8 @@
 # When generating dockermap, for paths of form /A/B/C/D.bam, remove C/D.bam to obtain common path /A/B.  Create Dockermap of all
 # such unique paths mapped to /input1, /input2, etc.
 
+SCRIPT=$(basename $0)
+
 while getopts ":b:" opt; do
   case $opt in
     b)  # Required
@@ -62,7 +64,7 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal error.  Exiting.
+            >&2 echo $SCRIPT: Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
