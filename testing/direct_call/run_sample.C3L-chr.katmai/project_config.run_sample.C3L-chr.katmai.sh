@@ -28,8 +28,6 @@ REF_BASE="${R}"
 # This is the root directory of per-chrom reference.  Filename is e.g. chr20.fa
 REF_CHR="/data2/hg38"
 
-# All output directories are rooted in $OUTD
-OUTD="/data1"
 
 READ_LENGTH=150
 
@@ -43,23 +41,30 @@ SRCD="/BICSEQ2/src"	# scripts directory
 MAPD="/data2"
 
 
+
+##### Output directory definitions
+#
+## All output directories are rooted in $OUTD_BASE
+# Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
+
 # This is not ideal way to do this - for example, this statement is printed out every step.
 # Better isolate this into separate file
 ## the path to the .seq file, 
 if [ "$IMPORT_SEQ" == 1 ]; then
     SEQD="/data4"
-    >&2 echo "IMPORT_SEQ: will read .seq from $SEQD"
+#    >&2 echo "IMPORT_SEQ: will read .seq from $SEQD"
 else
-    SEQD="$OUTD/unique_reads"
-    >&2 echo "IMPORT_SEQ: will read .seq from workflow $SEQD"
+    SEQD="$OUTD_BASE/unique_reads"
+#    >&2 echo "IMPORT_SEQ: will read .seq from workflow $SEQD"
 fi
 
 # Output of normalization step
-NORMD="$OUTD/norm"
+NORMD="$OUTD_BASE/norm"
 # Output of segmentation step
-SEGD="$OUTD/segmentation"
+SEGD="$OUTD_BASE/segmentation"
 # Output of annotation step
-ANND="$OUTD/annotation"
+ANND="$OUTD_BASE/annotation"
+#####
 
 # MER is a convenience string defined in make_mappability.sh
 MER=${REF_BASE}.${READ_LENGTH}mer     # common name used for output
@@ -68,16 +73,9 @@ MER=${REF_BASE}.${READ_LENGTH}mer     # common name used for output
 
 # Assumed per-chrom FASTA installed in same directory as $REF
 FA_CHR="${REF_CHR}/%s.fa"
-# MAPD is identical to OUTD in make_mappability.sh
+# MAPD is identical to OUTD_BASE in make_mappability.sh
 # v1 defined in main.sh as /diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs/GRCh38.d1.vd1.fa.150mer/
 MAP_CHR="$MAPD/$MER/$MER.%s.txt"
-
-# get_unique.sh parameters
-# SEQ_CHR is used when multiple chrom exist, otherwise SEQ_OUT is used
-# SEQ_CHR="$SEQD/$SAMPLE_NAME.%s.seq"
-# SEQ_OUT="$SEQD/$SAMPLE_NAME.seq"
-# NORM_CHR="$OUTD/${SAMPLE_NAME}.%s.norm.bin" 
-# NORM_PDF="$OUTD/${SAMPLE_NAME}.GC.pdf"
 
 # NOte that config file does not know about sequence names
 SEQ_CHR="$SEQD/%s_%s.seq"

@@ -49,7 +49,6 @@ MAPD="/data2"
 #
 ## All output directories are rooted in $OUTD_BASE
 # Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
-# Instead, it would be better to define paths here relative to base directory
 
 # This is not ideal way to do this - for example, this statement is printed out every step.
 # Better isolate this into separate file

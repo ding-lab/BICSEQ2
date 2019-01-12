@@ -6,7 +6,7 @@ BICSEQ2="/home/mwyczalk_test/Projects/BICSEQ2"
 CONFIG="project_config.execute_pipeline.C3L-chr.katmai.sh"
 source $CONFIG
 
-OUTD="/gscmnt/gc2508/dinglab/mwyczalk/BICSEQ2-dev.tmp/$PROJECT "
+OUTD="/diskmnt/Datasets/BICSEQ2-dev.tmp/run_sample.C3L-chr.katmai"
 >&2 echo Output directory: $OUTD
 mkdir -p $OUTD
 # See README.md for details.  Paths specific to katmai
