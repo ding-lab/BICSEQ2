@@ -17,6 +17,7 @@
 #   -w: issue warnings instead of fatal errors if files do not exist
 #   -s CASE_NAME: define name of case (patient) corresponding to both case and control samples. 
 #       Default is longest common prefix of SAMPLE_NAME.CASE and SAMPLE_NAME.CONTROL
+#   -o OUTD_BASE: set output base root directory.  Defalt is /data1
 
 # * Input
 #   * Reads per-chrom normalized data files
@@ -27,6 +28,8 @@
 #   * CNV file  (CASE.cnv)
 #   * tmp directory $OUTD/tmp
 
+# Defaults
+OUTD_BASE="/data1"
 
 function test_exit_status {
     # Evaluate return value for chain of pipes; see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
@@ -92,6 +95,9 @@ while getopts ":vdc:C:ws:" opt; do
     s) # Define CASE_NAME explicitly
       CASE_NAME_ARG=$OPTARG
       ;;
+    o) 
+      OUTD_BASE=$OPTARG
+      ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
       exit 1
@@ -121,6 +127,7 @@ if [ ! -e $PROJECT_CONFIG ]; then
     exit 1
 fi
 
+# Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
 >&2 echo Reading $PROJECT_CONFIG
 source $PROJECT_CONFIG
 
@@ -147,6 +154,8 @@ if [ ! $LAMBDA ]; then
     exit 1
 fi
 
+# Output, tmp, and log files go here
+# Note that SEGD is set in project_config, but OUTD_BASE is set here.
 OUTD=$SEGD
 
 ## create tmp directory

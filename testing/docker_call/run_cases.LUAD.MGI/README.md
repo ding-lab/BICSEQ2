@@ -14,3 +14,8 @@ CaseList file contains BAM paths (mapped to container) and other details to proc
 Reads in BamMap and a list of case names.
 
 
+**TODO**
+process_cases.sh is partly implemented, designed to loop over cases and start each.
+This will be a loop over `start_docker`.  TODO is pass all appropriate paths
+
+

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run BICSeq pipeline on tumor / normal pair to get somatic CNV calls
+# Run BICSeq pipeline on tumor / normal pair to get somatic CNV calls.  Execuites in container
 # Usage:
 #   bash execute_pipeline [options] PROJECT_CONFIG CASE_NAME SN_TUMOR TUMOR_BAM SN_NORMAL NORMAL_BAM
 #
@@ -15,6 +15,7 @@
 # -f: force overwrite of existing data, if it exists
 # -j: number of parallel jobs for get_unique step [default 4]
 # -s: step to run [ get_unique, normalization, segmentation, annotation, all ]
+# -o OUTD_BASE: set output base root directory.  Defalt is /data1
 
 # Details about BICSEQ2 pipeline: http://compbio.med.harvard.edu/BIC-seq/
 
@@ -47,8 +48,10 @@ function announce {
 ARGS=""
 GET_UNIQ_ARGS=""
 STEP="all"	# this might be expanded to allow comma-separated steps
+OUTD_BASE="/data1"
+
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":dfj:s:" opt; do
+while getopts ":dfj:s:o:" opt; do
   case $opt in
     d)
       DRYRUN="d$DRYRUN" # -d is a stack of parameters, each script popping one off until get to -d
@@ -61,6 +64,10 @@ while getopts ":dfj:s:" opt; do
       ;;
     s) 
       STEP="$OPTARG"
+      ;;
+    o) 
+      OUTD_BASE="$OPTARG"
+      >&2 echo Output directory: $OUTD_BASE
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -103,7 +110,10 @@ else    # DRYRUN has multiple d's: pop one d off the argument and pass it to fun
     DRYARG="-${DRYRUN%?}"
 fi
 
-ARGS="$ARGS $DRYARG"
+ARGS="$ARGS $DRYARG "
+
+# propagate output directory
+ARGS="$ARGS -o $OUTD_BASE"
 
 # -s: step to run [ get_unique, normalization, segmentation, annotation, all ]
 if [ $STEP == "all" ]; then 

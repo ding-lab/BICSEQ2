@@ -17,6 +17,7 @@
 #    skip per-chrom processing
 # -j JOBS: if parallel run, number of jobs to run at any one time (-j parameter to parallel).  Default: 4
 # -f : Force overwrite if .seq files exist
+# -o OUTD_BASE: set output root directory.  Defalt is /data1
 #
 # In parallel mode, will use [GNU parallel][1], but script will block until all jobs completed.
 # Output logs written to $SAMPLE_NAME.$CHR.get_uniq.log
@@ -28,8 +29,9 @@
 # set defaults
 PARALLEL_JOBS=4
 
+OUTD_BASE="/data1"
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":dc:1fj:" opt; do
+while getopts ":dc:1fj:o:" opt; do
   case $opt in
     d)  # example of binary argument
       >&2 echo "Dry run" 
@@ -46,7 +48,10 @@ while getopts ":dc:1fj:" opt; do
       FORCE_OVERWRITE=1
       ;;
     j) 
-      PARALLEL_JOBS=$OPTARG
+      PARALLEL_JOBS=$OPTARG  # not same as in execute_workflow.sh
+      ;;
+    o) 
+      OUTD_BASE=$OPTARG
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
@@ -80,6 +85,7 @@ if [ ! -e $PROJECT_CONFIG ]; then
     exit 1
 fi
 
+# Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
 >&2 echo Reading $PROJECT_CONFIG
 source $PROJECT_CONFIG
 
@@ -92,6 +98,7 @@ if [ $CHRLIST_ARG ]; then
 fi
 
 # Output, tmp, and log files go here
+# Note that SEQD is set in project_config, but OUTD_BASE is set here.
 OUTD=$SEQD
 mkdir -p $OUTD
 TMPD="$OUTD/tmp"

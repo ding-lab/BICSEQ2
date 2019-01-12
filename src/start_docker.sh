@@ -3,16 +3,21 @@
 # Usage: start_docker.sh [options] [data_path_1 data_path_2 ...]
 #
 # -M: run in MGI environment
-# -L: MGI logs host path. Output of bsub goes here.  directory will be created
+# -L LOGD_H: Log directory on host.  MGI logs written to $LOGD_H/bsub/*.[err|out]
 # -d: dry run.  print out docker statement but do not execute
 # -I DOCKER_IMAGE: Specify docker image.  Default: mwyczalkowski/bicseq2:latest
 # -c cmd: run given command.  default: bash
 # -H mntH : additional host mount, may be a file or directory, relative path OK.  If defined, -C must also be defined
 # -C mntC : additional container command.  mntH will be mapped to mntC
 # -m DOCKERMAP : path to docker map file.  Contains 1 or more lines like PATH_H:PATH_C which define additional volume mapping
+# -g LSF_GROUP: LSF group to start in.  MGI mode only
 
 # data_path will map to /data in container
 # TODO: make /data1 be rw, others ro
+#
+# Details about LSF_GROUP: https://github.com/ding-lab/importGDC.CPTAC3
+# See also https://confluence.gsc.wustl.edu/pages/viewpage.action?pageId=27592450
+# 
 
 # TIPS:
 # * May want to do `git pull origin maw-dev` in /BICSEQ2
@@ -22,17 +27,18 @@
 DOCKER_IMAGE="mwyczalkowski/bicseq2:latest"
 
 LSFQ="-q research-hpc"  # MGI LSF queue.  
+LSF_ARGS=""
 DOCKER_CMD="/bin/bash"
 INTERACTIVE=1
 
-while getopts ":MdI:c:H:C:L:m:" opt; do
+while getopts ":MdI:c:H:C:L:m:g:" opt; do
   case $opt in
     M)  
       MGI=1
       >&2 echo MGI Mode
       ;;
     L)  
-      LOGD=$OPTARG
+      LOGD_H=$OPTARG
       ;;
     H)  
       MNTH=$OPTARG
@@ -52,6 +58,10 @@ while getopts ":MdI:c:H:C:L:m:" opt; do
       ;;    
     m) 
       DOCKERMAP="$OPTARG"
+      ;;
+    g)
+      LSF_ARGS="$LSF_ARGS -g $OPTARG"
+      >&2 echo LSF Group: $OPTARG
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" >&2
@@ -115,39 +125,39 @@ if [[ $MNTH ]]; then
     fi 
 fi
 
-# Dockermap provides additional ways to map volumes. Expect each line to be passed as is to docker -v
+# Dockermap provides additional ways to map volumes. Expect each line to be passed as if to docker -v
 if [ ! -z $DOCKERMAP ]; then
 # If defined, dockermap must exist
     if [ ! -e $DOCKERMAP ]; then
         >&2 echo "ERROR: Dockermap \(-m\) $DOCKERMAP does not exist"
         exit 1
     fi
+
+    # DOCKERMAP has lines of format,
+    #   PATH_H:PATH_C
+    while read l; do
+        # Skip comments 
+        [[ $l = \#* ]] && continue
+        PATH_H=$(echo "$l" | cut -f 1 -d :)
+        PATH_C=$(echo "$l" | cut -f 2 -d :)
+        if [ -z $PATH_C ] || [ -z $PATH_H ]; then
+            >&2 echo ERROR: Bad line in $DOCKERMAP:
+            >&2 echo $l
+            exit 1
+        fi
+        if [ ! -e $PATH_H ]; then
+            >&2 echo ERROR: $PATH_H does not exist \( defined in $DOCKERMAP \)
+            exit 1
+        fi
+
+        if [ $MGI ]; then
+            DATMAP="$DATMAP $l"
+        else
+            DATMAP="$DATMAP -v $l"
+        fi
+     
+    done < $DOCKERMAP
 fi
-
-# DOCKERMAP has lines of format,
-#   PATH_H:PATH_C
-while read l; do
-    # Skip comments 
-    [[ $l = \#* ]] && continue
-    PATH_H=$(echo "$l" | cut -f 1 -d :)
-    PATH_C=$(echo "$l" | cut -f 2 -d :)
-    if [ -z $PATH_C ] || [ -z $PATH_H ]; then
-        >&2 echo ERROR: Bad line in $DOCKERMAP:
-        >&2 echo $l
-        exit 1
-    fi
-    if [ ! -e $PATH_H ]; then
-        >&2 echo ERROR: $PATH_H does not exist \( defined in $DOCKERMAP \)
-        exit 1
-    fi
-
-    if [ $MGI ]; then
-        DATMAP="$DATMAP $l"
-    else
-        DATMAP="$DATMAP -v $l"
-    fi
- 
-done < $DOCKERMAP
 
 # MGI code from https://github.com/ding-lab/importGDC/blob/master/GDC_import.sh
 function start_docker_MGI {
@@ -162,16 +172,16 @@ if [ $INTERACTIVE == 1 ]; then
     ARGS="-Is"
 fi
 
-if [ $LOGD ]; then
-    mkdir -p $LOGD
+if [ $LOGD_H ]; then
+    mkdir -p $LOGD_H/bsub
     TS=$(date +%s)
-    ERRLOG="$LOGD/${TS}.err"
-    OUTLOG="$LOGD/${TS}.out"
+    ERRLOG="$LOGD_H/bsub/${TS}.err"
+    OUTLOG="$LOGD_H/bsub/${TS}.out"
     LOGS="-e $ERRLOG -o $OUTLOG"
     >&2 echo Writing bsub logs to $OUTLOG and $ERRLOG
 fi
 
-DCMD="bsub $LSFQ $ARGS $LOGS -a \"docker($DOCKER_IMAGE)\" $CMD "
+DCMD="bsub $LSFQ $LSF_ARGS $ARGS $LOGS -a \"docker($DOCKER_IMAGE)\" $CMD "
 if [ $DRYRUN ]; then
     >&2 echo Dryrun: $DCMD
 else

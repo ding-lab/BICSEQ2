@@ -4,10 +4,14 @@ For now, main difference between them, aside from project names, is that GENE_BE
 from workflow directory or from mapped directory (e.g. data4, as is done in execute_workflow)
 
 
+* early Jan 19
 Starting with project_config.execute_workflow.C3L-chr.MGI.sh, OUTD is changed from /data1/PROJECT to /data1,
 and it no longer has `mkdir`.  It is the responsibility of the calling container to create the appropriate
 directories.  This is done so that host-based log files can be associated with the run output
 Project is not defined in project_config right now
 
-These changes should be propagated to other project_config and tested
+* 1/11/19 
+Output base directory is set in script via argument rather than defined in project_config; by default it is /data1
+Renamed to OUTD_BASE.  Reference implementation:
+-> /docker_call/run_cases.LUAD.MGI/project_config.run_cases.LUAD.MGI.sh
 

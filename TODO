@@ -6,13 +6,17 @@ TODOs for project:
 
 # Pipeline improvements
 
+## Disk Space usage
+```
 Here is disk space usage for chr 20-23:
     640K    bed
     129M    norm
     320K    segmentation
     995M    unique_reads
+```
 
-## unique_reads:
+### unique_reads:
+```
 -rw-r--r-- 1 mwyczalk dinglab  375 Jan  9 12:53 C3L-00001.WGS.N.hg38.chr18.get_uniq.log
 -rw-r--r-- 1 mwyczalk dinglab  45M Jan  9 12:53 C3L-00001.WGS.N.hg38_chr18.seq.gz
 -rw-r--r-- 1 mwyczalk dinglab  375 Jan  9 12:52 C3L-00001.WGS.N.hg38.chr19.get_uniq.log
@@ -20,18 +24,24 @@ Here is disk space usage for chr 20-23:
 -rw-r--r-- 1 mwyczalk dinglab  375 Jan  9 12:53 C3L-00001.WGS.N.hg38.chr20.get_uniq.log
 -rw-r--r-- 1 mwyczalk dinglab 171M Jan  9 12:53 C3L-00001.WGS.N.hg38_chr20.seq
 -rw-r--r-- 1 mwyczalk dinglab  375 Jan  9 12:50 C3L-00001.WGS.T.hg38.chr18.get_uniq.log
+```
 
 Compressing unique_reads is quite effective:
+```
 C3L-00001.WGS.N.hg38_chr18.seq:  78.2% -- replaced with C3L-00001.WGS.N.hg38_chr18.seq.gz
+```
 
-
-## norm:
+### norm:
+```
 -rw-r--r-- 1 mwyczalk dinglab 26M Jan  9 13:05 C3L-00001.WGS.N.hg38.chr18.norm.bin
 -rw-r--r-- 1 mwyczalk dinglab 19M Jan  9 13:06 C3L-00001.WGS.N.hg38.chr19.norm.bin
 -rw-r--r-- 1 mwyczalk dinglab 21M Jan  9 13:07 C3L-00001.WGS.N.hg38.chr20.norm.bin
 -rw-r--r-- 1 mwyczalk dinglab 772 Jan  9 13:00 C3L-00001.WGS.N.hg38.norm-config.txt
 -rw-r--r-- 1 mwyczalk dinglab 66K Jan  9 13:07 C3L-00001.WGS.N.hg38.out.txt
+```
 
 compression:
+```
 C3L-00001.WGS.N.hg38.chr18.norm.bin:     66.2% -- replaced with C3L-00001.WGS.N.hg38.chr18.norm.bin.gz
+```
 

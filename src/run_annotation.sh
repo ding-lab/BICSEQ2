@@ -8,6 +8,7 @@
 #
 # Options:
 # -d: dry run: print command but do not execute
+# -o OUTD_BASE: set output base root directory.  Defalt is /data1
 #
 # Input:
 #  * .cnv file output by run_segmentation step
@@ -19,6 +20,9 @@
 # Previous data on Katmai
 # detectDir: /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/BICSEQ2.UCEC.hg38.121/run_detect/lambda3
 # outputPath: /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/BICSEQ2.UCEC.hg38.121/get_gene_level_cnv
+
+# Defaults
+OUTD_BASE="/data1"
 
 function test_exit_status {
     # Evaluate return value for chain of pipes; see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
@@ -38,9 +42,9 @@ while getopts ":d" opt; do
     d)  
       DRYRUN=1
       ;;
-#    s) # example
-#      CASE_NAME_ARG=$OPTARG
-#      ;;
+    o) 
+      OUTD_BASE=$OPTARG
+      ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
       exit 1
@@ -68,6 +72,7 @@ if [ ! -e $PROJECT_CONFIG ]; then
     exit 1
 fi
 
+# Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
 >&2 echo Reading $PROJECT_CONFIG
 source $PROJECT_CONFIG
 
@@ -76,6 +81,8 @@ if [ ! -e $GENE_BED ]; then
     exit 1
 fi
 
+# Output, tmp, and log files go here
+# Note that ANND is set in project_config, but OUTD_BASE is set here.
 OUTD=$ANND
 mkdir -p $OUTD
 
