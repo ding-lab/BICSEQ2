@@ -13,6 +13,7 @@
 #   -c CHRLIST: define chrom list, overriding value in PROJECT_CONFIG
 #   -C norm_config: Use given normalization config file, rather than creating it
 #   -w: issue warnings instead of fatal errors if files do not exist
+#   -o OUTD_BASE: set output base root directory.  Defalt is /data1
 
 # * Input
 #   * Reads per-chrom reference, mapping, and seq files
@@ -25,8 +26,11 @@
 #     * Note that this is written to config file used by NBICseq-norm.pl
 #   * Tmp directory $OUTD/tmp created and passed as argument to NBICseq-norm.pl
 
+SCRIPT=$(basename $0)
+
+OUTD_BASE="/data1"
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":vdc:C:w" opt; do
+while getopts ":vdc:C:wo:" opt; do
   case $opt in
     v)  
       VERBOSE=1
@@ -44,12 +48,15 @@ while getopts ":vdc:C:w" opt; do
       NORM_CONFIG=$OPTARG
       >&2 echo Norm config file passed: $NORM_CONFIG
       ;;
+    o) 
+      OUTD_BASE=$OPTARG
+      ;;
     \?)
-      >&2 echo "Invalid option: -$OPTARG" 
+      >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
       exit 1
       ;;
     :)
-      >&2 echo "Option -$OPTARG requires an argument." 
+      >&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument."
       exit 1
       ;;
   esac
@@ -72,6 +79,7 @@ if [ ! -e $PROJECT_CONFIG ]; then
     exit 1
 fi
 
+# Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
 >&2 echo Reading $PROJECT_CONFIG
 source $PROJECT_CONFIG
 
@@ -84,19 +92,14 @@ if [ ! -e $CHRLIST ]; then
     exit 1
 fi
 
+# Output, tmp, and log files go here
+# Note that NORMD is set in project_config, but OUTD_BASE is set here.
 OUTD=$NORMD
 
 ## create tmp directory
-# be able to specify with -t
+# TODO: be able to specify with -t
 TMPD="$OUTD/tmp"
 mkdir -p $TMPD
-
-# V1 names
-#chromName="chr${chr}"
-#faFile="${REF}chr${chr}.fa"
-#MapFile="${MAPD}${MER}.chr${chr}.txt"
-#readPosFile="${SEQD}${Case}_${SampType}_chr${chr}.seq"
-#binFileNorm="${OUTD}${Case}_${SampType}_chr${chr}_norm.bin" 
 
 # Output:
 # NORM_PDF - per sample

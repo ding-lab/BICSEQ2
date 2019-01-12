@@ -8,6 +8,7 @@
 #
 # Options:
 # -d: dry run: print command but do not execute
+# -o OUTD_BASE: set output base root directory.  Defalt is /data1
 #
 # Input:
 #  * .cnv file output by run_segmentation step
@@ -20,33 +21,37 @@
 # detectDir: /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/BICSEQ2.UCEC.hg38.121/run_detect/lambda3
 # outputPath: /diskmnt/Projects/CPTAC3CNV/BICSEQ2/outputs/BICSEQ2.UCEC.hg38.121/get_gene_level_cnv
 
+SCRIPT=$(basename $0)
+
+# Defaults
+OUTD_BASE="/data1"
+
 function test_exit_status {
     # Evaluate return value for chain of pipes; see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal ERROR.  Exiting.
+            >&2 echo $SCRIPT: Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
 }
 
-
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":d" opt; do
+while getopts ":do:" opt; do
   case $opt in
     d)  
       DRYRUN=1
       ;;
-#    s) # example
-#      CASE_NAME_ARG=$OPTARG
-#      ;;
+    o) 
+      OUTD_BASE=$OPTARG
+      ;;
     \?)
-      >&2 echo "Invalid option: -$OPTARG" 
+      >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
       exit 1
       ;;
     :)
-      >&2 echo "Option -$OPTARG requires an argument." 
+      >&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument."
       exit 1
       ;;
   esac
@@ -68,6 +73,7 @@ if [ ! -e $PROJECT_CONFIG ]; then
     exit 1
 fi
 
+# Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
 >&2 echo Reading $PROJECT_CONFIG
 source $PROJECT_CONFIG
 
@@ -76,6 +82,8 @@ if [ ! -e $GENE_BED ]; then
     exit 1
 fi
 
+# Output, tmp, and log files go here
+# Note that ANND is set in project_config, but OUTD_BASE is set here.
 OUTD=$ANND
 mkdir -p $OUTD
 

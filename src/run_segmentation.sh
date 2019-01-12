@@ -17,6 +17,7 @@
 #   -w: issue warnings instead of fatal errors if files do not exist
 #   -s CASE_NAME: define name of case (patient) corresponding to both case and control samples. 
 #       Default is longest common prefix of SAMPLE_NAME.CASE and SAMPLE_NAME.CONTROL
+#   -o OUTD_BASE: set output base root directory.  Defalt is /data1
 
 # * Input
 #   * Reads per-chrom normalized data files
@@ -27,13 +28,17 @@
 #   * CNV file  (CASE.cnv)
 #   * tmp directory $OUTD/tmp
 
+SCRIPT=$(basename $0)
+
+# Defaults
+OUTD_BASE="/data1"
 
 function test_exit_status {
     # Evaluate return value for chain of pipes; see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo Fatal ERROR.  Exiting.
+            >&2 echo $SCRIPT: Fatal ERROR.  Exiting.
             exit $rc;
         fi;
     done
@@ -71,7 +76,7 @@ function write_seg_config {
 }
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":vdc:C:ws:" opt; do
+while getopts ":vdc:C:ws:o:" opt; do
   case $opt in
     v)  
       VERBOSE=1
@@ -92,12 +97,15 @@ while getopts ":vdc:C:ws:" opt; do
     s) # Define CASE_NAME explicitly
       CASE_NAME_ARG=$OPTARG
       ;;
+    o) 
+      OUTD_BASE=$OPTARG
+      ;;
     \?)
-      >&2 echo "Invalid option: -$OPTARG" 
+      >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
       exit 1
       ;;
     :)
-      >&2 echo "Option -$OPTARG requires an argument." 
+      >&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument."
       exit 1
       ;;
   esac
@@ -121,6 +129,7 @@ if [ ! -e $PROJECT_CONFIG ]; then
     exit 1
 fi
 
+# Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
 >&2 echo Reading $PROJECT_CONFIG
 source $PROJECT_CONFIG
 
@@ -147,6 +156,8 @@ if [ ! $LAMBDA ]; then
     exit 1
 fi
 
+# Output, tmp, and log files go here
+# Note that SEGD is set in project_config, but OUTD_BASE is set here.
 OUTD=$SEGD
 
 ## create tmp directory
