@@ -24,6 +24,8 @@
 # * To start another terminal in running container, first get name of running container with `docker ps`,
 #   then start bash in it with `docker exec -it <container_name> bash`
 
+SCRIPT=$(basename $0)
+
 DOCKER_IMAGE="mwyczalkowski/bicseq2:latest"
 
 LSFQ="-q research-hpc"  # MGI LSF queue.  
@@ -64,11 +66,11 @@ while getopts ":MdI:c:H:C:L:m:g:" opt; do
       >&2 echo LSF Group: $OPTARG
       ;;
     \?)
-      >&2 echo "Invalid option: -$OPTARG" >&2
+      >&2 echo "$SCRIPT: ERROR. Invalid option: -$OPTARG" >&2
       exit 1
       ;;
     :)
-      >&2 echo "Option -$OPTARG requires an argument." >&2
+      >&2 echo "$SCRIPT: ERROR. Option -$OPTARG requires an argument." >&2
       exit 1
       ;;
   esac

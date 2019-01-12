@@ -21,6 +21,7 @@
 # -f: force overwrite of existing data, if it exists
 # -g LSF_GROUP: LSF group to use starting job (MGI specific)
 #       details: https://confluence.ris.wustl.edu/pages/viewpage.action?pageId=27592450
+#       See also https://github.com/ding-lab/importGDC.CPTAC3
 # -s: step to run [ get_unique, normalization, segmentation, annotation, all ]
 #     currently unimplemented, value is 'all'
 # -m DOCKERMAP : path to docker map file.  Contains 1 or more lines like PATH_H:PATH_C which define additional volume mapping
@@ -79,7 +80,7 @@ while getopts ":dfg:S:p:s:m:P:j:1ML:o:" opt; do
       STEP="$OPTARG"
       ;;
     m) 
-      DOCKERMAP="$OPTARG"
+      RUN_ARGS="$RUN_ARGS -m $OPTARG"
       ;;
     P)  
       DATAMAP="$OPTARG"
@@ -174,15 +175,14 @@ function get_launch_cmd {
     CMD="bash $SCRIPT_PATH/start_docker.sh $RUN_ARGS_CASE -c \"$CMD_HOST\" $DATAMAP "
 
     echo "$CMD"
-
 }
 
 if [ -z $CASELIST ]; then
-    >&2 echo ERROR: CaseList file not defined \(-S\)
+    >&2 echo $SCRIPT: ERROR: CaseList file not defined \(-S\)
     exit 1
 fi
 if [ -z $PROJECT_CONFIG ]; then
-    >&2 echo ERROR: Project config file not defined \(-p\)
+    >&2 echo $SCRIPT: ERROR: Project config file not defined \(-p\)
     exit 1
 fi
 confirm $CASELIST
@@ -215,7 +215,6 @@ else
     CASES="$@"
 fi
 
-echo CASES = $CASES
 if [ -z "$CASES" ]; then
     >&2 echo ERROR: no case names specified
     exit 1

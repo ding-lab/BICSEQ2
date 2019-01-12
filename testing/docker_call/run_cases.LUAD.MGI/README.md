@@ -14,8 +14,15 @@ CaseList file contains BAM paths (mapped to container) and other details to proc
 Reads in BamMap and a list of case names.
 
 
-**TODO**
-process_cases.sh is partly implemented, designed to loop over cases and start each.
-This will be a loop over `start_docker`.  TODO is pass all appropriate paths
+# Testing
 
+Launched first 5 cases 1/12/19 with,
+    head -n 5 dat/case_names.dat | bash A.process_project_cases.sh -
 
+Follow first one along here:
+    /gscmnt/gc2508/dinglab/mwyczalk/BICSEQ2-dev.tmp/run_cases.LUAD.MGI/11LU013/bsub/1547328929.err
+
+# TODO
+
+Need to implement `evaluate_cases`, which tests various runs for success.
+Question: how will it find log files?  They should probably have a name not based on timestamp; they need not be unique

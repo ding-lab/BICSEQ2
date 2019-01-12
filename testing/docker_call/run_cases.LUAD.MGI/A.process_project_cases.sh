@@ -21,6 +21,15 @@ mkdir -p $OUTD_H
 CASELIST="dat/CaseList.dat"
 DOCKERMAP="dat/Dockermap.dat"
 
+# this is new, specific to MGI.  Might be moved to process_cases.sh
+# https://github.com/ding-lab/importGDC.CPTAC3
+NJOBS=3
+export LSF_GROUP="/mwyczalk/BICSEQ2"
+#bgadd -L $NJOBS $LSF_GROUP  # this is needed only the first time, when group created
+bgmod -L $NJOBS  $LSF_GROUP  # this is to modify number of jobs running
+bjgroup -s $LSF_GROUP        # to see job group stats
+
+
 # DATAMAP lists directories mapped to /data1, /data2, etc.
 DATAMAP=" $OUTD_H \
     /gscmnt/gc2521/dinglab/yigewu/Projects/CPTAC3CNV/BICSEQ2/inputs \
@@ -28,5 +37,5 @@ DATAMAP=" $OUTD_H \
     /gscmnt/gc2508/dinglab/mwyczalk/BICSEQ2-dev.tmp/cached.annotation"
 
 # -M for MGI
-bash $BICSEQ_H/src/process_cases.sh -M -L $OUTD_H -p $PROJECT_CONFIG -S $CASELIST -m $DOCKERMAP $@
+bash $BICSEQ_H/src/process_cases.sh -M -L $OUTD_H -p $PROJECT_CONFIG -S $CASELIST -m $DOCKERMAP -P "$DATAMAP" -g $LSF_GROUP $@
 
