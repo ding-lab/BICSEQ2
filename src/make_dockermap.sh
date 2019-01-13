@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# author: Matthew Wyczalkowski m.wyczalkowski@wustl.edu
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
 
 # Usage: make_docker_map.sh [options] CASE [ CASE2 ... ]
 #   Calculate a Dockermap file, which provides a list of host / container path mappings, and write to disk

@@ -1,4 +1,8 @@
-# Based on cdde from Yige Wu
+#!/bin/bash
+
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
 
 # Download annotation GFF file and process it to obtain gene annotation BED file
 # Usage:

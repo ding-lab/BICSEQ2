@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
+
 # Create normalization configuration file and run BICSeq normalization on all chromsomes
 # Usage:
 #   bash run_norm.sh [options] SAMPLE_NAME PROJECT_CONFIG 

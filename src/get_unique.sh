@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
+
 # Get the uniquely mapped reads from bam file, optionally in parallel runs
 # Modeled after run_uniq.sh in v1
 # Writes to directory $SEQD, filename is based SEQ_CHR when looping over CHRLIST, SEQ_OUT otherwise

@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
+
 # Start docker container in regular and/or MGI environment, and optionally map given paths to /data1, /data2, ...
 # Usage: start_docker.sh [options] [data_path_1 data_path_2 ...]
 #

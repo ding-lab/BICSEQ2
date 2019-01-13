@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# author: Matthew Wyczalkowski m.wyczalkowski@wustl.edu
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
 
 # Usage: make_case_list.sh [options] CASE [ CASE2 ... ]
 #   Make a CaseList file, which contains info about tumor/normal input data, which will be input to start_workflow.sh

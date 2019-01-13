@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
+
 ## get gene-level copy number values for given case
 #
 # Usage:

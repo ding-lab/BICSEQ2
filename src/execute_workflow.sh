@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
+
 # Run BICSeq pipeline on tumor / normal pair to get somatic CNV calls.  Execuites in container
 # Usage:
 #   bash execute_pipeline [options] PROJECT_CONFIG CASE_NAME SN_TUMOR TUMOR_BAM SN_NORMAL NORMAL_BAM

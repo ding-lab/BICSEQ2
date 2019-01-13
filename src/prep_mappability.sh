@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
+
 # Create mappability indices for a reference
 # * Reads all-chromosome reference 
 # * Generates per-chromosome mappability files 

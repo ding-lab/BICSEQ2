@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# Matthew Wyczalkowski <m.wyczalkowski@wustl.edu>
+# Yige Wu <yigewu@wustl.edu>
+# https://dinglab.wustl.edu/
+
 # launch BICSEQ2 workflow for multiple cases.  Run from host
 
 # takes list of case names and starts processing on each, calling `execute_workflow CASE`
