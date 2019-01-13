@@ -31,7 +31,7 @@ SCRIPT=$(basename $0)
 # where STATUS should be START, SUCCESS, ERROR
 # prints standardized format log string to stderr
 function write_log {
-    printf "BS2:%s\t[ %s ]\t%s\t%s\n" "$1" "$(date)" "$SCRIPT" "$2" 1>&2
+    printf "BS2:%s\t%s\t[ %s ]\t%s\n" "$1" "$SCRIPT" "$(date)" "$2" 1>&2
 }
 
 # Usage:   write_START "message"
@@ -116,11 +116,11 @@ if [ "$#" -ne 6 ]; then
 #    >&2 echo bash execute_pipeline \[options\] PROJECT_CONFIG CASE_NAME SN_TUMOR TUMOR_BAM SN_NORMAL NORMAL_BAM
 
 # https://stackoverflow.com/questions/1167746/how-to-assign-a-heredoc-value-to-a-variable-in-bash
-read -r -d '' MSG <<'EOF'
+read -r -d '' MSG<<'EOF'
 Wrong number of arguments 
 Usage: 
 bash execute_pipeline \[options\] PROJECT_CONFIG CASE_NAME SN_TUMOR TUMOR_BAM SN_NORMAL NORMAL_BAM
-EOF 
+EOF
     write_ERROR "$MSG"
     exit 1
 fi
