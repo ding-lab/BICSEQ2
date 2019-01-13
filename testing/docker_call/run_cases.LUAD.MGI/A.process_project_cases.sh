@@ -1,9 +1,11 @@
+# start processing of list of cases
+
 # Usage:
-#   process_project_cases.sh CASE1 CASE2 ...
+#   A.process_project_cases.sh [options] CASE1 CASE2 ...
 # or 
-#   cat CASES | process_project_cases.sh -
+#   cat CASES | A.process_project_cases.sh [options] -
 #
-# with CASES a list of case names
+# with CASES a list of case names.  All options passed to src/process_cases.sh
 
 # Project config path is on host, and may be relative. Will be mounted as a file /project_config.sh
 PROJECT_CONFIG="./project_config.run_cases.LUAD.MGI.sh"

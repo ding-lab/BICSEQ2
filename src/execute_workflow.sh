@@ -26,10 +26,34 @@
 
 SCRIPT=$(basename $0)
 
+# Usage
+# write_log STATUS "message"
+# where STATUS should be START, SUCCESS, ERROR
+# prints standardized format log string to stderr
+function write_log {
+    printf "BS2:%s\t[ %s ]\t%s\t%s\n" "$1" "$(date)" "$SCRIPT" "$2" 1>&2
+}
+
+# Usage:   write_START "message"
+function write_START {
+    write_log "START" "$1"
+}
+
+# Usage:   write_SUCCESS "message"
+function write_SUCCESS {
+    write_log "SUCCESS" "$1"
+}
+
+# Usage:   write_ERROR "message"
+function write_ERROR {
+    write_log "ERROR" "$1"
+}
+
 function confirm {
     FN=$1
     if [ ! -e $FN ]; then
-        >&2 echo ERROR: $FN does not exist
+        #>&2 echo ERROR: $FN does not exist
+        write_ERROR "$FN does not exist"
         exit 1
     fi
 }
@@ -39,18 +63,14 @@ function test_exit_status {
     rcs=${PIPESTATUS[*]};
     for rc in ${rcs}; do
         if [[ $rc != 0 ]]; then
-            >&2 echo $SCRIPT: Fatal ERROR.  Exiting.
+            #>&2 echo $SCRIPT: Fatal ERROR.  Exiting.
+            write_ERROR "Fatal ERROR.  Exiting."
             exit $rc;
         fi;
     done
 }
 
-# Print timestamp and given string to stderr
-function announce {
-    TXT="$1"
-    NOW=$(date)
-    >&2 echo [ $NOW ] $0: $TXT
-}
+write_START
 
 ARGS=""
 GET_UNIQ_ARGS=""
@@ -77,11 +97,13 @@ while getopts ":dfj:s:o:" opt; do
       >&2 echo Output directory: $OUTD_BASE
       ;;
     \?)
-      >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
+      #>&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
+      write_ERROR "Invalid option: -$OPTARG"
       exit 1
       ;;
     :)
-      >&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument."
+      #>&2 echo "$SCRIPT: ERROR: Option -$OPTARG requires an argument."
+      write_ERROR "Option -$OPTARG requires an argument."
       exit 1
       ;;
   esac
@@ -89,9 +111,17 @@ done
 shift $((OPTIND-1))
 
 if [ "$#" -ne 6 ]; then
-    >&2 echo ERROR: Wrong number of arguments
-    >&2 echo Usage:
-    >&2 echo bash execute_pipeline \[options\] PROJECT_CONFIG CASE_NAME SN_TUMOR TUMOR_BAM SN_NORMAL NORMAL_BAM
+#    >&2 echo ERROR: Wrong number of arguments
+#    >&2 echo Usage:
+#    >&2 echo bash execute_pipeline \[options\] PROJECT_CONFIG CASE_NAME SN_TUMOR TUMOR_BAM SN_NORMAL NORMAL_BAM
+
+# https://stackoverflow.com/questions/1167746/how-to-assign-a-heredoc-value-to-a-variable-in-bash
+read -r -d '' MSG <<'EOF'
+Wrong number of arguments 
+Usage: 
+bash execute_pipeline \[options\] PROJECT_CONFIG CASE_NAME SN_TUMOR TUMOR_BAM SN_NORMAL NORMAL_BAM
+EOF 
+    write_ERROR "$MSG"
     exit 1
 fi
 
@@ -101,6 +131,7 @@ SN_TUMOR=$3
 TUMOR_BAM=$4
 SN_NORMAL=$5
 NORMAL_BAM=$6
+
 
 confirm $CONFIG
 confirm $TUMOR_BAM
@@ -162,32 +193,35 @@ function process_sample {
     BAM=$2
 
     if [ $RUN_UNIQUE ]; then
-        announce "$SN: Running get_unique step"
+        write_START "$SN: Running get_unique step"
         CMD="bash /BICSEQ2/src/get_unique.sh $ARGS $GET_UNIQ_ARGS $SN $CONFIG $BAM"
         run_cmd "$CMD"
     fi
 
     if [ $RUN_NORM ]; then
-        announce "$SN: Running normalization step"
+        write_START "$SN: Running normalization step"
         CMD="bash /BICSEQ2/src/run_norm.sh $ARGS $SN $CONFIG "
         run_cmd "$CMD"
     fi
 }
 
+write_START "$CASE Tumor"
 process_sample $SN_TUMOR $TUMOR_BAM 
+
+write_START "$CASE Normal"
 process_sample $SN_NORMAL $NORMAL_BAM 
 
 if [ $RUN_SEG ]; then
     # Execute segmentation step using tumor/normal as case/control
-    announce "Running segmentation step"
+    write_START "Running segmentation step"
     CMD="bash /BICSEQ2/src/run_segmentation.sh $ARGS -s $CASE_NAME $SN_TUMOR $SN_NORMAL $CONFIG "
     run_cmd "$CMD"
 fi
 
 if [ $RUN_ANN ]; then
-    announce "Running gene annotation step"
+    write_START "Running gene annotation step"
     CMD="bash /BICSEQ2/src/run_annotation.sh $ARGS $CASE_NAME $CONFIG"
     run_cmd "$CMD"
 fi
 
-
+write_SUCCESS

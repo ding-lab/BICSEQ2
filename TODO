@@ -1,8 +1,18 @@
 TODOs for project:
 
-* All files should have author details
-* start with /bin/bash?
-* License
+# project_config management
+
+Consider splitting project_config into two parts:
+* `project_config_host`
+  * Defines all host paths
+  * project name
+  * Expected to vary per analysis project
+  * Visible prior to `docker run`
+* `project_config_container`
+  * defines all container paths
+  * Visible within container
+  * expected to change with BICSEQ2 development
+
 
 # Pipeline improvements
 

@@ -11,7 +11,7 @@
 # Based on https://github.com/ding-lab/importGDC/blob/master/start_step.sh
 
 # Usage:
-#   bash process_cases.sh [options] CASE [CASE2 ...]
+#   bash process_cases.sh -S CASE_LIST -p PROJECT_CONFIG [options] CASE [CASE2 ...]
 # 
 # One or more CASEs required.  If CASE is - then read CASE from STDIN
 #
@@ -34,7 +34,7 @@
 # -j PARALLEL_JOBS: If not MGI mode, specify number of cases to run in parallel.  If not defined, run sequentially, do not use `parallel`
 # -M: run in MGI environment
 # -L LOGD_BASE_PROJECT: Log base dir relative to host.  Logs of parallel / bsub will be LOGD_PROJECT_BASE/CASE
-# -o LOGD_BASE_PROJECT: set project output base root directory relative to container.  Defalt is /data1
+# -o OUTD_BASE_PROJECT: set project output base root directory relative to container.  Defalt is /data1
 #   Case analyses will be in OUTD_PROJECT_BASE/CASE
 
 # Submission modes:
