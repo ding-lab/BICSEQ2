@@ -7,14 +7,16 @@ Notes on generating log files during workflow.
     * START
     * SUCCESS
     * ERROR
-    * it might be reasonalbe to add "COMPLETED" to indicate an end of an iteration of a loop,
-      but not the successful end of the complete workflow.  Not currently used.
+    * COMPLETE
+    
+COMPLETE indicates a partial completion, e.g. an end of an iteration of a loop,
+but not the successful end of the complete workflow.
 
-
-START tag will be written upon start of script, but it can be delayed until after argument parsing
-complete, to allow for e.g. CASE to be added.  In the case of an argument parsing error START will 
-not be written.
+START tag will be written upon start of script, but it can be delayed until
+after argument parsing complete, to allow for e.g. CASE to be added.  In the
+case of an argument parsing error START will not be written.
 
 One script can have multiple START tags, indicating, e.g., looping over cases.
-However, a script must write exactly one SUCCESS tag, indicating successful completion of loop
-Generally expect one (or zero) ERROR tags, but OK if multiple occur
+However, a script must write exactly one SUCCESS tag, indicating successful
+completion of loop Generally expect one (or zero) ERROR tags, but OK if
+multiple occur

@@ -19,8 +19,12 @@
 #     This may be repeated (e.g., -dd or -d -d) to pass the -d argument to called functions instead,
 # -f: force overwrite of existing data, if it exists
 # -j: number of parallel jobs for get_unique step [default 4]
-# -s: step to run [ get_unique, normalization, segmentation, annotation, all ]
+# -s: step to run [ get_unique, normalization, segmentation, annotation, clean, all ]
 # -o OUTD_BASE: set output base root directory.  Defalt is /data1
+# -C CLEAN_OPT: options for `clean` step.  CLEAN_OPT may be one of:
+#   * none: do nothing
+#   * compress: Create .tar.gz for unique_reads and norm directories, then delete directories.  This is the default
+#   * delete: delete unique_reads and norm directories (and their corresponding .tar.gz if they exist)
 
 # Details about BICSEQ2 pipeline: http://compbio.med.harvard.edu/BIC-seq/
 
@@ -76,9 +80,10 @@ ARGS=""
 GET_UNIQ_ARGS=""
 STEP="all"	# this might be expanded to allow comma-separated steps
 OUTD_BASE="/data1"
+CLEAN_OPT="compress"
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":dfj:s:o:" opt; do
+while getopts ":dfj:s:o:C:" opt; do
   case $opt in
     d)
       DRYRUN="d$DRYRUN" # -d is a stack of parameters, each script popping one off until get to -d
@@ -95,6 +100,9 @@ while getopts ":dfj:s:o:" opt; do
     o) 
       OUTD_BASE="$OPTARG"
       >&2 echo Output directory: $OUTD_BASE
+      ;;
+    C) 
+      CLEAN_OPT="$OPTARG"
       ;;
     \?)
       #>&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
@@ -125,13 +133,17 @@ EOF
     exit 1
 fi
 
+if [ $CLEAN_OPT != "none" ] && [ $CLEAN_OPT != "compress" ] && [ $CLEAN_OPT != "delete" ]; then
+    write_ERROR "Unknown CLEAN_OPT = $CLEAN_OPT"
+    exit 1
+fi
+
 CONFIG=$1
 CASE_NAME=$2
 SN_TUMOR=$3
 TUMOR_BAM=$4
 SN_NORMAL=$5
 NORMAL_BAM=$6
-
 
 confirm $CONFIG
 confirm $TUMOR_BAM
@@ -159,6 +171,7 @@ if [ $STEP == "all" ]; then
     RUN_NORM=1
     RUN_SEG=1
     RUN_ANN=1
+    RUN_CLEAN=1
 elif [ $STEP == "get_unique" ]; then 
     RUN_UNIQUE=1
 elif [ $STEP == "normalization" ]; then 
@@ -167,9 +180,11 @@ elif [ $STEP == "segmentation" ]; then
     RUN_SEG=1
 elif [ $STEP == "annotation" ]; then
     RUN_ANN=1
+elif [ $STEP == "clean" ]; then
+    RUN_CLEAN=1
 else
     >&2 echo ERROR: Unknown step $STEP
-    >&2 echo Valid values: get_unique, normalization, segmentation, annotation, all
+    >&2 echo Valid values: get_unique, normalization, segmentation, annotation, clean, all
     exit 1
 fi
 >&2 echo Running step $STEP
@@ -222,6 +237,35 @@ if [ $RUN_ANN ]; then
     write_START "Running gene annotation step"
     CMD="bash /BICSEQ2/src/run_annotation.sh $ARGS $CASE_NAME $CONFIG"
     run_cmd "$CMD"
+fi
+
+# Typical output size:
+# 1.0M    annotation
+# 256K    bsub
+# 1.9G    norm
+# 320K    segmentation
+# 0   tmp
+# 8.2G    unique_reads
+
+# Cleanup step aims to reduce disk usage by either compressing or deleting the unique_reads and norm directories
+if [ $RUN_CLEAN ]; then
+    write_START "Running cleanup step"
+    
+    if [ $CLEAN_OPT == "compress" ]; then
+        # if the .tar.gz already exists, skip compression, so that running this twice does not give an error
+        if [ ! -e $OUTD_BASE/unique_reads.tar.gz ]; then
+            run_cmd "tar -P -zcf $OUTD_BASE/unique_reads.tar.gz $OUTD_BASE/unique_reads"
+            run_cmd "rm -rf $OUTD_BASE/unique_reads "
+        fi
+        if [ ! -e $OUTD_BASE/norm.tar.gz ]; then
+            run_cmd "tar -P -zcf $OUTD_BASE/norm.tar.gz $OUTD_BASE/norm"
+            run_cmd "rm -rf $OUTD_BASE/norm"
+        fi
+    elif [ $CLEAN_OPT == "delete" ]; then
+        run_cmd "rm -rf $OUTD_BASE/unique_reads $OUTD_BASE/unique_reads.tar.gz $OUTD_BASE/norm $OUTD_BASE/norm.tar.gz"
+    else
+        >&2 echo "No cleanup"
+    fi
 fi
 
 write_SUCCESS
