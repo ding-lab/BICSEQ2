@@ -18,6 +18,7 @@
 # Required options:
 # -S CASE_LIST: path to CASE LIST data file
 # -p PROJECT_CONFIG: project configuration file.  Will be mapped to /project_config.sh in container
+# -L LOGD_BASE_PROJECT: Log base dir relative to host.  Logs of parallel / bsub will be LOGD_PROJECT_BASE/CASE
 #
 # Optional options
 # -d: dry run: print commands but do not run
@@ -33,7 +34,6 @@
 # -P DATAMAP: space-separated list of paths which map to /data1, /data2, etc.
 # -j PARALLEL_JOBS: If not MGI mode, specify number of cases to run in parallel.  If not defined, run sequentially, do not use `parallel`
 # -M: run in MGI environment
-# -L LOGD_BASE_PROJECT: Log base dir relative to host.  Logs of parallel / bsub will be LOGD_PROJECT_BASE/CASE
 # -o OUTD_BASE_PROJECT: set project output base root directory relative to container.  Defalt is /data1
 #   Case analyses will be in OUTD_PROJECT_BASE/CASE
 
@@ -222,6 +222,11 @@ fi
 
 if [ -z "$CASES" ]; then
     >&2 echo ERROR: no case names specified
+    exit 1
+fi
+
+if [ -z $LOGD_BASE_PROJECT ]; then
+    >&2 echo ERROR: Log Base Directory \(-L\) not specified
     exit 1
 fi
 

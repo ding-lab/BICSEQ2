@@ -22,7 +22,10 @@ Launched first 5 cases 1/12/19 with,
 Follow first one along here:
     /gscmnt/gc2508/dinglab/mwyczalk/BICSEQ2-dev.tmp/run_cases.LUAD.MGI/11LU013/bsub/1547328929.err
 
-# TODO
 
-Need to implement `evaluate_cases`, which tests various runs for success.
-Question: how will it find log files?  They should probably have a name not based on timestamp; they need not be unique
+# Running
+
+```
+bash B.evaluate_project_cases.sh -f not_started -u | bash A.process_project_cases.sh -
+```
+

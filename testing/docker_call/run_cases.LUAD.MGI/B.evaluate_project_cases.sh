@@ -5,11 +5,10 @@
 #
 # Evaluate status of case processing.  All options passed to src/evaluate_cases.sh
 # Reads host-directory log files and output directories to indicate status of each case.  Status may be one of,
-#   * ready - ready to begin processing, not yet started
-#   * incomplete - processing is being performed
+#   * not_started - ready to begin processing, not yet started
+#   * running - processing is being performed
 #   * complete - processing has completed
 #   * error - processing has completed with an error
-
 
 PROJECT_CONFIG="./project_config.run_cases.LUAD.MGI.sh"
 source $PROJECT_CONFIG
@@ -22,7 +21,6 @@ OUTBASE_H="/gscmnt/gc2508/dinglab/mwyczalk/BICSEQ2-dev.tmp"
 OUTD_H="$OUTBASE_H/$PROJECT"
 
 CASELIST="dat/CaseList.dat"
-DOCKERMAP="dat/Dockermap.dat"
 
 # -M for MGI
 bash $BICSEQ_H/src/evaluate_cases.sh -M -L $OUTD_H -p $PROJECT_CONFIG -S $CASELIST $@

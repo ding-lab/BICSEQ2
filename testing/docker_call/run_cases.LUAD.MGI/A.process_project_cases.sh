@@ -25,11 +25,12 @@ DOCKERMAP="dat/Dockermap.dat"
 
 # this is new, specific to MGI.  Might be moved to process_cases.sh
 # https://github.com/ding-lab/importGDC.CPTAC3
+
 NJOBS=3
 export LSF_GROUP="/mwyczalk/BICSEQ2"
-#bgadd -L $NJOBS $LSF_GROUP  # this is needed only the first time, when group created
-bgmod -L $NJOBS  $LSF_GROUP  # this is to modify number of jobs running
-bjgroup -s $LSF_GROUP        # to see job group stats
+##bgadd -L $NJOBS $LSF_GROUP  # this is needed only the first time, when group created
+#bgmod -L $NJOBS  $LSF_GROUP  # this is to modify number of jobs running
+#bjgroup -s $LSF_GROUP        # to see job group stats.  This is relatively slow
 
 
 # DATAMAP lists directories mapped to /data1, /data2, etc.
