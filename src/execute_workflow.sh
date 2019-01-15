@@ -253,11 +253,11 @@ if [ $RUN_CLEAN ]; then
     
     if [ $CLEAN_OPT == "compress" ]; then
         # if the .tar.gz already exists, skip compression, so that running this twice does not give an error
-        if [ ! -e $OUTD_BASE/unique_reads.tar.gz ]; then
+        if [ -d $OUTD_BASE/unique_reads ] && [ ! -e $OUTD_BASE/unique_reads.tar.gz ]; then
             run_cmd "tar -P -zcf $OUTD_BASE/unique_reads.tar.gz $OUTD_BASE/unique_reads"
             run_cmd "rm -rf $OUTD_BASE/unique_reads "
         fi
-        if [ ! -e $OUTD_BASE/norm.tar.gz ]; then
+        if [ -d $OUTD_BASE/norm ] && [ ! -e $OUTD_BASE/norm.tar.gz ]; then
             run_cmd "tar -P -zcf $OUTD_BASE/norm.tar.gz $OUTD_BASE/norm"
             run_cmd "rm -rf $OUTD_BASE/norm"
         fi

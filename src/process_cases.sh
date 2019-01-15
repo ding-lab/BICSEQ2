@@ -28,8 +28,7 @@
 # -g LSF_GROUP: LSF group to use starting job (MGI specific)
 #       details: https://confluence.ris.wustl.edu/pages/viewpage.action?pageId=27592450
 #       See also https://github.com/ding-lab/importGDC.CPTAC3
-# -s: step to run [ get_unique, normalization, segmentation, annotation, all ]
-#     currently unimplemented, value is 'all'
+# -s: step to run [ get_unique, normalization, segmentation, annotation, clean, all ].  Default is all
 # -m DOCKERMAP : path to docker map file.  Contains 1 or more lines like PATH_H:PATH_C which define additional volume mapping
 # -P DATAMAP: space-separated list of paths which map to /data1, /data2, etc.
 # -j PARALLEL_JOBS: If not MGI mode, specify number of cases to run in parallel.  If not defined, run sequentially, do not use `parallel`
@@ -62,6 +61,7 @@ SCRIPT_PATH=$(dirname $0)
 # Defaults
 OUTD_PROJECT_BASE="/data1"
 RUN_ARGS=""  # These are arguments passed to start_docker.sh
+STEP="all"
 
 while getopts ":dfg:S:p:s:m:P:j:1ML:o:" opt; do
   case $opt in
@@ -169,7 +169,7 @@ function get_launch_cmd {
     PATH_B=$(echo "$CASEDATA" | cut -f 6)
 
     # define output directory for this case and propagate DRYRUN workflow arguments
-    ARGS_CASE="-o $OUTD_PROJECT_BASE/$CASE $DRYARG_WORKFLOW"
+    ARGS_CASE="-o $OUTD_PROJECT_BASE/$CASE $DRYARG_WORKFLOW -s $STEP"
 
     # This is the command which will be executed for each CASE in container
     CMD_HOST="bash /BICSEQ2/src/execute_workflow.sh $ARGS_CASE $PROJECT_CONFIG_C $CASE $SN_A $PATH_A $SN_B $PATH_B"
