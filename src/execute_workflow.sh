@@ -19,12 +19,15 @@
 #     This may be repeated (e.g., -dd or -d -d) to pass the -d argument to called functions instead,
 # -f: force overwrite of existing data, if it exists
 # -j: number of parallel jobs for get_unique step [default 4]
-# -s: step to run [ get_unique, normalization, segmentation, annotation, clean, all ]
+# -s: step to run [ get_unique, normalization, segmentation, annotation, clean, reset, all ]
 # -o OUTD_BASE: set output base root directory.  Defalt is /data1
 # -C CLEAN_OPT: options for `clean` step.  CLEAN_OPT may be one of:
 #   * none: do nothing
 #   * compress: Create .tar.gz for unique_reads and norm directories, then delete directories.  This is the default
 #   * delete: delete unique_reads and norm directories (and their corresponding .tar.gz if they exist)
+
+# The reset step is a special step which deletes all log and result data.  It is dangerous because data loss will occur, 
+# but useful way to reset output directory to state where another run can cleanly take place.  
 
 # Details about BICSEQ2 pipeline: http://compbio.med.harvard.edu/BIC-seq/
 
@@ -165,7 +168,7 @@ ARGS="$ARGS $DRYARG "
 # propagate output directory
 ARGS="$ARGS -o $OUTD_BASE"
 
-# -s: step to run [ get_unique, normalization, segmentation, annotation, all ]
+# -s: step to run [ get_unique, normalization, segmentation, annotation, clean, reset, all ]
 if [ $STEP == "all" ]; then 
     RUN_UNIQUE=1
     RUN_NORM=1
@@ -182,6 +185,8 @@ elif [ $STEP == "annotation" ]; then
     RUN_ANN=1
 elif [ $STEP == "clean" ]; then
     RUN_CLEAN=1
+elif [ $STEP == "reset" ]; then
+    RUN_RESET=1
 else
     >&2 echo ERROR: Unknown step $STEP
     >&2 echo Valid values: get_unique, normalization, segmentation, annotation, clean, all
@@ -220,11 +225,19 @@ function process_sample {
     fi
 }
 
-write_START "$CASE Tumor"
-process_sample $SN_TUMOR $TUMOR_BAM 
+if [ $RUN_RESET ]; then
+    write_START "Running reset step"
+    run_cmd "rm -rf $OUTD_BASE/* "
+    exit 
+fi
 
-write_START "$CASE Normal"
-process_sample $SN_NORMAL $NORMAL_BAM 
+if [ $RUN_UNIQUE ] || [ $RUN_NORM ]; then
+    write_START "$CASE Tumor"
+    process_sample $SN_TUMOR $TUMOR_BAM 
+
+    write_START "$CASE Normal"
+    process_sample $SN_NORMAL $NORMAL_BAM 
+fi
 
 if [ $RUN_SEG ]; then
     # Execute segmentation step using tumor/normal as case/control
