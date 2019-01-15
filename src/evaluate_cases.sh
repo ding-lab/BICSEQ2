@@ -129,8 +129,8 @@ function test_import_success {
 
     # Logic of testing
     # If log file does not exist: status = not_started
-    # if log file contains "ERROR": status = error
     # if log file contains "SUCCESS": status = complete
+    # if log file contains "ERROR": status = error
     # otherwise status = running
     ERROR_STRING="BS2:ERROR"
     SUCCESS_STRING="BS2:SUCCESS"
@@ -140,13 +140,26 @@ function test_import_success {
         return
     fi
 
+    if fgrep -Fq "$SUCCESS_STRING" $LOG_FN; then
+        echo complete
+        return
+    fi
+
     if fgrep -Fq "$ERROR_STRING" $LOG_FN; then
         echo error
         return
     fi
 
-    if fgrep -Fq "$SUCCESS_STRING" $LOG_FN; then
-        echo complete
+    # Ad hoc error conditions:
+    # Also check for error conditions which do not trigger our error status, such as out of disk errors
+    # Assume that if see the string "error" (case insensitive), we have an error condition
+    if fgrep -Fiq "error" $LOG_FN; then
+        echo error
+        return
+    fi
+
+    if fgrep -Fiq "disk quota exceeded" $LOG_FN; then
+        echo error
         return
     fi
 
