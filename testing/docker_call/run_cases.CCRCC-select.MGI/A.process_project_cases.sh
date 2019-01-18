@@ -27,7 +27,7 @@ DOCKERMAP="dat/Dockermap.dat"
 # https://github.com/ding-lab/importGDC.CPTAC3
 
 NJOBS=3
-export LSF_GROUP="/mwyczalk/BICSEQ2"
+export LSF_GROUP="/mwyczalk/BICSEQ2.2"
 ##bgadd -L $NJOBS $LSF_GROUP  # this is needed only the first time, when group created
 #bgmod -L $NJOBS  $LSF_GROUP  # this is to modify number of jobs running
 #bjgroup -s $LSF_GROUP        # to see job group stats.  This is relatively slow

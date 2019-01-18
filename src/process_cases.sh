@@ -28,7 +28,7 @@
 # -g LSF_GROUP: LSF group to use starting job (MGI specific)
 #       details: https://confluence.ris.wustl.edu/pages/viewpage.action?pageId=27592450
 #       See also https://github.com/ding-lab/importGDC.CPTAC3
-# -s: step to run [ get_unique, normalization, segmentation, annotation, clean, all ].  Default is all
+# -s: step to run [ get_unique, normalization, segmentation, annotation, clean, reset, all ].  Default is all
 # -m DOCKERMAP : path to docker map file.  Contains 1 or more lines like PATH_H:PATH_C which define additional volume mapping
 # -P DATAMAP: space-separated list of paths which map to /data1, /data2, etc.
 # -j PARALLEL_JOBS: If not MGI mode, specify number of cases to run in parallel.  If not defined, run sequentially, do not use `parallel`
@@ -212,8 +212,8 @@ else    # DRYRUN has multiple d's: pop two d off the argument and pass it to wor
 fi
 
 # this allows us to get CASEs in one of two ways:
-# 1: start_step.sh ... CASE1 CASE2 CASE3
-# 2: cat CASES.dat | start_step.sh ... -
+# 1: process_cases.sh ... CASE1 CASE2 CASE3
+# 2: cat CASES.dat | process_cases.sh ... -
 if [ "$1" == "-" ]; then
     CASES=$(cat - )
 else
@@ -238,17 +238,23 @@ RUN_ARGS="$RUN_ARGS -H $PROJECT_CONFIG -C $PROJECT_CONFIG_C"
 for CASE in $CASES; do
     >&2 echo Processing CASE $CASE
 
-    CMD=$(get_launch_cmd $CASE)
-    test_exit_status
+    # Treat `reset` step separately.  While this could be submitted to run_docker, this it generate warnings
+    # because log cannot be written after output directory deleted; also, this will run more quickly on the host.
+    if [ "$STEP" == "reset" ]; then
+        CMD="rm -rf $LOGD_BASE_PROJECT/$CASE/*"
+    else
+        CMD=$(get_launch_cmd $CASE)
+        test_exit_status
 
-    # OUTD_PROJECT_BASE_HOST
-    JOBLOG="$LOGD_BASE_PROJECT/$CASE/execute_workflow.$CASE.log"
-    TMPD="$LOGD_BASE_PROJECT/$CASE/tmp"
-    mkdir -p $TMPD
-    test_exit_status
+        # OUTD_PROJECT_BASE_HOST
+        JOBLOG="$LOGD_BASE_PROJECT/$CASE/execute_workflow.$CASE.log"
+        TMPD="$LOGD_BASE_PROJECT/$CASE/tmp"
+        mkdir -p $TMPD
+        test_exit_status
 
-    if [ $PARALLEL_JOBS ]; then
-        CMD="parallel --semaphore -j$PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
+        if [ $PARALLEL_JOBS ]; then
+            CMD="parallel --semaphore -j$PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
+        fi
     fi
 
     if [ "$DRYRUN" == "d" ]; then

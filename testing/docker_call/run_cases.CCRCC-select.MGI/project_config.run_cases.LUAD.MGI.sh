@@ -15,7 +15,7 @@
 IMPORT_SEQ=0
 
 # It doesnt seem like PROJECT name should be here.  Aim for a project_config that can be maximally reused
-PROJECT="run_cases.LUAD.MGI"
+PROJECT="run_cases.CCRCC.MGI"
 #CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
 CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
 

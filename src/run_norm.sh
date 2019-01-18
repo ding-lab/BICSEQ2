@@ -112,13 +112,15 @@ mkdir -p $TMPD
 
 OUTPARS=$OUTD/${SAMPLE_NAME}.out.txt
 
+# Check to make sure file exists and its size is not zero
 function confirm {
     FN=$1
-    if [ ! -e $FN ]; then
+
+    if [ ! -s $FN ]; then
         if [ $WARN ]; then
-            >&2 echo Warning: $FN does not exist
+            >&2 echo Warning: $FN does not exist or is empty
         else
-            >&2 echo ERROR: $FN does not exist
+            >&2 echo ERROR: $FN does not exist or is empty
             exit 1
         fi
     fi

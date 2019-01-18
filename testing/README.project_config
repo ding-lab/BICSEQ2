@@ -15,3 +15,6 @@ Output base directory is set in script via argument rather than defined in proje
 Renamed to OUTD_BASE.  Reference implementation:
 -> /docker_call/run_cases.LUAD.MGI/project_config.run_cases.LUAD.MGI.sh
 
+
+* 1/17/19
+Change "PDF" -> "PNG"

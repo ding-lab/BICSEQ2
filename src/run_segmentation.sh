@@ -28,7 +28,7 @@
 #   * Iterates over CHRLIST
 # * All output of this step written to $OUTD:
 #   * segmentation configuration file {CASE_NAME}.seg-config.txt
-#   * PDF output (CASE-seg.pdf)
+#   * PNG output (CASE-seg.png)
 #   * CNV file  (CASE.cnv)
 #   * tmp directory $OUTD/tmp
 
@@ -176,10 +176,10 @@ else
     confirm $SEG_CONFIG
 fi
 
-PDF=$(printf $SEG_PDF $CASE_NAME)
+PNG=$(printf $SEG_PNG $CASE_NAME)
 CNV=$(printf $SEG_CNV $CASE_NAME)
 
-CMD="perl $BICSEQ_SEG --detail --control --noscale --lambda=$LAMBDA --tmp=$TMPD --fig $PDF $SEG_CONFIG $CNV"
+CMD="perl $BICSEQ_SEG --detail --control --noscale --lambda=$LAMBDA --tmp=$TMPD --fig $PNG $SEG_CONFIG $CNV"
 
 if [ $DRYRUN ]; then
     >&2 echo Dry run: $CMD
