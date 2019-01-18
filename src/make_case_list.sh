@@ -11,7 +11,6 @@
 #     with each called function called in dry run mode if it gets one -d, and popping off one and passing rest otherwise
 # -b BAMMAP: path to BamMap data file.  Required
 #     Format defined here: https://github.com/ding-lab/importGDC/blob/master/make_bam_map.sh
-# -D DIS: filter BAMMAP by disease.  Required
 # -r REF : filter BAMMAP by reference.  Default: hg38
 # -e ES : filter BAMMAP by experimental strategy. Default: WGS
 # -A ST_A: sample type of sample A.  Default: tumor
@@ -45,7 +44,7 @@ STA="tumor"
 STB="blood_normal"
 HEADER=1
 
-while getopts ":db:r:e:A:B:m:D:H" opt; do
+while getopts ":db:r:e:A:B:m:H" opt; do
   case $opt in
     d)  
       DRYRUN=1
@@ -68,9 +67,6 @@ while getopts ":db:r:e:A:B:m:D:H" opt; do
     m) 
       DOCKERMAP="$OPTARG"
       ;;
-    D) 
-      DIS="$OPTARG"
-      ;;
     H)  
       HEADER=0
       ;;
@@ -86,10 +82,6 @@ while getopts ":db:r:e:A:B:m:D:H" opt; do
 done
 shift $((OPTIND-1))
 
-if [ -z $DIS ]; then
-    >&2 echo ERROR: Disease not defined \(-D\)
-    exit 1
-fi
 if [ -z $BAMMAP ]; then
     >&2 echo ERROR: BamMap file not defined \(-b\)
     exit 1
@@ -180,13 +172,13 @@ do
     #    10  UUID
     #    11  system
 
-    LINE_A=$(awk -v c=$CASE -v ref=$REF -v es=$ES -v st=$STA -v dis=$DIS 'BEGIN{FS="\t";OFS="\t"}{if ($2 == c && $3 == dis && $4 == es && $5 == st && $9 == ref) print}' $BAMMAP)
+    LINE_A=$(awk -v c=$CASE -v ref=$REF -v es=$ES -v st=$STA 'BEGIN{FS="\t";OFS="\t"}{if ($2 == c && $4 == es && $5 == st && $9 == ref) print}' $BAMMAP)
 
     if [ -z "$LINE_A" ]; then
-        >&2 echo ERROR: $DIS $REF $CASE $ES $STA sample not found in $BAMMAP
+        >&2 echo ERROR: $REF $CASE $ES $STA sample not found in $BAMMAP
         exit 1
     elif [ $(echo "$LINE_A" | wc -l) != "1" ]; then
-        >&2 echo ERROR: $DIS $REF $CASE $ES $STA sample has multiple matches in $BAMMAP
+        >&2 echo ERROR: $REF $CASE $ES $STA sample has multiple matches in $BAMMAP
         exit 1
     fi    
 
@@ -194,12 +186,12 @@ do
     PATH_H_A=$(echo "$LINE_A" | cut -f 6)
     UUID_A=$(echo "$LINE_A" | cut -f 10)
 
-    LINE_B=$(awk -v c=$CASE -v ref=$REF -v es=$ES -v st=$STB -v dis=$DIS 'BEGIN{FS="\t";OFS="\t"}{if ($2 == c && $3 == dis && $4 == es && $5 == st && $9 == ref) print}' $BAMMAP)
+    LINE_B=$(awk -v c=$CASE -v ref=$REF -v es=$ES -v st=$STB 'BEGIN{FS="\t";OFS="\t"}{if ($2 == c && $4 == es && $5 == st && $9 == ref) print}' $BAMMAP)
     if [ -z "$LINE_B" ]; then
-        >&2 echo ERROR: $DIS $REF $CASE $ES $STB sample not found in $BAMMAP
+        >&2 echo ERROR: $REF $CASE $ES $STB sample not found in $BAMMAP
         exit 1
     elif [ $(echo $LINE_B | wc -l) != "1" ]; then
-        >&2 echo ERROR: $DIS $REF $CASE $ES $STB sample has multiple matches in $BAMMAP
+        >&2 echo ERROR: $REF $CASE $ES $STB sample has multiple matches in $BAMMAP
         exit 1
     fi    
     
