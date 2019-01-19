@@ -225,10 +225,13 @@ function process_sample {
     fi
 }
 
+mkdir -p $OUTD_BASE
+test_exit_status
+
 if [ $RUN_RESET ]; then
     write_START "Running reset step"
     run_cmd "rm -rf $OUTD_BASE/* "
-    exit 
+    exit 0  # successful completion
 fi
 
 if [ $RUN_UNIQUE ] || [ $RUN_NORM ]; then

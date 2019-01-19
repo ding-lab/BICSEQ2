@@ -178,8 +178,9 @@ do
         >&2 echo ERROR: $REF $CASE $ES $STA sample not found in $BAMMAP
         exit 1
     elif [ $(echo "$LINE_A" | wc -l) != "1" ]; then
-        >&2 echo ERROR: $REF $CASE $ES $STA sample has multiple matches in $BAMMAP
-        exit 1
+        >&2 echo WARNING: $REF $CASE $ES $STA sample has multiple matches in $BAMMAP
+        >&2 echo Using the first one
+        LINE_A=$(echo "$LINE_A" | head -n 1)
     fi    
 
     SN_A=$(echo "$LINE_A" | cut -f 1)
@@ -191,8 +192,9 @@ do
         >&2 echo ERROR: $REF $CASE $ES $STB sample not found in $BAMMAP
         exit 1
     elif [ $(echo $LINE_B | wc -l) != "1" ]; then
-        >&2 echo ERROR: $REF $CASE $ES $STB sample has multiple matches in $BAMMAP
-        exit 1
+        >&2 echo WARNING: $REF $CASE $ES $STB sample has multiple matches in $BAMMAP
+        >&2 echo Using the first one
+        LINE_B=$(echo "$LINE_B" | head -n 1)
     fi    
     
     SN_B=$(echo "$LINE_B" | cut -f 1)

@@ -18,22 +18,24 @@
 # Required options:
 # -S CASE_LIST: path to CASE LIST data file
 # -p PROJECT_CONFIG: project configuration file.  Will be mapped to /project_config.sh in container
-# -L LOGD_BASE_PROJECT: Log base dir relative to host.  Logs of parallel / bsub will be LOGD_PROJECT_BASE/CASE
+# -L LOGD_PROJECT_BASE: Log base dir relative to host.  Logs of parallel / bsub will be LOGD_PROJECT_BASE/CASE
 #
 # Optional options
 # -d: dry run: print commands but do not run
 #     This may be repeated (e.g., -dd or -d -d) to pass the -d argument to called functions instead,
 # -1 : stop after one case processed.
 # -f: force overwrite of existing data, if it exists
-# -g LSF_GROUP: LSF group to use starting job (MGI specific)
-#       details: https://confluence.ris.wustl.edu/pages/viewpage.action?pageId=27592450
-#       See also https://github.com/ding-lab/importGDC.CPTAC3
 # -s: step to run [ get_unique, normalization, segmentation, annotation, clean, reset, all ].  Default is all
 # -m DOCKERMAP : path to docker map file.  Contains 1 or more lines like PATH_H:PATH_C which define additional volume mapping
 # -P DATAMAP: space-separated list of paths which map to /data1, /data2, etc.
-# -j PARALLEL_JOBS: If not MGI mode, specify number of cases to run in parallel.  If not defined, run sequentially, do not use `parallel`
 # -M: run in MGI environment
-# -o OUTD_BASE_PROJECT: set project output base root directory relative to container.  Defalt is /data1
+# -J PARALLEL_CASES: Specify number of cases to run in parallel.  
+#    * If not MGI environment, run this many cases at a time using `parallel`.  If not defined, run cases sequentially
+#    * If in MGI environment, and LSF_GROUP defined, run this many cases at a time; otherwise, run all jobs simultaneously
+# -g LSF_GROUP: LSF group to use starting job (MGI specific)
+#       details: https://confluence.ris.wustl.edu/pages/viewpage.action?pageId=27592450
+#       See also https://github.com/ding-lab/importGDC.CPTAC3
+# -o OUTD_PROJECT_BASE: set project output base root directory relative to container.  Defalt is /data1
 #   Case analyses will be in OUTD_PROJECT_BASE/CASE
 
 # Submission modes:
@@ -63,7 +65,7 @@ OUTD_PROJECT_BASE="/data1"
 RUN_ARGS=""  # These are arguments passed to start_docker.sh
 STEP="all"
 
-while getopts ":dfg:S:p:s:m:P:j:1ML:o:" opt; do
+while getopts ":dfg:S:p:s:m:P:J:1ML:o:" opt; do
   case $opt in
     d)  # -d is a stack of parameters, each script popping one off until get to -d
       DRYRUN="d$DRYRUN"
@@ -72,13 +74,14 @@ while getopts ":dfg:S:p:s:m:P:j:1ML:o:" opt; do
       FORCE_OVERWRITE=1
       ;;
     g) # define LSF_GROUP
-      RUN_ARGS="$RUN_ARGS -g $OPTARG"
+      LSF_GROUP="$OPTARG"
+      RUN_ARGS="$RUN_ARGS -g $LSF_GROUP"
       ;;
     S) 
       CASELIST=$OPTARG
       >&2 echo "Case List: $CASELIST" 
       ;;
-    p) # define LSF_GROUP
+    p) 
       PROJECT_CONFIG="$OPTARG"
       ;;
     s) 
@@ -90,14 +93,14 @@ while getopts ":dfg:S:p:s:m:P:j:1ML:o:" opt; do
     P)  
       DATAMAP="$OPTARG"
       ;;
-    j) 
-      PARALLEL_JOBS=$OPTARG
+    J) 
+      PARALLEL_CASES=$OPTARG
       # See get_unique.sh for details about parallel
       NOW=$(date)
       MYID=$(date +%Y%m%d%H%M%S)
       ;;
     L)  
-      LOGD_BASE_PROJECT=$OPTARG
+      LOGD_PROJECT_BASE=$OPTARG
       ;;
     1) 
       >&2 echo "Will stop after one case" 
@@ -127,8 +130,8 @@ shift $((OPTIND-1))
 
 function confirm {
     FN=$1
-    if [ ! -e $FN ]; then
-        >&2 echo ERROR: $FN does not exist
+    if [ ! -s $FN ]; then
+        >&2 echo ERROR: $FN does not exist or is empty
         exit 1
     fi
 }
@@ -175,7 +178,7 @@ function get_launch_cmd {
     CMD_HOST="bash /BICSEQ2/src/execute_workflow.sh $ARGS_CASE $PROJECT_CONFIG_C $CASE $SN_A $PATH_A $SN_B $PATH_B"
 
     # Define log path for this case, add dry run policy 
-    RUN_ARGS_CASE="$RUN_ARGS $DRYARG_DOCKER -L $LOGD_BASE_PROJECT/$CASE"
+    RUN_ARGS_CASE="$RUN_ARGS $DRYARG_DOCKER -L $LOGD_PROJECT_BASE/$CASE"
 
     CMD="bash $SCRIPT_PATH/start_docker.sh $RUN_ARGS_CASE -c \"$CMD_HOST\" $DATAMAP "
 
@@ -192,6 +195,10 @@ if [ -z $PROJECT_CONFIG ]; then
 fi
 confirm $CASELIST
 confirm $PROJECT_CONFIG
+
+>&2 echo Creating output directory $LOGD_PROJECT_BASE
+mkdir -p $LOGD_PROJECT_BASE
+test_exit_status
 
 # DRYRUN implementation here takes into account that we're calling `start_docker.sh execute_workflow.sh`
 # We want successive 'd' in DRYRUN to propagate to called functions as DRYARG_XXX
@@ -225,10 +232,35 @@ if [ -z "$CASES" ]; then
     exit 1
 fi
 
-if [ -z $LOGD_BASE_PROJECT ]; then
+if [ -z $LOGD_PROJECT_BASE ]; then
     >&2 echo ERROR: Log Base Directory \(-L\) not specified
     exit 1
 fi
+
+# set up LSF_GROUPS if appropriate
+# If user defines LSF_GROUP in MGI environment, check to make sure this group exists,
+# and exit with an error if it does not.  If PARALLEL_CASES is defined, set this as the
+# number of jobs which can run at a time
+if [ "$MGI" == 1 ] && [ $LSF_GROUP ] ; then
+
+# test if LSF Group is valid.  
+    >&2 echo Evaluating LSF Group $LSF_GROUP
+    LSF_OUT=$( bjgroup -s $LSF_GROUP )
+    if [ -z $LSF_OUT ]; then
+        >&2 echo ERROR: LSF Group $LSF_GROUP does not exist.
+        >&2 echo Please create with,
+        >&2 echo "   bgadd /mwyczalk/test_group"
+        exit 1
+    fi
+    if [ $PARALLEL_CASES ]; then
+        >&2 echo Setting job limit of $PARALLEL_CASES for LSF Group $LSF_GROUP
+        bgmod -L $PARALLEL_CASES $LSF_GROUP
+        LSF_OUT=$( bjgroup -s $LSF_GROUP )
+    fi
+    >&2 echo $LSF_OUT
+    >&2 echo Job limit may be modified with, \`bgmod -L NUMBER_JOBS $LSF_GROUP \`
+fi
+
 
 # We will map PROJECT_CONFIG on host to /project_config.sh in container
 PROJECT_CONFIG_C="/project_config.sh"
@@ -241,19 +273,19 @@ for CASE in $CASES; do
     # Treat `reset` step separately.  While this could be submitted to run_docker, this it generate warnings
     # because log cannot be written after output directory deleted; also, this will run more quickly on the host.
     if [ "$STEP" == "reset" ]; then
-        CMD="rm -rf $LOGD_BASE_PROJECT/$CASE/*"
+        CMD="rm -rf $LOGD_PROJECT_BASE/$CASE/*"
     else
         CMD=$(get_launch_cmd $CASE)
         test_exit_status
 
         # OUTD_PROJECT_BASE_HOST
-        JOBLOG="$LOGD_BASE_PROJECT/$CASE/execute_workflow.$CASE.log"
-        TMPD="$LOGD_BASE_PROJECT/$CASE/tmp"
+        JOBLOG="$LOGD_PROJECT_BASE/$CASE/execute_workflow.$CASE.log"
+        TMPD="$LOGD_PROJECT_BASE/$CASE/tmp"
         mkdir -p $TMPD
         test_exit_status
 
-        if [ $PARALLEL_JOBS ]; then
-            CMD="parallel --semaphore -j$PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
+        if [ $PARALLEL_CASES ]; then
+            CMD="parallel --semaphore -j$PARALLEL_CASES --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
         fi
     fi
 
@@ -272,7 +304,7 @@ for CASE in $CASES; do
 done
 
 # this will wait until all jobs completed
-if [ $PARALLEL_JOBS ] && [ ! $DRYRUN ]; then
+if [ $PARALLEL_CASES ] && [ ! $DRYRUN ]; then
     parallel --semaphore --wait --id $MYID
     test_exit_status
 fi
