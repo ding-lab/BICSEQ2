@@ -13,7 +13,6 @@ BICSEQ_H="/home/mwyczalk_test/Projects/BICSEQ2"
 OUTBASE_H="/diskmnt/Datasets/BICSEQ2-dev.tmp"
 OUTD_H="$OUTBASE_H/$PROJECT"
 
-PARALLEL_CASES=5
 
 # Define directories to be mapped to /data2, etc.  If more than DATA4, adjust call to process_cases.sh accordingly
 # data2: chrom reference (./hg38) and mappability

@@ -18,15 +18,23 @@ Reads in BamMap and a list of case names.
 
 # Testing
 
-Launched first 5 cases 1/12/19 with,
-    head -n 5 dat/case_names.dat | bash A.process_project_cases.sh -
+Good idea to test everything prior to run.  Can do `dry run` to print out commands rather than executing them.  The
+dry run argument -d can be repeated to get down to scripts which are called.  the -1 argument will exit after one
+case is processed.
 
-Follow first one along here:
-    /gscmnt/gc2508/dinglab/mwyczalk/BICSEQ2-dev.tmp/run_cases.LUAD.MGI/11LU013/bsub/1547328929.err
+```
+bash A.process_project_cases.sh -d1 - < dat/case_names.dat
+```
 
 
 # Running
 
+To launch five cases:
+```
+    head -n 5 dat/case_names.dat | bash A.process_project_cases.sh -
+```
+
+Alternatively, use `B` to find cases to run
 ```
 bash B.evaluate_project_cases.sh -f not_started -u | bash A.process_project_cases.sh -
 ```

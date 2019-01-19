@@ -14,8 +14,8 @@
 # Be careful about inadvertant overwriting of data
 IMPORT_SEQ=0
 
-#CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
-CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
+CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
+#CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
 
 # make perl on MGI be quiet
 LANG="C"

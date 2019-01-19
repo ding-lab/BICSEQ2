@@ -23,9 +23,7 @@ if [ $IS_MGI == 1 ]; then
 fi
 
 # If PARALLEL_CASES is not defined, on non-MGI run jobs sequentially
-if [ ! -z $PARALLEL_CASES ]; then
-    PARGS="-J $PARALLEL_CASES"
-fi
+# PARALLEL_CASES=1; PARGS="-J $PARALLEL_CASES"
 
 bash $BICSEQ_H/src/process_cases.sh $MGI_ARGS $PARGS -L $OUTD_H -p $PROJECT_CONFIG -S $CASELIST -m $DOCKERMAP -P "$DATAMAP" $@
 
