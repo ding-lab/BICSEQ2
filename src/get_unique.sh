@@ -183,7 +183,7 @@ function process_BAM_parallel {
             fi
         fi
 
-        LOGD="$OUTD/logs"
+        LOGD="$OUTD/log_$CHR"
         mkdir -p $LOGD
         test_exit_status
 
