@@ -183,13 +183,9 @@ function process_BAM_parallel {
             fi
         fi
 
-        LOGD="$OUTD/log_$CHR"
-        mkdir -p $LOGD
-        test_exit_status
-
         JOBLOG="$LOGD/$SAMPLE_NAME.$CHR.get_uniq.log"
         CMD="samtools view $BAM $CHR | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
-        CMDP="parallel --semaphore -j$PARALLEL_JOBS --id $MYID --joblog $JOBLOG --results $LOGD --tmpdir $TMPD \"$CMD\" "
+        CMDP="parallel --semaphore -j$PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
         >&2 echo Launching $CHR
         if [ $DRYRUN ]; then
             >&2 echo Dryrun: $CMDP

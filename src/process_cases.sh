@@ -308,7 +308,6 @@ for CASE in $CASES; do
         test_exit_status
 
         LOGD="$LOGD_PROJECT_BASE/$CASE/log"
-        JOBLOG="$LOGD/process_cases.$CASE.log"
         mkdir -p $LOGD
         test_exit_status
         TMPD="$LOGD_PROJECT_BASE/$CASE/tmp"
@@ -316,8 +315,9 @@ for CASE in $CASES; do
         test_exit_status
 
         if [ $PARALLEL_MODE ]; then
+            JOBLOG="$LOGD/process_cases.${CASE}.log"
             CMD=$(echo "$CMD" | sed 's/"/\\"/g' )   # This will escape the quotes in $CMD 
-            CMD="parallel --semaphore -j$PARALLEL_CASES --id $MYID --joblog $JOBLOG --results $LOGD --tmpdir $TMPD \"$CMD\" "
+            CMD="parallel --semaphore -j$PARALLEL_CASES --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
         fi
     fi
 

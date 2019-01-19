@@ -8,7 +8,7 @@
 # Usage: start_docker.sh [options] [data_path_1 data_path_2 ...]
 #
 # -M: run in MGI environment
-# -L LOGD_H: Log directory on host.  MGI logs written to $LOGD_H/bsub/*.[err|out]
+# -L LOGD_H: Log directory on host.  Logs are written to $LOGD_H/log/*.[err|out]
 # -d: dry run.  print out docker statement but do not execute
 # -I DOCKER_IMAGE: Specify docker image.  Default: mwyczalkowski/bicseq2:latest
 # -c CMD: run given command.  default: bash
@@ -180,12 +180,12 @@ if [ $INTERACTIVE == 1 ]; then
 fi
 
 if [ $LOGD_H ]; then
-    mkdir -p $LOGD_H/bsub
+    mkdir -p $LOGD_H/log
     TS=$(date +%s)
-    ERRLOG="$LOGD_H/bsub/${TS}.err"
-    OUTLOG="$LOGD_H/bsub/${TS}.out"
+    ERRLOG="$LOGD_H/log/${TS}.err"
+    OUTLOG="$LOGD_H/log/${TS}.out"
     LOGS="-e $ERRLOG -o $OUTLOG"
-    >&2 echo Writing bsub logs to :
+    >&2 echo Writing logs to :
     >&2 echo "   " $OUTLOG
     >&2 echo "   " $ERRLOG
 fi
@@ -208,6 +208,17 @@ CMD=$1
 
 if [ $INTERACTIVE == 1 ]; then
     ARGS="-it"
+fi
+
+if [ $LOGD_H ]; then
+    mkdir -p $LOGD_H/log
+    TS=$(date +%s)
+    ERRLOG="$LOGD_H/log/${TS}.err"
+    OUTLOG="$LOGD_H/log/${TS}.out"
+    >&2 echo Writing logs to :
+    >&2 echo "   " $OUTLOG
+    >&2 echo "   " $ERRLOG
+    CMD="$CMD 1>$OUTLOG 2>$ERRLOG"
 fi
 
 DCMD="docker run $ENVARGS $DATMAP $ARGS $DOCKER_IMAGE $CMD"

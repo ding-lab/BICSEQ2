@@ -105,7 +105,7 @@ fi
 # write a warning.  If no file exists, return ""
 function get_MGI_log {
     CASE=$1
-    LOGD="$LOGD_BASE_PROJECT/$CASE/bsub"
+    LOGD="$LOGD_BASE_PROJECT/$CASE/log"
 
     # Count number of matching log files.  
     LOGS=$(ls -1t $LOGD/*.err 2>/dev/null)
