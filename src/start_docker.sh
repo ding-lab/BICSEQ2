@@ -24,11 +24,6 @@
 # See also https://confluence.gsc.wustl.edu/pages/viewpage.action?pageId=27592450
 # 
 
-# TIPS:
-# * May want to do `git pull origin maw-dev` in /BICSEQ2
-# * To start another terminal in running container, first get name of running container with `docker ps`,
-#   then start bash in it with `docker exec -it <container_name> bash`
-
 SCRIPT=$(basename $0)
 
 DOCKER_IMAGE="mwyczalkowski/bicseq2:latest"
