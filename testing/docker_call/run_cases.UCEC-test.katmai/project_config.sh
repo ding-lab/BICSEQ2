@@ -9,13 +9,8 @@
 #       /diskmnt/Projects/CPTAC3CNV/gatk4wxscnv/inputs/gencode.v29.annotation.hg38.p12.protein_coding.bed
 
 
-# if $IMPORT_SEQ is 1, use external (preprocessed) SEQ file, otherwise
-# use directory as defined by workflow.  This is to simplify testing and restarts
-# Be careful about inadvertant overwriting of data
-IMPORT_SEQ=0
-
-CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
-#CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
+#CHRLIST="/BICSEQ2/testing/test_data/chromosomes.18-20.dat"
+CHRLIST="/BICSEQ2/testing/test_data/chromosomes.dat"
 
 # make perl on MGI be quiet
 LANG="C"
@@ -35,7 +30,7 @@ REF_CHR="/data2/hg38"
 READ_LENGTH=150
 
 # This is used in prep_gene_annotation.sh and run_annotation.sh
-GENE_BED="/data4/gencode.v29.annotation.hg38.p12.bed"
+GENE_BED="/data3/gencode.v29.annotation.hg38.p12.bed"
 
 SRCD="/BICSEQ2/src"	# scripts directory
 
@@ -48,16 +43,8 @@ MAPD="/data2"
 ## All output directories are rooted in $OUTD_BASE
 # Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
 
-# This is not ideal way to do this - for example, this statement is printed out every step.
-# Better isolate this into separate file
-## the path to the .seq file, 
-if [ "$IMPORT_SEQ" == 1 ]; then
-    SEQD="/data4"
-#    >&2 echo "IMPORT_SEQ: will read .seq from $SEQD"
-else
-    SEQD="$OUTD_BASE/unique_reads"
-#    >&2 echo "IMPORT_SEQ: will read .seq from workflow $SEQD"
-fi
+# SEQD="/data4"   # might define this if using external data (restart)
+SEQD="$OUTD_BASE/unique_reads"
 
 # Output of normalization step
 NORMD="$OUTD_BASE/norm"

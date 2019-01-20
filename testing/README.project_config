@@ -4,7 +4,7 @@ For now, main difference between them, aside from project names, is that GENE_BE
 from workflow directory or from mapped directory (e.g. data4, as is done in execute_workflow)
 
 
-* early Jan 19
+* early Jan 2019
 Starting with project_config.execute_workflow.C3L-chr.MGI.sh, OUTD is changed from /data1/PROJECT to /data1,
 and it no longer has `mkdir`.  It is the responsibility of the calling container to create the appropriate
 directories.  This is done so that host-based log files can be associated with the run output
@@ -18,3 +18,7 @@ Renamed to OUTD_BASE.  Reference implementation:
 
 * 1/17/19
 Change "PDF" -> "PNG"
+
+* 1/19/19
+Working in run_cases.UCEC-test.katmai, significant changes to project_config.sh structure.  Includes moving
+host-specific details to project_config-host.sh

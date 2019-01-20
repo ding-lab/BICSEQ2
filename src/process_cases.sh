@@ -26,7 +26,7 @@ Optional options
     This may be repeated (e.g., -dd or -d -d) to pass the -d argument to called functions instead,
 -1 : stop after one case processed.
 -f: force overwrite of existing data, if it exists
--s: step to run [ get_unique, normalization, segmentation, annotation, clean, reset, all ].  Default is all
+-s: step to run [ get_unique, normalization, segmentation, annotation, clean, reset, reset-host, all ].  Default is all
 -m DOCKERMAP : path to docker map file.  Contains 1 or more lines like PATH_H:PATH_C which define additional volume mapping
 -P DATAMAP: space-separated list of paths which map to /data1, /data2, etc.
 -M: run in MGI environment
@@ -52,12 +52,16 @@ Docker mapping paths come from 3 sources:
   Used for mapping arbitrary other paths e.g., reference
   Passed as arguments to start_docker.sh
 
-In parallel mode, will use [GNU parallel][1], but script will block until all jobs completed.
-Background on `parallel` and details about blocking / semaphores here:
-    O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
-    ;login: The USENIX Magazine, February 2011:42-47.
-[ https://www.usenix.org/system/files/login/articles/105438-Tange.pdf ]
+reset and reset-host steps are designed to delete all data in case output directory so that successive runs can start 
+from a clean state.  Step `reset` removes data by running in a container, while `reset-host` removes data running in 
+the host.  The latter is faster but may have permission issues.
+
 EOF
+
+# Background on `parallel` and details about blocking / semaphores here:
+#    O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
+#    ;login: The USENIX Magazine, February 2011:42-47.
+# [ https://www.usenix.org/system/files/login/articles/105438-Tange.pdf ]
 
 SCRIPT=$(basename $0)
 SCRIPT_PATH=$(dirname $0)
@@ -299,9 +303,10 @@ RUN_ARGS="$RUN_ARGS -H $PROJECT_CONFIG -C $PROJECT_CONFIG_C"
 for CASE in $CASES; do
     >&2 echo Processing CASE $CASE
 
-    # Treat `reset` step separately.  While this could be submitted to run_docker, this it generate warnings
+    # Treat `reset-host` step separately.  While this could be submitted to run_docker (as step `reset`), this may generate warnings
     # because log cannot be written after output directory deleted; also, this will run more quickly on the host.
-    if [ "$STEP" == "reset" ]; then
+    # however, may have permission issues, when resetting on host,
+    if [ "$STEP" == "reset-host" ]; then
         CMD="rm -rf $LOGD_PROJECT_BASE/$CASE/*"
     else
         CMD=$(get_launch_cmd $CASE)

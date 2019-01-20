@@ -29,9 +29,9 @@ bash A.process_project_cases.sh -d1 - < dat/case_names.dat
 
 # Running
 
-To launch five cases:
+To launch all cases with 3 running at once:
 ```
-    head -n 5 dat/case_names.dat | bash A.process_project_cases.sh -
+bash A.process_project_cases.sh -J 3 -  < dat/case_names.dat
 ```
 
 Alternatively, use `B` to find cases to run
