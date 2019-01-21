@@ -17,8 +17,8 @@ OUTD_H="$OUTBASE_H/$PROJECT"
 # Define directories to be mapped to /data2, etc.  If more than DATA4, adjust call to process_cases.sh accordingly
 # data2: chrom reference (./hg38) and mappability
 DATA2="/diskmnt/Projects/CPTAC3CNV/BICSEQ2/inputs"
-# data3: gene annotation file
-DATA3="/diskmnt/Projects/CPTAC3CNV/gatk4wxscnv/inputs"
+# data3: gene annotation file.  using updated one (19940 lines) copied from MGI
+DATA3="/diskmnt/Datasets/BICSEQ2-dev.tmp/cached.annotation" # /gencode.v29.annotation.hg38.p12.bed
 
 # set this to 1 if running on MGI
 IS_MGI=0
