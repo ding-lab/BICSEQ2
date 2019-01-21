@@ -269,7 +269,7 @@ if [ "$MGI" == 1 ] ; then
     # test if LSF Group is valid.  
         >&2 echo Evaluating LSF Group $LSF_GROUP
         LSF_OUT=$( bjgroup -s $LSF_GROUP )
-        if [ -z $LSF_OUT ]; then
+        if [ -z "$LSF_OUT" ]; then
             >&2 echo ERROR: LSF Group $LSF_GROUP does not exist.
             >&2 echo Please create with,
             >&2 echo "   bgadd /mwyczalk/test_group"
@@ -280,7 +280,7 @@ if [ "$MGI" == 1 ] ; then
             bgmod -L $PARALLEL_CASES $LSF_GROUP
             LSF_OUT=$( bjgroup -s $LSF_GROUP )
         fi
-        >&2 echo $LSF_OUT
+        >&2 echo "$LSF_OUT"
         >&2 echo Job limit may be modified with, \`bgmod -L NUMBER_JOBS $LSF_GROUP \`
     fi
 else

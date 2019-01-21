@@ -8,7 +8,7 @@
 # bash evaluate_status.sh -S CASE_LIST -p PROJECT_CONFIG -L LOGD_BASE_PROJECT [options]
 
 # Evaluate status of analysis workflow for each case in CaseList by examining log files. Write output STDOUT
-# Possible states for each case: "not_started", "running", "complete", "error"
+# Possible states for each case: "not_started", "running", "complete", "error", "warning"
 
 # Required options:
 # -S CASE_LIST: path to CASE LIST data file
@@ -20,13 +20,14 @@
 # -u: include only CASE in output
 # -1 : stop after one case processed.
 # -v : verbose output
+# -W : suppress multiple log file warnings 
 
 # based on /gscuser/mwyczalk/projects/CPTAC3/import/LUAD.hb2.3/importGDC/evaluate_status.sh
 # Note that MGI and non-MGI logs look the same
 SCRIPT=$(basename $0)
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":S:p:L:f:uM1v" opt; do
+while getopts ":S:p:L:f:uM1vW" opt; do
   case $opt in
     S)  
       CASE_LIST="$OPTARG"
@@ -48,6 +49,9 @@ while getopts ":S:p:L:f:uM1v" opt; do
       ;;
     v)  
       VERBOSE=1
+      ;;
+    W)  
+      NO_WARN=1
       ;;
     \?)
       >&2 echo "$SCRIPT: ERROR: Invalid option: -$OPTARG"
@@ -112,7 +116,9 @@ function get_log {
     elif [ $NLOG == "0" ]; then
         echo ""
     else
-        >&2 echo WARNING: More than one log file exists in $LOGD.  Processing the most recent one
+        if [ -z $NO_WARN ]; then
+            >&2 echo WARNING: More than one log file exists in $LOGD.  Processing the most recent one
+        fi
         echo $(echo "$LOGS" | head -n 1)
     fi
 }
@@ -137,6 +143,23 @@ function test_import_success {
         return
     fi
 
+    # Ad hoc warning conditions:
+    # Normalization step sometimes has the following warning:
+    #
+    #   Warning: Possible divergence detected in fast.REML.fit
+    # and
+    #   Warning message:
+    #   In bgam.fit(G, mf, chunk.size, gp, scale, gamma, method = method,  :
+    #     algorithm did not converge
+    # We find that the results are significantly different when this occurs; rerunning may fix this. To catch this situation, we issue a warning
+    
+    if fgrep -Fiq "warning" $LOG_FN; then
+        echo warning
+        return
+    fi
+
+    # Check for success; it can occur even if warnings exist
+
     if fgrep -Fq "$SUCCESS_STRING" $LOG_FN; then
         echo complete
         return
@@ -160,18 +183,6 @@ function test_import_success {
         return
     fi
 
-    # Ad hoc warning conditions:
-    # Normalization step sometimes has the following warning:
-    #
-    #   Warning message:
-    #   In bgam.fit(G, mf, chunk.size, gp, scale, gamma, method = method,  :
-    #     algorithm did not converge
-    # We find that the results are significantly different when this occurs; rerunning may fix this. To catch this situation, we issue a warning
-    
-    if fgrep -Fiq "algorithm did not converge" $LOG_FN; then
-        echo warning
-        return
-    fi
 
     echo running
 }
