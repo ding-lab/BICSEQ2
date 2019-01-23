@@ -132,8 +132,10 @@ function test_import_success {
 
     # Logic of testing
     # If log file does not exist: status = not_started
-    # if log file contains "SUCCESS": status = complete
     # if log file contains "ERROR": status = error
+    # if log file contains "warning": status = warning
+    #   Note that in this case run still completed
+    # if log file contains "SUCCESS": status = complete
     # otherwise status = running
     ERROR_STRING="BS2:ERROR"
     SUCCESS_STRING="BS2:SUCCESS"
@@ -152,18 +154,6 @@ function test_import_success {
     #   In bgam.fit(G, mf, chunk.size, gp, scale, gamma, method = method,  :
     #     algorithm did not converge
     # We find that the results are significantly different when this occurs; rerunning may fix this. To catch this situation, we issue a warning
-    
-    if fgrep -Fiq "warning" $LOG_FN; then
-        echo warning
-        return
-    fi
-
-    # Check for success; it can occur even if warnings exist
-
-    if fgrep -Fq "$SUCCESS_STRING" $LOG_FN; then
-        echo complete
-        return
-    fi
 
     if fgrep -Fq "$ERROR_STRING" $LOG_FN; then
         echo error
@@ -182,9 +172,19 @@ function test_import_success {
         echo error
         return
     fi
+    
+    # Warnings may occur even if success or running
+    # Be able to distinguish these
+    if fgrep -Fiq "warning" $LOG_FN; then
+        WARNING_SUFFIX="+warning"
+    fi
 
+    if fgrep -Fq "$SUCCESS_STRING" $LOG_FN; then
+        echo "complete${WARNING_SUFFIX}"
+        return
+    fi
 
-    echo running
+    echo "running${WARNING_SUFFIX}"
 }
 
 function get_job_status {
