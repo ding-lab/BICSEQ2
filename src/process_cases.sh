@@ -125,12 +125,12 @@ while getopts ":hdfg:S:p:s:m:P:J:1ML:o:" opt; do
       ;;
     \?)
       >&2 echo "Invalid option: -$OPTARG" 
-      >&2 echo $USAGE
+      >&2 echo "$USAGE"
       exit 1
       ;;
     :)
       >&2 echo "Option -$OPTARG requires an argument." 
-      >&2 echo $USAGE
+      >&2 echo "$USAGE"
       exit 1
       ;;
   esac
