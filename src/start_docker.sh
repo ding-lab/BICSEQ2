@@ -28,16 +28,20 @@ SCRIPT=$(basename $0)
 
 DOCKER_IMAGE="mwyczalkowski/bicseq2:latest"
 
-LSFQ="-q research-hpc"  # MGI LSF queue.  
+#LSFQ="-q research-hpc"  # MGI LSF queue.  
 LSF_ARGS=""
 DOCKER_CMD="/bin/bash"
 INTERACTIVE=1
 
-while getopts ":MdI:c:H:C:L:m:g:" opt; do
+while getopts ":MZdI:c:H:C:L:m:g:q:" opt; do
   case $opt in
     M)  
       MGI=1
       >&2 echo MGI Mode
+      ;;
+    Z)
+      COMPUTE1=1
+      >&2 echo COMPUTE1 Mode
       ;;
     L)  
       LOGD_H=$OPTARG
@@ -64,6 +68,10 @@ while getopts ":MdI:c:H:C:L:m:g:" opt; do
     g)
       LSF_ARGS="$LSF_ARGS -g $OPTARG"
       >&2 echo LSF Group: $OPTARG
+      ;;
+    q)
+      LSF_ARGS="$LSF_ARGS -q $OPTARG"
+      >&2 echo LSF QUEUE: $OPTARG
       ;;
     \?)
       >&2 echo "$SCRIPT: ERROR. Invalid option: -$OPTARG" >&2
@@ -95,7 +103,7 @@ do
     DATDC="/data${D}" 
 
     >&2 echo Mapping $DATDC to $ADATDH
-    if [ $MGI ]; then
+    if [ $MGI ] || [ $COMPUTE1 ]; then
         DATMAP="$DATMAP $ADATDH:$DATDC"
     else
         DATMAP="$DATMAP -v $ADATDH:$DATDC"
@@ -120,7 +128,7 @@ if [[ $MNTH ]]; then
     AMNTH=$(python -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' $MNTH)   # get absolute path
 
     >&2 echo Mapping $MNTC to $AMNTH
-    if [ $MGI ]; then
+    if [ $MGI ] || [ $COMPUTE1 ]; then
         DATMAP="$DATMAP $AMNTH:$MNTC"
     else
         DATMAP="$DATMAP -v $AMNTH:$MNTC"
@@ -152,7 +160,7 @@ if [ ! -z $DOCKERMAP ]; then
             exit 1
         fi
 
-        if [ $MGI ]; then
+        if [ $MGI ] || [ $COMPUTE1 ]; then
             DATMAP="$DATMAP $l"
         else
             DATMAP="$DATMAP -v $l"
@@ -185,7 +193,40 @@ if [ $LOGD_H ]; then
     >&2 echo "   " $ERRLOG
 fi
 
-DCMD="bsub $LSFQ $LSF_ARGS $ARGS $LOGS -a \"docker($DOCKER_IMAGE)\" $CMD "
+DCMD="bsub $LSF_ARGS $ARGS $LOGS -a \"docker($DOCKER_IMAGE)\" $CMD "
+if [ $DRYRUN ]; then
+    >&2 echo Dryrun: $DCMD
+else
+    >&2 echo Running: $DCMD
+    eval $DCMD
+fi
+
+}
+
+function start_docker_compute1 {
+CMD="$1"
+
+# Where container's /data is mounted on host
+#export LSF_DOCKER_VOLUMES="$ADATD:/data"
+DATMAP="$DATMAP $HOME:$HOME"
+export LSF_DOCKER_VOLUMES="$DATMAP"
+# Based on importGDC/GDC_import.sh
+if [ $INTERACTIVE == 1 ]; then
+    ARGS="-Is"
+fi
+
+if [ $LOGD_H ]; then
+    mkdir -p $LOGD_H/log
+    TS=$(date +%s)
+    ERRLOG="$LOGD_H/log/${TS}.err"
+    OUTLOG="$LOGD_H/log/${TS}.out"
+    LOGS="-e $ERRLOG -o $OUTLOG"
+    >&2 echo Writing logs to :
+    >&2 echo "   " $OUTLOG
+    >&2 echo "   " $ERRLOG
+fi
+
+DCMD="bsub $LSF_ARGS $ARGS $LOGS -a \"docker($DOCKER_IMAGE)\" $CMD "
 if [ $DRYRUN ]; then
     >&2 echo Dryrun: $DCMD
 else
@@ -232,6 +273,10 @@ fi
 if [ $MGI ]; then
     start_docker_MGI "$DOCKER_CMD"
 else
-    start_docker "$DOCKER_CMD"
+    if [ $COMPUTE1 ]; then
+        start_docker_compute1 "$DOCKER_CMD"
+    else
+        start_docker "$DOCKER_CMD"
+    fi
 fi
 

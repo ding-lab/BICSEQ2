@@ -71,7 +71,7 @@ OUTD_PROJECT_BASE="/data1"
 RUN_ARGS=""  # These are arguments passed to start_docker.sh
 STEP="all"
 
-while getopts ":hdfg:S:p:s:m:P:J:1ML:o:" opt; do
+while getopts ":hdfg:q:S:p:s:m:P:J:1MZCL:o:" opt; do
   case $opt in
     h) 
       echo "$USAGE"
@@ -86,6 +86,12 @@ while getopts ":hdfg:S:p:s:m:P:J:1ML:o:" opt; do
     g) # define LSF_GROUP
       LSF_GROUP="$OPTARG"
       RUN_ARGS="$RUN_ARGS -g $LSF_GROUP"
+      >&2 echo LSF Group: $OPTARG
+      ;;
+    q) # define LSF_QUEUE
+      LSF_QUEUE="$OPTARG"
+      RUN_ARGS="$RUN_ARGS -q $LSF_QUEUE"
+      >&2 echo LSF QUEUE: $OPTARG
       ;;
     S) 
       CASELIST=$OPTARG
@@ -118,6 +124,11 @@ while getopts ":hdfg:S:p:s:m:P:J:1ML:o:" opt; do
       MGI=1
       RUN_ARGS="$RUN_ARGS -M"
       >&2 echo MGI Mode
+      ;;
+    Z)
+      COMPUTE1=1
+      RUN_ARGS="$RUN_ARGS -Z"
+      >&2 echo COMPUTE1 Mode
       ;;
     o) 
       OUTD_PROJECT_BASE="$OPTARG"
@@ -292,6 +303,38 @@ else
     fi
 fi
 
+# set up LSF_GROUPS if appropriate
+# If user defines LSF_GROUP in compute1 environment, check to make sure this group exists,
+# and exit with an error if it does not.  If PARALLEL_CASES is defined, set this as the
+# number of jobs which can run at a time
+if [ "$COMPUTE1" == 1 ] ; then
+    >&2 echo Job submission at compute1 using bsub
+    if [ $LSF_GROUP ] ; then
+    # test if LSF Group is valid.
+        >&2 echo Evaluating LSF Group $LSF_GROUP
+        LSF_OUT=$( bjgroup -s $LSF_GROUP )
+        if [ -z "$LSF_OUT" ]; then
+            >&2 echo ERROR: LSF Group $LSF_GROUP does not exist.
+            >&2 echo Please create with,
+            >&2 echo "   bgadd /yigewu/bicseq2"
+            exit 1
+        fi
+        if [ $PARALLEL_CASES ]; then
+            >&2 echo Setting job limit of $PARALLEL_CASES for LSF Group $LSF_GROUP
+            bgmod -L $PARALLEL_CASES $LSF_GROUP
+            LSF_OUT=$( bjgroup -s $LSF_GROUP )
+        fi
+        >&2 echo "$LSF_OUT"
+        >&2 echo Job limit may be modified with, \`bgmod -L NUMBER_JOBS $LSF_GROUP \`
+    fi
+else
+    if [ -z $PARALLEL_CASES ] ; then
+        >&2 echo Running single case at a time \(single mode\)
+    else
+        >&2 echo Job submission with $PARALLEL_CASES cases in parallel
+        PARALLEL_MODE=1
+    fi
+fi
 
 # We will map PROJECT_CONFIG on host to /project_config.sh in container
 PROJECT_CONFIG_C="/project_config.sh"
