@@ -156,7 +156,7 @@ function remap_path {
 }
 
 if [ $HEADER == 1 ]; then
-    printf "# Case_Name\tDisease\tOutput_Path\tFile_Format\tTumor_Sample_Name\tTumor_BAM_UUID\tNormal_Sample_Name\tNormal_BAM_UUID\n"
+    printf "# Case_Name\tDisease\tOutput_Path\tFile_Format\tTumor_Sample_Name\tTumor_BAM_UUID\tNormal_Sample_Name\tNormal_BAM_UUID\tResult_Type\n"
 fi
 
 # Loop over all remaining arguments
@@ -225,6 +225,10 @@ do
 
     PATH_OUT=$OUTD"/"$CASE"/annotation/"$CASE".gene_level.log2.seg"
 
-    printf "$CASE\t$DISEASE\t$PATH_OUT\t$FF\t$SN_A\t$UUID_A\t$SN_B\t$UUID_B\n"
+    printf "$CASE\t$DISEASE\t$PATH_OUT\t$FF\t$SN_A\t$UUID_A\t$SN_B\t$UUID_B\tSEG\n"
+
+    PATH_OUT=$OUTD"/"$CASE"/segmentation/"$CASE".cnv"
+
+    printf "$CASE\t$DISEASE\t$PATH_OUT\t$FF\t$SN_A\t$UUID_A\t$SN_B\t$UUID_B\tCNV\n"
 
 done
