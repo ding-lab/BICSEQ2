@@ -83,7 +83,7 @@ ARGS=""
 GET_UNIQ_ARGS=""
 STEP="all"	# this might be expanded to allow comma-separated steps
 OUTD_BASE="/data1"
-CLEAN_OPT="delete"
+CLEAN_OPT="compress"
 
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
 while getopts ":dfj:s:o:C:" opt; do
@@ -266,16 +266,15 @@ fi
 # Cleanup step aims to reduce disk usage by either compressing or deleting the unique_reads and norm directories
 if [ $RUN_CLEAN ]; then
     write_START "Running cleanup step"
-    
+    run_cmd "find $OUTD_BASE -xtype l -delete"
+ 
     if [ $CLEAN_OPT == "compress" ]; then
         # if the .tar.gz already exists, skip compression, so that running this twice does not give an error
         if [ -d $OUTD_BASE/unique_reads ] && [ ! -e $OUTD_BASE/unique_reads.tar.gz ]; then
-            run_cmd "ls -R $OUTD_BASE/unique_reads"
             run_cmd "tar -P -zcf $OUTD_BASE/unique_reads.tar.gz $OUTD_BASE/unique_reads"
             run_cmd "rm -rf $OUTD_BASE/unique_reads "
         fi
         if [ -d $OUTD_BASE/norm ] && [ ! -e $OUTD_BASE/norm.tar.gz ]; then
-            run_cmd "ls -R $OUTD_BASE/norm"
             run_cmd "tar -P -zcf $OUTD_BASE/norm.tar.gz $OUTD_BASE/norm"
             run_cmd "rm -rf $OUTD_BASE/norm"
         fi
