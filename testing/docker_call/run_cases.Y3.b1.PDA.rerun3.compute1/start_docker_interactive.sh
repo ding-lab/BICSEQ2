@@ -1,0 +1,2 @@
+export LSF_DOCKER_VOLUMES="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Analysis/WGS_CNV_Somatic/:/storage1/fs1/dinglab/Active/Projects/CPTAC3/Analysis/WGS_CNV_Somatic/ /storage1/fs1/m.wyczalkowski/Active/Primary/Resources/References/:/storage1/fs1/m.wyczalkowski/Active/Primary/Resources/References/ /storage1/fs1/m.wyczalkowski/Active/Primary/CPTAC3.share/CPTAC3-GDC/GDC_import/data:/storage1/fs1/m.wyczalkowski/Active/Primary/CPTAC3.share/CPTAC3-GDC/GDC_import/data /home/yigewu:/home/yigewu"
+bsub -Is -a 'docker1(mwyczalkowski/bicseq2)' bash

@@ -33,7 +33,7 @@ LSF_ARGS=""
 DOCKER_CMD="/bin/bash"
 INTERACTIVE=1
 
-while getopts ":MZdI:c:H:C:L:m:g:q:" opt; do
+while getopts ":MZdI:c:H:C:L:m:g:q:R:G:" opt; do
   case $opt in
     M)  
       MGI=1
@@ -73,6 +73,10 @@ while getopts ":MZdI:c:H:C:L:m:g:q:" opt; do
       LSF_ARGS="$LSF_ARGS -q $OPTARG"
       >&2 echo LSF QUEUE: $OPTARG
       ;;
+    G) # define memory
+      MEM_GB="$OPTARG"
+      >&2 echo LSF Memory: $MEM_GB GB
+      ;;
     \?)
       >&2 echo "$SCRIPT: ERROR. Invalid option: -$OPTARG" >&2
       exit 1
@@ -84,6 +88,19 @@ while getopts ":MZdI:c:H:C:L:m:g:q:" opt; do
   esac
 done
 shift $((OPTIND-1))
+
+if [ $MEM_GB ]; then
+    SELECT="select[mem>$(( $MEM_GB * 1000 ))] rusage[mem=$(( $MEM_GB * 1000 ))]";
+    # -M argument takes kb at MGI, mb in compute1
+    if [ COMPUTE1 == 1 ]; then
+        M_ARG=$(( $MEM_GB * 1000 ))
+    else
+        M_ARG=$(( $MEM_GB * 1000000 ))
+    fi
+    MEM_ARGS="-M $M_ARG -R \"$SELECT\""
+    LSF_ARGS="$LSF_ARGS $MEM_ARGS"
+    >&2 echo "Add Memory Arguments $MEM_ARGS"
+fi
 
 D=1
 DATMAP=""
@@ -118,7 +135,7 @@ if [[ ( $MNTC  && ! $MNTH) || ( ! $MNTC  && $MNTH) ]] ; then
     exit 1
 fi
 
-# alternative mounting may be used for e.g. files
+# DOESN't WORK on COMPUTE1 ANYMORE: alternative mounting may be used for e.g. files
 if [[ $MNTH ]]; then
     if [ ! -e $MNTH ]; then
         >&2 echo ERROR: $MNTH does not exist

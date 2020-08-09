@@ -1,7 +1,7 @@
 # Define host-specific project paths and configuration
 # This is for katmai
 
-BATCH_NAME="Y3.b1"
+BATCH_NAME="Y3.b1.PDA.rerun4"
 PROJECT="run_cases."$BATCH_NAME
 
 # All paths here are relative to host
@@ -23,7 +23,7 @@ DATA2="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Analysis/WGS_CNV_Somatic/Dat
 # data3: gene annotation file.  using updated one (19940 lines) copied from MGI
 DATA3="/storage1/fs1/dinglab/Active/Projects/CPTAC3/Analysis/WGS_CNV_Somatic/Datasets/cached.annotation"
 # data4: directory to the scripts, espcially the project config
-DATA4=${BICSEQ_H}"/testing/docker_call/run_cases.Y3.b1.compute1"
+DATA4=${BICSEQ_H}"/testing/docker_call/run_cases.Y3.b1.PDA.rerun4.compute1"
 
 # set this to 1 if running on MGI
 IS_MGI=0

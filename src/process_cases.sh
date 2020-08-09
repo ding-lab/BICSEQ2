@@ -71,7 +71,7 @@ OUTD_PROJECT_BASE="/data1"
 RUN_ARGS=""  # These are arguments passed to start_docker.sh
 STEP="all"
 
-while getopts ":hdfg:q:S:p:s:m:P:J:1MZCL:o:" opt; do
+while getopts ":hdfG:g:q:S:p:s:m:P:J:1MZCL:o:" opt; do
   case $opt in
     h) 
       echo "$USAGE"
@@ -82,6 +82,11 @@ while getopts ":hdfg:q:S:p:s:m:P:J:1MZCL:o:" opt; do
       ;;
     f) 
       FORCE_OVERWRITE=1
+      ;;
+    G) # define memory
+      MEM_GB="$OPTARG"
+      RUN_ARGS="$RUN_ARGS -G $MEM_GB"
+      >&2 echo LSF Memory: $MEM_GB GB
       ;;
     g) # define LSF_GROUP
       LSF_GROUP="$OPTARG"
@@ -147,6 +152,7 @@ while getopts ":hdfg:q:S:p:s:m:P:J:1MZCL:o:" opt; do
   esac
 done
 shift $((OPTIND-1))
+
 
 # Evaluate given command CMD either as dry run or for real
 function run_cmd {
@@ -337,8 +343,8 @@ else
 fi
 
 # We will map PROJECT_CONFIG on host to /project_config.sh in container
-PROJECT_CONFIG_C="/project_config.sh"
-RUN_ARGS="$RUN_ARGS -H $PROJECT_CONFIG -C $PROJECT_CONFIG_C"
+PROJECT_CONFIG_C="/data4/project_config.sh"
+#RUN_ARGS="$RUN_ARGS -H $PROJECT_CONFIG -C $PROJECT_CONFIG_C"
 
 >&2 echo "Iterating over cases in $CASELIST "
 

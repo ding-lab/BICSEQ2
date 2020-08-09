@@ -1,0 +1,1 @@
+cat Weirdp1.txt | cut -f 1 | grep -v Sample > case_names.dat
