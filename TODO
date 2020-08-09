@@ -16,6 +16,9 @@ Consider splitting project_config into two parts:
 
 # Pipeline improvements
 
+## Detect memory issues
+* Maybe move away from parallel to bsub, it will detect better if there is memory problem or find ways to have parallel to report memory issues
+
 ## Disk Space usage
 ```
 Here is disk space usage for chr 20-23:
