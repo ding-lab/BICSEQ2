@@ -214,7 +214,8 @@ function get_launch_cmd {
     ARGS_CASE="-o $OUTD_PROJECT_BASE/$CASE $DRYARG_WORKFLOW -s $STEP"
 
     # This is the command which will be executed for each CASE in container
-    CMD_HOST="bash /BICSEQ2/src/execute_workflow.sh $ARGS_CASE $PROJECT_CONFIG_C $CASE $SN_A $PATH_A $SN_B $PATH_B"
+#    CMD_HOST="bash /BICSEQ2/src/execute_workflow.sh $ARGS_CASE $PROJECT_CONFIG_C $CASE $SN_A $PATH_A $SN_B $PATH_B"
+    CMD_HOST="bash /data5/src/execute_workflow.sh $ARGS_CASE $PROJECT_CONFIG_C $CASE $SN_A $PATH_A $SN_B $PATH_B"
 
     # Define log path for this case, add dry run policy 
     RUN_ARGS_CASE="$RUN_ARGS $DRYARG_DOCKER -L $LOGD_PROJECT_BASE/$CASE"

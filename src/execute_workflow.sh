@@ -266,17 +266,18 @@ fi
 # Cleanup step aims to reduce disk usage by either compressing or deleting the unique_reads and norm directories
 if [ $RUN_CLEAN ]; then
     write_START "Running cleanup step"
-    run_cmd "find $OUTD_BASE -xtype l -delete"
  
     if [ $CLEAN_OPT == "compress" ]; then
         # if the .tar.gz already exists, skip compression, so that running this twice does not give an error
         if [ -d $OUTD_BASE/unique_reads ] && [ ! -e $OUTD_BASE/unique_reads.tar.gz ]; then
-            run_cmd "tar -P -zcf $OUTD_BASE/unique_reads.tar.gz $OUTD_BASE/unique_reads"
-            run_cmd "rm -rf $OUTD_BASE/unique_reads "
+            run_cmd "tar -P -zcf $OUTD_BASE/unique_reads.tar.gz --exclude=$OUTD_BASE/unique_reads/tmp  $OUTD_BASE/unique_reads"
+            run_cmd "ls -la $OUTD_BASE/unique_reads"
+            run_cmd "rm -rf $OUTD_BASE/unique_reads 2>&2"
         fi
         if [ -d $OUTD_BASE/norm ] && [ ! -e $OUTD_BASE/norm.tar.gz ]; then
-            run_cmd "tar -P -zcf $OUTD_BASE/norm.tar.gz $OUTD_BASE/norm"
-            run_cmd "rm -rf $OUTD_BASE/norm"
+            run_cmd "tar -P -zcf $OUTD_BASE/norm.tar.gz --exclude=$OUTD_BASE/norm/tmp $OUTD_BASE/norm"
+            run_cmd "ls -la $OUTD_BASE/norm"
+            run_cmd "rm -rf $OUTD_BASE/norm 2>&2"
         fi
     elif [ $CLEAN_OPT == "delete" ]; then
         run_cmd "rm -rf $OUTD_BASE/unique_reads $OUTD_BASE/unique_reads.tar.gz $OUTD_BASE/norm $OUTD_BASE/norm.tar.gz"

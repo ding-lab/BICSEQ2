@@ -163,7 +163,7 @@ function test_import_success {
     # Ad hoc error conditions:
     # Also check for error conditions which do not trigger our error status, such as out of disk errors
     # Assume that if see the string "error" (case insensitive), we have an error condition
-    if fgrep -Fiq "error" $LOG_FN; then
+    if fgrep -Fiq "error" $LOG_FN | fgrep -v "docker1_monitor"; then
         echo error
         return
     fi

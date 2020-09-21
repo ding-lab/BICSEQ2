@@ -197,7 +197,7 @@ do
     SN_A=$(echo "$LINE_A" | cut -f 1)
     PATH_H_A=$(echo "$LINE_A" | cut -f 6)
     UUID_A=$(echo "$LINE_A" | cut -f 10)
-
+    DISEASE=$(echo "$LINE_A" | cut -f 3)
     LINE_B=$(awk -v c=$CASE -v ref=$REF -v es=$ES -v st=$STB 'BEGIN{FS="\t";OFS="\t"}{if ($2 == c && $4 == es && $5 == st && $9 == ref) print}' $BAMMAP)
     if [ -z "$LINE_B" ]; then
         >&2 echo ERROR: $REF $CASE $ES $STB sample not found in $BAMMAP
