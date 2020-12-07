@@ -35,56 +35,57 @@ by each step
 ### Steps
 
 Steps:
-    * Prepare dependencies
-        * Obtain reference per chromosome
-            * Yige uses katmai:/diskmnt/Datasets/Reference/GRCh38.d1.vd1/GRCh38.d1.vd1.fa
-            * per-chrom hg38 is downloaded from http://hgdownload.cse.ucsc.edu/goldenPath/hg38/chromosomes/
-            * Output / reference directory is $REFD
-            * Not currently automated
-        * `prep_mappability.sh` generates mapping files
-            * specific to reference
-            * dependent on read length (150 currently used)
-            * Takes long time to run.  Can use cached results XXX *TODO*
-            * Example filename: GRCh38.d1.vd1.150mer.chr1.txt
-            * Output / mappability directory is $MAPD
-        * `prep_gene_annotation.sh` generates annotation bed files
-            * Based on gencode GFF file
-    * Per sample
-        * `get_unique.sh` get read positions, i.e., locations of unique mapped reads (.seq "readPos" file)
-            * Usage: get_unique.sh [options] BAM
-            * Input: 
-                * BAM file 
-                * sample name: Unique name for this run.  In V1, sample name of form "Case_SampleType"
-                * Optional CHRLIST, a file with list of chromosomes which are analyzed in parallel
-            * Output 
-                * Directory is $SEQD
-                * filename is $SAMPLE_NAME.seq (or $SAMPLE_NAME.$CHR.seq when iterating over chrom)
-            * stores all the mapping positions of all reads that uniquely mapped to this chromosome
-            * May run per chrom in parallel iterating over chromosome.txt
-        * `run_norm.sh`: run normalization step
-            * Run script /NBICseq-norm_v0.2.4/NBICseq-norm.pl
-            * Requires CHRLIST
-            * Requires SAMPLE_NAME
-            * Output directory is $NORMD. Files written:
-                * Configuration (norm-config) file {SAMPLE_NAME}.config.txt
-                * PDF written as {SAMPLE_NAME}.GC.pdf
-                * parameter estimate output in {SAMPLE_NAME}.out.txt.  Not used
-                * Normalized data, per chrom, written to {SAMPLE_NAME}.{CHR}.norm.bin
-                * Tmp directory $OUTD/tmp created and passed as argument to NBICseq-norm.pl
-            * Creates normalization configuration (norm-config) file of format specified by NBICseq-norm.pl,
-                * 1 row per chrom, as per CHRLIST.  For each, list
-                    * reference sequence per chrom
-                    * mappability file per chrom
-                    * seq (readPosFile) per chrom
-                    * output filename (binFile) 
-                * Note that we are working with arrays of files, with path written to norm-config file 
-                    * for CWL this may complicate staging, may require .tar.gz to pass data around
-                    * For now, focus on docker implementation and have paths as well as filenames defined in project config file
-                        * Filenames are passed as strings with `%s` which will be replaced by CHROM
-        * `run_detect.sh` - run segmentation step
-            * Run BICSeq Detect step
-        * Gene annotation - run gene annotation step
-            * requires gene annotation bed file
+
+* Prepare dependencies
+    * Obtain reference per chromosome
+        * Yige uses katmai:/diskmnt/Datasets/Reference/GRCh38.d1.vd1/GRCh38.d1.vd1.fa
+        * per-chrom hg38 is downloaded from http://hgdownload.cse.ucsc.edu/goldenPath/hg38/chromosomes/
+        * Output / reference directory is $REFD
+        * Not currently automated
+    * `prep_mappability.sh` generates mapping files
+        * specific to reference
+        * dependent on read length (150 currently used)
+        * Takes long time to run.  Can use cached results XXX *TODO*
+        * Example filename: GRCh38.d1.vd1.150mer.chr1.txt
+        * Output / mappability directory is $MAPD
+    * `prep_gene_annotation.sh` generates annotation bed files
+        * Based on gencode GFF file
+* Per sample
+    * `get_unique.sh` get read positions, i.e., locations of unique mapped reads (.seq "readPos" file)
+        * Usage: get_unique.sh [options] BAM
+        * Input: 
+            * BAM file 
+            * sample name: Unique name for this run.  In V1, sample name of form "Case_SampleType"
+            * Optional CHRLIST, a file with list of chromosomes which are analyzed in parallel
+        * Output 
+            * Directory is $SEQD
+            * filename is $SAMPLE_NAME.seq (or $SAMPLE_NAME.$CHR.seq when iterating over chrom)
+        * stores all the mapping positions of all reads that uniquely mapped to this chromosome
+        * May run per chrom in parallel iterating over chromosome.txt
+    * `run_norm.sh`: run normalization step
+        * Run script /NBICseq-norm_v0.2.4/NBICseq-norm.pl
+        * Requires CHRLIST
+        * Requires SAMPLE_NAME
+        * Output directory is $NORMD. Files written:
+            * Configuration (norm-config) file {SAMPLE_NAME}.config.txt
+            * PDF written as {SAMPLE_NAME}.GC.pdf
+            * parameter estimate output in {SAMPLE_NAME}.out.txt.  Not used
+            * Normalized data, per chrom, written to {SAMPLE_NAME}.{CHR}.norm.bin
+            * Tmp directory $OUTD/tmp created and passed as argument to NBICseq-norm.pl
+        * Creates normalization configuration (norm-config) file of format specified by NBICseq-norm.pl,
+            * 1 row per chrom, as per CHRLIST.  For each, list
+                * reference sequence per chrom
+                * mappability file per chrom
+                * seq (readPosFile) per chrom
+                * output filename (binFile) 
+            * Note that we are working with arrays of files, with path written to norm-config file 
+                * for CWL this may complicate staging, may require .tar.gz to pass data around
+                * For now, focus on docker implementation and have paths as well as filenames defined in project config file
+                    * Filenames are passed as strings with `%s` which will be replaced by CHROM
+    * `run_detect.sh` - run segmentation step
+        * Run BICSeq Detect step
+    * Gene annotation - run gene annotation step
+        * requires gene annotation bed file
 
 Note that processing here is per-sample.  Additional post-processing may be performed to merge per-sample gene annotation
 results; for guidance see section which writes to $geneLevelOut in original [`get_gene_level_cnv.sh`](https://github.com/ding-lab/BICSEQ2/blob/master/get_gene_level_cnv.sh)
