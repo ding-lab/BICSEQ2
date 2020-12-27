@@ -1,0 +1,21 @@
+# Error? It shows error in the B script but the get unique outputs look ok
+ 
+[ Thu Jul 23 23:45:40 UTC 2020 ] All jobs launched. Waiting for them to complete
+Traceback (most recent call last):
+  File "/opt/ibm/lsfsuite/lsf/10.1/linux2.6-glibc2.3-x86_64/etc/docker1_monitor.py", line 385, i
+n <module>
+    main(sys.argv[1:])
+  File "/opt/ibm/lsfsuite/lsf/10.1/linux2.6-glibc2.3-x86_64/etc/docker1_monitor.py", line 378, i
+n main
+    if driverMonitor.start_monitor() < 0 :
+  File "/opt/ibm/lsfsuite/lsf/10.1/linux2.6-glibc2.3-x86_64/etc/docker1_monitor.py", line 175, i
+n start_monitor
+    if self.__collect_rusage() < 0 :
+  File "/opt/ibm/lsfsuite/lsf/10.1/linux2.6-glibc2.3-x86_64/etc/docker1_monitor.py", line 225, i
+n __collect_rusage
+    self.dbHandler.update_db(resources)
+  File "/opt/ibm/lsfsuite/lsf/10.1/linux2.6-glibc2.3-x86_64/etc/docker1_monitor.py", line 131, i
+n update_db
+    conn.rollback()
+sqlite3.OperationalError: cannot rollback - no transaction is active
+[ Fri Jul 24 05:08:35 UTC 2020 ] All jobs have completed, written to /data1/C3N-01719/unique_reads
