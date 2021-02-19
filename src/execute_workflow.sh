@@ -214,18 +214,19 @@ function process_sample {
 
     if [ $RUN_UNIQUE ]; then
         write_START "$SN: Running get_unique step"
-        CMD="bash /BICSEQ2/src/get_unique.sh $ARGS $GET_UNIQ_ARGS $SN $CONFIG $BAM"
+        CMD="bash /data5/src/get_unique.sh $ARGS $GET_UNIQ_ARGS $SN $CONFIG $BAM"
         run_cmd "$CMD"
     fi
 
     if [ $RUN_NORM ]; then
         write_START "$SN: Running normalization step"
-        CMD="bash /BICSEQ2/src/run_norm.sh $ARGS $SN $CONFIG "
+        CMD="bash /data5/src/run_norm.sh $ARGS $SN $CONFIG "
         run_cmd "$CMD"
     fi
 }
 
 mkdir -p $OUTD_BASE
+mkdir -p $OUTD_BASE/inspection
 test_exit_status
 
 if [ $RUN_RESET ]; then
@@ -245,13 +246,13 @@ fi
 if [ $RUN_SEG ]; then
     # Execute segmentation step using tumor/normal as case/control
     write_START "Running segmentation step"
-    CMD="bash /BICSEQ2/src/run_segmentation.sh $ARGS -s $CASE_NAME $SN_TUMOR $SN_NORMAL $CONFIG "
+    CMD="bash /data5/src/run_segmentation.sh $ARGS -s $CASE_NAME $SN_TUMOR $SN_NORMAL $CONFIG "
     run_cmd "$CMD"
 fi
 
 if [ $RUN_ANN ]; then
     write_START "Running gene annotation step"
-    CMD="bash /BICSEQ2/src/run_annotation.sh $ARGS $CASE_NAME $CONFIG"
+    CMD="bash /data5/src/run_annotation.sh $ARGS $CASE_NAME $CONFIG"
     run_cmd "$CMD"
 fi
 
@@ -271,13 +272,15 @@ if [ $RUN_CLEAN ]; then
         # if the .tar.gz already exists, skip compression, so that running this twice does not give an error
         if [ -d $OUTD_BASE/unique_reads ] && [ ! -e $OUTD_BASE/unique_reads.tar.gz ]; then
             run_cmd "tar -P -zcf $OUTD_BASE/unique_reads.tar.gz --exclude=$OUTD_BASE/unique_reads/tmp  $OUTD_BASE/unique_reads"
-            run_cmd "ls -la $OUTD_BASE/unique_reads"
-            run_cmd "rm -rf $OUTD_BASE/unique_reads 2>&2"
+            #run_cmd "ls -la $OUTD_BASE/unique_reads"
+            run_cmd "rm -rf $OUTD_BASE/unique_reads/* 2>&2"
+            run_cmd "rmdir --ignore-fail-on-non-empty $OUTD_BASE/unique_reads 2>&2"
         fi
         if [ -d $OUTD_BASE/norm ] && [ ! -e $OUTD_BASE/norm.tar.gz ]; then
             run_cmd "tar -P -zcf $OUTD_BASE/norm.tar.gz --exclude=$OUTD_BASE/norm/tmp $OUTD_BASE/norm"
-            run_cmd "ls -la $OUTD_BASE/norm"
-            run_cmd "rm -rf $OUTD_BASE/norm 2>&2"
+            #run_cmd "ls -la $OUTD_BASE/norm"
+            run_cmd "rm -rf $OUTD_BASE/norm/* 2>&2"
+            run_cmd "rmdir --ignore-fail-on-non-empty $OUTD_BASE/norm 2>&2"
         fi
     elif [ $CLEAN_OPT == "delete" ]; then
         run_cmd "rm -rf $OUTD_BASE/unique_reads $OUTD_BASE/unique_reads.tar.gz $OUTD_BASE/norm $OUTD_BASE/norm.tar.gz"

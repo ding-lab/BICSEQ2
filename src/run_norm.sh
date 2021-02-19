@@ -99,7 +99,7 @@ fi
 # Output, tmp, and log files go here
 # Note that NORMD is set in project_config, but OUTD_BASE is set here.
 OUTD=$NORMD
-
+mkdir -p $OUTD
 ## create tmp directory
 # TODO: be able to specify with -t
 TMPD="$OUTD/tmp"
@@ -176,4 +176,21 @@ if [[ $rc != 0 ]]; then
     exit $rc;
 fi
 
+## Evaluate whether there is an excess of 0s in the norm.bin files
+### create a directory for files for inspection
+mkdir -p $INSPD
+INSP_NORMD=$INSPD"/norm/"
+mkdir -p $INSP_NORMD
+while read CHR; do
+    binFile=$(printf $NORM_CHR $SAMPLE_NAME $CHR)
+    distrFile=${INSP_NORMD}${SAMPLE_NAME}"."${CHR}".column3.distr.txt"
+    cat $binFile | cut -f 3| sort | uniq -c | sort -nr > ${distrFile} 
+    if [ "$CHR" != "chrX" ] && [ "$CHR" != "chrY" ]; then
+        number_top=$(head -1 ${distrFile} | awk -F ' ' '{print $2}') 
+        if [[ $number_top = 0 ]]; then
+            >&2 echo ERRPR: Excess 0s in $binFile. Exiting.
+            exit 1
+        fi
+    fi
+done<$CHRLIST
 >&2 echo SUCCESS

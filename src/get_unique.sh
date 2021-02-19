@@ -109,6 +109,9 @@ OUTD=$SEQD
 mkdir -p $OUTD
 TMPD="$OUTD/tmp"
 mkdir -p $TMPD
+LOGD="$OUTD/log"
+mkdir -p ${LOGD}
+echo "hello" > ${TMPD}"/test.txt" 
 
 ## the path to the samtools getUnique helper script
 SAMTOOLS_GU="/samtools-0.1.7a_getUnique-0.1.3/misc/samtools.pl"
@@ -183,7 +186,7 @@ function process_BAM_parallel {
             fi
         fi
 
-        JOBLOG="$LOGD/$SAMPLE_NAME.$CHR.get_uniq.log"
+        JOBLOG="${LOGD}/${SAMPLE_NAME}.${CHR}.get_uniq.log"
         CMD="samtools view $BAM $CHR | perl $SAMTOOLS_GU unique - | cut -f 4 > $SEQ"
 #        CMDP="parallel --semaphore -j$PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
         CMDP="parallel -j$PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
