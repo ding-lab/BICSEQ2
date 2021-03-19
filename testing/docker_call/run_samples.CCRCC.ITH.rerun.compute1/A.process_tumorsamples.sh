@@ -24,11 +24,11 @@ fi
 
 if [ $IS_COMPUTE1 == 1 ]; then
     # -M for MGI
-    COMPUTE1_ARGS="-Z -g $COMPUTE1_LSF_GROUP -q general -G 50"
+    COMPUTE1_ARGS="-Z -g $COMPUTE1_LSF_GROUP -q general -G 100"
 fi
 
 # If PARALLEL_CASES is not defined, on non-MGI run jobs sequentially
-PARALLEL_CASES=20; PARGS="-J $PARALLEL_CASES"
+PARALLEL_CASES=15; PARGS="-J $PARALLEL_CASES"
 
 bash $BICSEQ_H/src/process_cases.sh $MGI_ARGS $COMPUTE1_ARGS $PARGS -L $OUTD_H -p $PROJECT_CONFIG -S $CASELIST -m $DOCKERMAP -P "$DATAMAP" $@
 

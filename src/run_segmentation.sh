@@ -187,6 +187,19 @@ else
     >&2 echo Running: $CMD
     eval $CMD
     test_exit_status
+    ## check extreme values
+    number_top=$(cut -f9 ${CNV} | sort -n | tail -1)
+    number_bottom=$(cut -f9 ${CNV} | sort -n | head -1)
+    number_top_cutoff=27
+    number_bottom_cutoff=-27
+    if (( $(echo "$number_top > $number_top_cutoff" | bc -l) )); then
+        >&2 echo ERROR: Extreme top CNV value in ${CNV}. Exiting.
+        exit 1
+    fi
+    if (( $(echo "$number_bottom < $number_bottom_cutoff" | bc -l) )); then
+        >&2 echo ERROR: Extreme bottom CNV value in ${CNV}. Exiting.
+        exit 1
+    fi
     >&2 echo Written to $CNV
 fi
 

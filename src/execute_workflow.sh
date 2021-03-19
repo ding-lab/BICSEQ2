@@ -273,6 +273,8 @@ if [ $RUN_CLEAN ]; then
         if [ -d $OUTD_BASE/unique_reads ] && [ ! -e $OUTD_BASE/unique_reads.tar.gz ]; then
             run_cmd "tar -P -zcf $OUTD_BASE/unique_reads.tar.gz --exclude=$OUTD_BASE/unique_reads/tmp  $OUTD_BASE/unique_reads"
             #run_cmd "ls -la $OUTD_BASE/unique_reads"
+            run_cmd "rm -rf $OUTD_BASE/unique_reads/tmp/* 2>&2"
+            run_cmd "rmdir --ignore-fail-on-non-empty $OUTD_BASE/unique_reads/tmp 2>&2"
             run_cmd "rm -rf $OUTD_BASE/unique_reads/* 2>&2"
             run_cmd "rmdir --ignore-fail-on-non-empty $OUTD_BASE/unique_reads 2>&2"
         fi

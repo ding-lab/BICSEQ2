@@ -222,11 +222,11 @@ do
         PATH_C_B=$PATH_H_B
     fi
 
-    PATH_OUT=$OUTD"/"$CASE"/annotation/"$CASE".gene_level.log2.seg"
+    PATH_OUT=$OUTD"/"${SN_A}"/annotation/"${SN_A}".gene_level.log2.seg"
 
     printf "$CASE\t$DISEASE\t$PATH_OUT\t$FF\t$SN_A\t$UUID_A\t$SN_B\t$UUID_B\tSEG\n"
 
-    PATH_OUT=$OUTD"/"$CASE"/segmentation/"$CASE".cnv"
+    PATH_OUT=$OUTD"/"${SN_A}"/segmentation/"${SN_A}".cnv"
 
     printf "$CASE\t$DISEASE\t$PATH_OUT\t$FF\t$SN_A\t$UUID_A\t$SN_B\t$UUID_B\tCNV\n"
 

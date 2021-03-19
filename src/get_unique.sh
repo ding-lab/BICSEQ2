@@ -33,7 +33,7 @@
 SCRIPT=$(basename $0)
 
 # set defaults
-PARALLEL_JOBS=4
+PARALLEL_JOBS=5
 
 OUTD_BASE="/data1"
 # http://wiki.bash-hackers.org/howto/getopts_tutorial

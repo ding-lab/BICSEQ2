@@ -129,12 +129,14 @@ function get_log {
 # where LOG_FN is the full filename of STDERR log written by execute_workflow.sh
 function test_import_success {
     LOG_FN=$1
+    CASE=$2
 
     # Logic of testing
     # If log file does not exist: status = not_started
     # if log file contains "ERROR": status = error
     # if log file contains "warning": status = warning
     #   Note that in this case run still completed
+    #   if the CNV file contains extreme values: status = extreme CNV values
     # if log file contains "SUCCESS": status = complete
     # otherwise status = running
     ERROR_STRING="BS2:ERROR"
@@ -154,8 +156,37 @@ function test_import_success {
     #   In bgam.fit(G, mf, chunk.size, gp, scale, gamma, method = method,  :
     #     algorithm did not converge
     # We find that the results are significantly different when this occurs; rerunning may fix this. To catch this situation, we issue a warning
+    ## check extreme values
+    OUTD_BASE=${LOGD_BASE_PROJECT}"/"${CASE}
+    # Note, OUTD_BASE must be defined prior to sourcing $PROJECT_CONFIG
+    source $PROJECT_CONFIG
+    CNV=$(printf $SEG_CNV $CASE)
+    if [ "$CNV" != "" ] && [ -e "$CNV" ] ; then
+        number_top=$(cut -f9 ${CNV} | sort -n | tail -1)
+        number_bottom=$(cut -f9 ${CNV} | sort -n | head -1)
+        number_top_cutoff=27
+        number_bottom_cutoff=-27
+        if (( $(echo "$number_top > $number_top_cutoff" | bc -l) )); then
+            echo error:extreme top CNV value
+            return
+        fi
+        if (( $(echo "$number_bottom < $number_bottom_cutoff" | bc -l) )); then
+            echo error:extreme bottom CNV value
+            return
+        fi
+    fi
+
+    if fgrep -Fiq "ERROR: Extreme CNV value" $LOG_FN; then
+        echo error:extreme CNV value
+        return
+    fi
 
     if fgrep -Fq "$ERROR_STRING" $LOG_FN; then
+        echo error
+        return
+    fi
+
+    if fgrep -Fiq "error" $LOG_FN | fgrep -v "docker1_monitor"; then
         echo error
         return
     fi
@@ -163,13 +194,8 @@ function test_import_success {
     # Ad hoc error conditions:
     # Also check for error conditions which do not trigger our error status, such as out of disk errors
     # Assume that if see the string "error" (case insensitive), we have an error condition
-    if fgrep -Fiq "error" $LOG_FN | fgrep -v "docker1_monitor"; then
-        echo error
-        return
-    fi
-
     if fgrep -Fiq "disk quota exceeded" $LOG_FN; then
-        echo error
+        echo error:disk quota exceeded
         return
     fi
     
@@ -196,7 +222,7 @@ function get_job_status {
         >&2 echo Case: $CASE Log file: $LOG_FN
     fi
 
-    TEST1=$(test_import_success $LOG_FN)  
+    TEST1=$(test_import_success $LOG_FN $CASE)  
 
     STEP="execute_workflow.sh"
     # for multi-step processing would report back a test for each step
