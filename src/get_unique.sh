@@ -33,7 +33,7 @@
 SCRIPT=$(basename $0)
 
 # set defaults
-PARALLEL_JOBS=5
+PARALLEL_JOBS=4
 
 OUTD_BASE="/data1"
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
@@ -111,7 +111,6 @@ TMPD="$OUTD/tmp"
 mkdir -p $TMPD
 LOGD="$OUTD/log"
 mkdir -p ${LOGD}
-echo "hello" > ${TMPD}"/test.txt" 
 
 ## the path to the samtools getUnique helper script
 SAMTOOLS_GU="/samtools-0.1.7a_getUnique-0.1.3/misc/samtools.pl"

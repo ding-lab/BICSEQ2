@@ -24,7 +24,7 @@ fi
 
 if [ $IS_COMPUTE1 == 1 ]; then
     # -M for MGI
-    COMPUTE1_ARGS="-Z -g $COMPUTE1_LSF_GROUP -q general -G 50"
+    COMPUTE1_ARGS="-Z -g $COMPUTE1_LSF_GROUP -q general -G 400"
 fi
 
 # If PARALLEL_CASES is not defined, on non-MGI run jobs sequentially

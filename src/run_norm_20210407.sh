@@ -32,8 +32,6 @@
 
 SCRIPT=$(basename $0)
 
-# set defaults
-PARALLEL_JOBS=4
 OUTD_BASE="/data1"
 # http://wiki.bash-hackers.org/howto/getopts_tutorial
 while getopts ":vdc:C:wo:" opt; do
@@ -106,8 +104,6 @@ mkdir -p $OUTD
 # TODO: be able to specify with -t
 TMPD="$OUTD/tmp"
 mkdir -p $TMPD
-LOGD="$OUTD/log"
-mkdir -p ${LOGD}
 
 # Output:
 # NORM_PDF - per sample
@@ -157,18 +153,6 @@ function write_norm_config {
     >&2 echo Normalization configuration $NORM_CONFIG written successfully
 }
 
-function test_exit_status {
-    # Evaluate return value for chain of pipes; see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
-    rcs=${PIPESTATUS[*]};
-    for rc in ${rcs}; do
-        if [[ $rc != 0 ]]; then
-            >&2 echo $SCRIPT Fatal ERROR.  Exiting.
-            exit $rc;
-        fi;
-    done
-}
-
-
 # Skip writing configutation file if it has already been defined with -C
 if [ ! $NORM_CONFIG ]; then
     write_norm_config
@@ -178,28 +162,11 @@ fi
 
 PDF=$(printf $NORM_PDF $SAMPLE_NAME)
 CMD="perl $BICSEQ_NORM --tmp=$TMPD -l $READ_LENGTH -s $FRAG_SIZE -b $BIN_SIZE --fig $PDF $NORM_CONFIG $OUTPARS"
-JOBLOG="${LOGD}/${SAMPLE_NAME}.norm.log"
-MYID=$(date +%Y%m%d%H%M%S)
-CMDP="parallel -j$PARALLEL_JOBS --id $MYID --joblog $JOBLOG --tmpdir $TMPD \"$CMD\" "
 if [ $DRYRUN ]; then
-    >&2 echo Dry run: $CMDP
+    >&2 echo Dry run: $CMD
 else
-    >&2 echo Running: $CMDP
-    eval ${CMDP}
-    >&2 echo Finished eval
-    test_exit_status
-
-    NOW=$(date)
-    >&2 echo [ $NOW ] ${SAMPLE_NAME} job launched.  Waiting for them to complete
-
-    # this will wait until all jobs completed
-    if [ ! $DRYRUN ]; then
-        parallel --semaphore --wait --id $MYID
-        test_exit_status
-    fi
-
-    NOW=$(date)
-    >&2 echo [ $NOW ] ${SAMPLE_NAME} job has completed
+    >&2 echo Running: $CMD
+    eval $CMD
 fi
 
 # Evaluate return value see https://stackoverflow.com/questions/90418/exit-shell-script-based-on-process-exit-code
